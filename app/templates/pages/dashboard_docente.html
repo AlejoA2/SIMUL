@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block title %}Panel docente | SIMUL{% endblock %}
+
+{% block content %}
+
+<script>
+    window.SIMUL_CONTENT   = {{ simul_content | tojson }};
+    window.SIMUL_REACTIONS = {{ simul_reactions | tojson }};
+    window.SIMUL_ROLE_LABELS = {{ role_labels | tojson }};
+</script>
+
+<div class="pt-16 min-h-screen bg-[#F9FAFB]">
+
+    <div class="max-w-[1440px] mx-auto px-8 py-10">
+
+        {# =====================================================
+             ENCABEZADO
+        ====================================================== #}
+
+        <div class="flex items-center justify-between mb-8">
+
+            <div class="flex items-center gap-4">
+                <img
+                    data-user-avatar
+                    src="{{ demo.avatar }}"
+                    alt="{{ demo.name }}"
+                    class="w-16 h-16 rounded-2xl object-cover ring-4 ring-[#C8102E]/20"
+                >
+
+                <div>
+                    <p
+                        class="text-sm text-gray-500"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        Panel docente
+                    </p>
+
+                    <h1
+                        data-user-name
+                        style="
+                            font-family: 'Montserrat', sans-serif;
+                            font-weight: 800;
+                            font-size: 28px;
+                            color: #1A1A1A;
+                        "
+                    >
+                        {{ demo.name }}
+                    </h1>
+
+                    <p
+                        class="text-sm text-gray-400"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        <span data-user-email>{{ demo.email }}</span>
+                        · Docente
+                    </p>
+                </div>
+            </div>
+
+            <a href="{{ url_for('web.registrar_contenido') }}" class="btn-primary hidden sm:block">
+                + Registrar contenido
+            </a>
+
+        </div>
+
+        {# =====================================================
+             ESTADÍSTICAS POR ESTADO
+        ====================================================== #}
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+
+            <div class="simul-card p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="text-2xl">✅</div>
+                    <span class="tag tag-publicado">Publicado</span>
+                </div>
+
+                <p
+                    class="text-3xl font-black"
+                    style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                >
+                    {{ estados.publicado | length }}
+                </p>
+
+                <p class="text-sm text-gray-500 mt-1" style="font-family: 'Inter', sans-serif;">
+                    Piezas visibles en el museo
+                </p>
+            </div>
+
+            <div class="simul-card p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="text-2xl">⏳</div>
+                    <span class="tag tag-pendiente">Pendiente</span>
+                </div>
+
+                <p
+                    class="text-3xl font-black"
+                    style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                >
+                    {{ estados.pendiente | length }}
+                </p>
+
+                <p class="text-sm text-gray-500 mt-1" style="font-family: 'Inter', sans-serif;">
+                    En revisión por el administrador
+                </p>
+            </div>
+
+            <div class="simul-card p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="text-2xl">✕</div>
+                    <span class="tag tag-rechazado">Rechazado</span>
+                </div>
+
+                <p
+                    class="text-3xl font-black"
+                    style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                >
+                    {{ estados.rechazado | length }}
+                </p>
+
+                <p class="text-sm text-gray-500 mt-1" style="font-family: 'Inter', sans-serif;">
+                    Requieren correcciones
+                </p>
+            </div>
+
+        </div>
+
+        {# =====================================================
+             DISTRIBUCIÓN
+        ====================================================== #}
+
+        <div class="simul-card p-6 mb-8">
+
+            <h2
+                class="mb-4"
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 800;
+                    font-size: 18px;
+                    color: #1A1A1A;
+                "
+            >
+                Distribución de tu contenido
+            </h2>
+
+            {% set total = contenido | length if contenido | length > 0 else 1 %}
+
+            <div class="flex h-3 rounded-full overflow-hidden bg-gray-100">
+                {% set pct_publicado = (estados.publicado | length / total * 100) | round(1) %}
+                {% set pct_pendiente = (estados.pendiente | length / total * 100) | round(1) %}
+                {% set pct_rechazado = (estados.rechazado | length / total * 100) | round(1) %}
+
+                <div style="width: {{ pct_publicado }}%; background: #059669;"></div>
+                <div style="width: {{ pct_pendiente }}%; background: #D97706;"></div>
+                <div style="width: {{ pct_rechazado }}%; background: #DC2626;"></div>
+            </div>
+
+            <div class="flex flex-wrap gap-6 mt-4">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full" style="background: #059669;"></span>
+                    <span class="text-sm text-gray-600" style="font-family: 'Inter', sans-serif;">
+                        Publicado ({{ estados.publicado | length }})
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full" style="background: #D97706;"></span>
+                    <span class="text-sm text-gray-600" style="font-family: 'Inter', sans-serif;">
+                        Pendiente ({{ estados.pendiente | length }})
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full" style="background: #DC2626;"></span>
+                    <span class="text-sm text-gray-600" style="font-family: 'Inter', sans-serif;">
+                        Rechazado ({{ estados.rechazado | length }})
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+        {# =====================================================
+             CONTENIDO REGISTRADO + PROPUESTAS ASESORADAS
+        ====================================================== #}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            {# ---- Listado ---- #}
+
+            <div class="lg:col-span-2">
+
+                <h2
+                    class="mb-4"
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 800;
+                        font-size: 20px;
+                        color: #1A1A1A;
+                    "
+                >
+                    Contenido registrado
+                </h2>
+
+                <div class="simul-card overflow-hidden">
+
+                    {# Cabecera de la tabla #}
+
+                    <div
+                        class="grid grid-cols-[1fr_110px_110px_80px] gap-4 px-5 py-3 border-b border-gray-100 bg-gray-50"
+                        style="font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #6B7280;"
+                    >
+                        <span>Título</span>
+                        <span>Categoría</span>
+                        <span>Estado</span>
+                        <span class="text-right">Año</span>
+                    </div>
+
+                    {% for pieza in contenido %}
+                        <a
+                            href="{{ url_for('web.detalle_contenido', contenido_id=pieza.id) }}"
+                            class="
+                                grid grid-cols-[1fr_110px_110px_80px] gap-4 px-5 py-4
+                                items-center border-b border-gray-50 hover:bg-gray-50
+                                transition-colors
+                            "
+                        >
+                            <span class="min-w-0">
+                                <span
+                                    class="block text-sm font-semibold text-gray-800 truncate"
+                                    style="font-family: 'Montserrat', sans-serif;"
+                                >
+                                    {{ pieza.title }}
+                                </span>
+                                <span
+                                    class="block text-xs text-gray-400 truncate"
+                                    style="font-family: 'Inter', sans-serif;"
+                                >
+                                    {{ pieza.author }}
+                                </span>
+                            </span>
+
+                            <span class="tag {{ pieza.categoryTag }}">{{ pieza.category }}</span>
+
+                            <span class="tag tag-{{ pieza.status }}">
+                                {{ pieza.status | capitalize }}
+                            </span>
+
+                            <span
+                                class="text-sm text-gray-500 text-right"
+                                style="font-family: 'Inter', sans-serif;"
+                            >
+                                {{ pieza.year }}
+                            </span>
+                        </a>
+                    {% else %}
+                        <div class="px-5 py-12 text-center">
+                            <p class="text-3xl mb-3">📭</p>
+                            <p class="text-sm text-gray-500" style="font-family: 'Inter', sans-serif;">
+                                Todavía no has registrado contenido.
+                            </p>
+                            <a href="{{ url_for('web.registrar_contenido') }}" class="btn-primary mt-5 inline-block">
+                                Registrar el primero
+                            </a>
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {# ---- Acciones ---- #}
+
+            <div>
+
+                <h2
+                    class="mb-4"
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 800;
+                        font-size: 20px;
+                        color: #1A1A1A;
+                    "
+                >
+                    Acciones rápidas
+                </h2>
+
+                <div class="flex flex-col gap-3">
+
+                    <a href="{{ url_for('web.registrar_contenido') }}" class="simul-card p-5 flex items-center gap-4">
+                        <span class="text-2xl">📜</span>
+                        <span>
+                            <span class="block font-bold text-gray-800" style="font-family: 'Montserrat', sans-serif; font-size: 14px;">
+                                Registrar contenido
+                            </span>
+                            <span class="block text-xs text-gray-500" style="font-family: 'Inter', sans-serif;">
+                                Acontecimiento, premio, proyecto, evento…
+                            </span>
+                        </span>
+                    </a>
+
+                    <a href="{{ url_for('web.adjuntar_evidencias') }}" class="simul-card p-5 flex items-center gap-4">
+                        <span class="text-2xl">📎</span>
+                        <span>
+                            <span class="block font-bold text-gray-800" style="font-family: 'Montserrat', sans-serif; font-size: 14px;">
+                                Adjuntar evidencias
+                            </span>
+                            <span class="block text-xs text-gray-500" style="font-family: 'Inter', sans-serif;">
+                                Respalda tu contenido con archivos
+                            </span>
+                        </span>
+                    </a>
+
+                    <a href="{{ url_for('web.explorar') }}" class="simul-card p-5 flex items-center gap-4">
+                        <span class="text-2xl">🔍</span>
+                        <span>
+                            <span class="block font-bold text-gray-800" style="font-family: 'Montserrat', sans-serif; font-size: 14px;">
+                                Explorar el museo
+                            </span>
+                            <span class="block text-xs text-gray-500" style="font-family: 'Inter', sans-serif;">
+                                Revisa lo publicado por el programa
+                            </span>
+                        </span>
+                    </a>
+
+                </div>
+
+                {# ---- Proyectos de estudiantes ---- #}
+
+                <h2
+                    class="mb-4 mt-8"
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 800;
+                        font-size: 20px;
+                        color: #1A1A1A;
+                    "
+                >
+                    Proyectos asesorados
+                </h2>
+
+                <div id="teacher-proposals" class="flex flex-col gap-3">
+                    {# app.js pinta aquí las propuestas asignadas. #}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/pages/dashboard_docente.js') }}"></script>
+{% endblock %}

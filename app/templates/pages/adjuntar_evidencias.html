@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Adjuntar evidencias | SIMUL{% endblock %}
+
+{% block content %}
+
+<script>
+    window.SIMUL_FILE_ICONS = {{ icons | tojson }};
+</script>
+
+<div class="pt-16 min-h-screen bg-[#F9FAFB]">
+
+    <div class="max-w-[900px] mx-auto px-6 py-10">
+
+        {# =====================================================
+             ENCABEZADO
+        ====================================================== #}
+
+        <div class="mb-8">
+            <a
+                href="{{ url_for('web.registrar_contenido') }}"
+                class="text-sm text-gray-500 hover:text-[#C8102E] flex items-center gap-1 mb-3"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                ← Registrar contenido
+            </a>
+
+            <h1
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 800;
+                    font-size: 36px;
+                    color: #1A1A1A;
+                "
+            >
+                Adjuntar evidencias
+            </h1>
+
+            <p
+                class="text-gray-500 mt-1"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Los archivos respaldan el contenido ante el administrador y quedan
+                disponibles para la comunidad.
+            </p>
+        </div>
+
+        {# =====================================================
+             CONTENIDO ASOCIADO
+        ====================================================== #}
+
+        <div class="simul-card p-5 mb-6 flex items-center gap-4">
+            <span class="text-2xl">📄</span>
+            <div class="flex-1 min-w-0">
+                <p
+                    class="text-xs text-gray-400 uppercase tracking-wider mb-0.5"
+                    style="font-family: 'Montserrat', sans-serif;"
+                >
+                    Evidencias para
+                </p>
+                <p
+                    class="text-sm font-semibold text-gray-800 truncate"
+                    style="font-family: 'Montserrat', sans-serif;"
+                >
+                    Sistema de Monitoreo Ambiental con IoT
+                </p>
+            </div>
+            <span class="tag tag-pendiente">Pendiente</span>
+        </div>
+
+        {# =====================================================
+             ZONA DE CARGA
+        ====================================================== #}
+
+        <label
+            id="evidence-dropzone"
+            class="
+                block border-2 border-dashed border-gray-300 rounded-2xl
+                p-12 text-center cursor-pointer
+                hover:border-[#C8102E] hover:bg-red-50/30 transition-colors
+            "
+        >
+            <div class="text-5xl mb-4">📤</div>
+
+            <p
+                class="font-bold text-gray-800 mb-1.5"
+                style="font-family: 'Montserrat', sans-serif; font-size: 16px;"
+            >
+                Arrastra tus archivos aquí
+            </p>
+
+            <p
+                class="text-sm text-gray-500"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                o haz clic para buscar en tu computador
+            </p>
+
+            <p
+                class="text-xs text-gray-400 mt-4"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                PDF, ZIP, PNG, JPG, MP4, DOCX, PPTX · máximo 25 MB por archivo
+            </p>
+
+            <input
+                type="file"
+                id="evidence-files"
+                name="files"
+                multiple
+                class="hidden"
+            >
+        </label>
+
+        {# =====================================================
+             ARCHIVOS CON PROGRESO
+        ====================================================== #}
+
+        <div class="mt-8">
+
+            <div class="flex items-center justify-between mb-4">
+                <h2
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 700;
+                        font-size: 16px;
+                        color: #1A1A1A;
+                    "
+                >
+                    Archivos adjuntos
+                </h2>
+
+                <span
+                    id="evidence-summary"
+                    class="text-sm text-gray-500"
+                    style="font-family: 'Inter', sans-serif;"
+                >
+                    0 archivos
+                </span>
+            </div>
+
+            <ul id="evidence-list" class="flex flex-col gap-3"></ul>
+
+            {# ---- Estado vacío ---- #}
+
+            <div id="evidence-empty" class="simul-card p-10 text-center">
+                <div class="text-4xl mb-3">🗂️</div>
+                <p
+                    class="text-sm text-gray-500"
+                    style="font-family: 'Inter', sans-serif;"
+                >
+                    Todavía no has adjuntado ningún archivo.
+                </p>
+            </div>
+
+        </div>
+
+        {# =====================================================
+             TEXTO ALTERNATIVO  (RNF-ACC-01)
+        ====================================================== #}
+
+        <div class="mt-8 p-6 rounded-2xl bg-[#FFF8E7] border border-[#C9A84C]/30">
+            <h2
+                class="mb-2 flex items-center gap-2"
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 700;
+                    font-size: 15px;
+                    color: #8A6D1F;
+                "
+            >
+                ♿ Accesibilidad
+            </h2>
+
+            <p
+                class="text-sm text-gray-600 leading-relaxed"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Cada imagen que adjuntes debe incluir una descripción en el campo
+                de texto alternativo. Sin ella la evidencia será rechazada por el
+                administrador.
+            </p>
+        </div>
+
+        {# =====================================================
+             ENVÍO
+        ====================================================== #}
+
+        <div class="mt-8 flex flex-col sm:flex-row gap-3">
+            <button
+                type="button"
+                id="evidence-submit"
+                class="btn-primary flex-1"
+                disabled
+            >
+                Guardar evidencias
+            </button>
+
+            <a href="{{ url_for('web.dashboard_docente') }}" class="btn-secondary text-center">
+                Volver al panel
+            </a>
+        </div>
+
+        {# =====================================================
+             CONFIRMACIÓN
+        ====================================================== #}
+
+        <div id="evidence-done" class="hidden text-center py-16 animate-fade-in">
+
+            <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-4xl mx-auto mb-5">
+                ✅
+            </div>
+
+            <h1
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 900;
+                    font-size: 28px;
+                    color: #1A1A1A;
+                "
+            >
+                ¡Evidencias guardadas!
+            </h1>
+
+            <p
+                class="text-gray-500 mt-3 mb-8 max-w-md mx-auto"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Los archivos quedaron vinculados a tu contenido y visibles para el
+                administrador durante la revisión.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a href="{{ url_for('web.dashboard_docente') }}" class="btn-primary">
+                    Volver al panel docente
+                </a>
+                <a href="{{ url_for('web.registrar_contenido') }}" class="btn-secondary">
+                    Registrar otra pieza
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/pages/adjuntar_evidencias.js') }}"></script>
+{% endblock %}

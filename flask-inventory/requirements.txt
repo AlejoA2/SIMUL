@@ -1,0 +1,14 @@
+# Framework
+Flask==3.1.1
+#ORM trabaja con la BD
+Flask-SQLAlchemy==3.1.1
+#JWT
+Flask-JWT-Extended==4.7.1
+#Validacion y serializacion de Datos
+marshmallow==4.0.1
+#Driver de conexion 
+PyMYSQL==1.1.1
+#servidor WSGI
+gunicorn==23.0.0
+#utilidades de segurida y pss
+Werkzeug==3.1.3

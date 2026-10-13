@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Dashboard | SIMUL{% endblock %}
+
+{% block content %}
+
+<script>
+    window.SIMUL_CONTENT   = {{ simul_content | tojson }};
+    window.SIMUL_REACTIONS = {{ simul_reactions | tojson }};
+    window.SIMUL_ROLE_LABELS = {{ role_labels | tojson }};
+    window.SIMUL_LEVEL_NAMES = {{ level_names | tojson }};
+</script>
+
+<div class="pt-16 min-h-screen bg-[#F9FAFB]">
+
+    <div class="max-w-[1440px] mx-auto px-8 py-10">
+
+        {# =====================================================
+             ENCABEZADO
+        ====================================================== #}
+
+        <div class="flex items-center justify-between mb-8">
+
+            <div class="flex items-center gap-4">
+                <img
+                    data-user-avatar
+                    src="{{ demo.avatar }}"
+                    alt="{{ demo.name }}"
+                    class="w-16 h-16 rounded-2xl object-cover ring-4 ring-[#C8102E]/20"
+                >
+
+                <div>
+                    <p
+                        class="text-sm text-gray-500"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        Bienvenida de nuevo,
+                    </p>
+
+                    <h1
+                        data-user-name
+                        style="
+                            font-family: 'Montserrat', sans-serif;
+                            font-weight: 800;
+                            font-size: 28px;
+                            color: #1A1A1A;
+                        "
+                    >
+                        {{ demo.name }}
+                    </h1>
+
+                    <p
+                        class="text-sm text-gray-400"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        <span data-user-email>{{ demo.email }}</span>
+                        · Estudiante
+                    </p>
+                </div>
+            </div>
+
+            <a href="{{ url_for('web.proponer_contenido') }}" class="btn-primary hidden sm:block">
+                + Proponer proyecto
+            </a>
+
+        </div>
+
+        {# =====================================================
+             BARRA DE GAMIFICACIÓN  (RF-GAM-01)
+        ====================================================== #}
+
+        <div class="bg-[#1A1A1A] rounded-2xl p-6 mb-8 text-white">
+
+            <div class="flex flex-col lg:flex-row lg:items-center gap-6">
+
+                <div class="flex items-center gap-4 shrink-0">
+                    <div class="text-4xl">⭐</div>
+
+                    <div>
+                        <p
+                            class="text-xs uppercase tracking-widest mb-1"
+                            style="font-family: 'Montserrat', sans-serif; color: #C9A84C;"
+                        >
+                            Nivel <span data-user-level>{{ demo.level }}</span>
+                        </p>
+
+                        <p
+                            data-user-level-name
+                            style="
+                                font-family: 'Montserrat', sans-serif;
+                                font-weight: 800;
+                                font-size: 22px;
+                            "
+                        >
+                            {{ level_names[demo.level] }}
+                        </p>
+                    </div>
+                </div>
+
+                {# Progreso hacia el siguiente nivel #}
+
+                <div class="flex-1">
+                    <div class="flex justify-between text-xs mb-2">
+                        <span
+                            style="font-family: 'Montserrat', sans-serif;"
+                        >
+                            <span data-user-points>{{ demo.points }}</span> puntos
+                        </span>
+                        <span class="text-gray-400">
+                            {{ max_points }} para el siguiente nivel
+                        </span>
+                    </div>
+
+                    <div class="h-2 rounded-full bg-white/15 overflow-hidden">
+                        <div
+                            class="gold-bar h-full"
+                            style="width: 0%;"
+                            data-progress
+                        ></div>
+                    </div>
+                </div>
+
+                {# Insignias conseguidas #}
+
+                <div data-user-badges class="flex gap-2 shrink-0">
+                    {% for badge in demo.badges %}
+                        <span
+                            class="px-3 py-1.5 rounded-full bg-white/10 text-xs font-medium"
+                            style="font-family: 'Inter', sans-serif;"
+                        >
+                            {{ badge }}
+                        </span>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+        </div>
+
+        {# =====================================================
+             TARJETAS DE ACCESO
+        ====================================================== #}
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+
+            <a href="{{ url_for('web.mis_aportes') }}" class="simul-card p-6 block">
+                <div class="text-2xl mb-3">📝</div>
+                <p
+                    class="text-2xl font-black mb-1"
+                    style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                >
+                    {{ aportes | length }}
+                </p>
+                <p class="text-sm text-gray-500" style="font-family: 'Inter', sans-serif;">
+                    Mis aportes
+                </p>
+            </a>
+
+            <a href="{{ url_for('web.favoritos') }}" class="simul-card p-6 block">
+                <div class="text-2xl mb-3">⭐</div>
+                <p
+                    id="favorites-count"
+                    class="text-2xl font-black mb-1"
+                    style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                >
+                    0
+                </p>
+                <p class="text-sm text-gray-500" style="font-family: 'Inter', sans-serif;">
+                    Favoritos
+                </p>
+            </a>
+
+            <a href="{{ url_for('web.ranking') }}" class="simul-card p-6 block">
+                <div class="text-2xl mb-3">🏆</div>
+                <p
+                    class="text-2xl font-black mb-1"
+                    style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                >
+                    {% if my_rank %}#{{ my_rank }}{% else %}—{% endif %}
+                </p>
+                <p class="text-sm text-gray-500" style="font-family: 'Inter', sans-serif;">
+                    Posición en el ranking
+                </p>
+            </a>
+
+            <a href="{{ url_for('web.proponer_contenido') }}" class="simul-card p-6 block">
+                <div class="text-2xl mb-3">💡</div>
+                <p
+                    class="text-2xl font-black mb-1"
+                    style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                >
+                    +
+                </p>
+                <p class="text-sm text-gray-500" style="font-family: 'Inter', sans-serif;">
+                    Proponer proyecto
+                </p>
+            </a>
+
+        </div>
+
+        {# =====================================================
+             APORTES + ACTIVIDAD
+        ====================================================== #}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            {# ---- Mis aportes ---- #}
+
+            <div class="lg:col-span-2">
+                <div class="flex items-center justify-between mb-4">
+                    <h2
+                        style="
+                            font-family: 'Montserrat', sans-serif;
+                            font-weight: 800;
+                            font-size: 20px;
+                            color: #1A1A1A;
+                        "
+                    >
+                        Mis aportes
+                    </h2>
+
+                    <a
+                        href="{{ url_for('web.mis_aportes') }}"
+                        class="text-sm font-semibold hover:underline"
+                        style="font-family: 'Montserrat', sans-serif; color: #C8102E;"
+                    >
+                        Ver todos →
+                    </a>
+                </div>
+
+                <div id="dashboard-aportes" class="flex flex-col gap-4">
+                    {# app.js pinta aquí las tarjetas de contenido. #}
+                </div>
+
+            </div>
+
+            {# ---- Actividad reciente ---- #}
+
+            <div>
+                <h2
+                    class="mb-4"
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 800;
+                        font-size: 20px;
+                        color: #1A1A1A;
+                    "
+                >
+                    Actividad reciente
+                </h2>
+
+                <div class="simul-card p-5">
+                    <ul class="flex flex-col gap-4">
+                        {% for evento in activity %}
+                            <li class="flex gap-3">
+                                <span class="text-lg leading-none mt-0.5">{{ evento.icon }}</span>
+                                <span class="flex-1">
+                                    <span
+                                        class="block text-sm text-gray-700"
+                                        style="font-family: 'Inter', sans-serif;"
+                                    >
+                                        {{ evento.text }}
+                                    </span>
+                                    <span
+                                        class="block text-xs text-gray-400 mt-0.5"
+                                        style="font-family: 'Inter', sans-serif;"
+                                    >
+                                        {{ evento.time }}
+                                    </span>
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                {# ---- Insignias ---- #}
+
+                <h2
+                    class="mb-4 mt-8"
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 800;
+                        font-size: 20px;
+                        color: #1A1A1A;
+                    "
+                >
+                    Insignias
+                </h2>
+
+                <div class="simul-card p-5">
+                    <ul class="flex flex-col gap-3">
+                        {% for insignia in demo.badges %}
+                            <li class="flex items-center gap-3">
+                                <span
+                                    class="w-9 h-9 rounded-full flex items-center justify-center text-sm"
+                                    style="background: #FFF8E7;"
+                                >
+                                    🎖️
+                                </span>
+                                <span
+                                    class="text-sm font-semibold text-gray-700"
+                                    style="font-family: 'Montserrat', sans-serif;"
+                                >
+                                    {{ insignia }}
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/pages/dashboard_estudiante.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,278 @@
+{# ==========================================================
+   NAVBAR - Barra superior fija
+
+   El HTML se entrega completo y `app.js` decide qué bloques
+   mostrar según la sesión guardada en localStorage:
+
+     data-requires-auth → solo con sesión iniciada
+     data-requires-guest → solo como visitante
+     data-role="..."    → solo para ese rol (RNF-SEG-02)
+
+   Así el servidor no necesita conocer el estado de sesión:
+   la barra se renderiza una vez y el navegador la adapts.
+   ========================================================== #}
+
+<nav
+    id="simul-navbar"
+    class="fixed top-0 left-0 right-0 z-40 bg-[#1A1A1A] text-white"
+    style="box-shadow: 0 2px 12px rgba(0,0,0,0.35);"
+>
+
+    <div class="max-w-[1440px] mx-auto px-8 flex items-center justify-between h-16">
+
+        {# ------------------------------------------------
+             LOGO
+        ------------------------------------------------ #}
+
+        <a
+            href="{{ url_for('web.index') }}"
+            class="flex items-center gap-2 group"
+            aria-label="SIMUL - Inicio"
+        >
+            <img
+                src="{{ url_for('static', filename='img/logo-unilibre.png') }}"
+                alt="Logo Universidad Libre"
+                class="h-10 w-auto object-contain transition-transform group-hover:scale-105"
+            >
+            <span
+                style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.02em;"
+            >
+                SIMUL
+            </span>
+            <span
+                class="text-simul-gold-light text-xs font-medium hidden sm:block"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Museo Digital
+            </span>
+        </a>
+
+        {# ------------------------------------------------
+             ENLACES PRINCIPALES
+        ------------------------------------------------ #}
+
+        <div class="hidden md:flex items-center gap-1">
+
+            <a
+                href="{{ url_for('web.explorar') }}"
+                data-nav="explorar"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                style="font-family: 'Montserrat', sans-serif;"
+            >
+                Explorar
+            </a>
+
+            <a
+                href="{{ url_for('web.buscar', cat='eventos') }}"
+                data-nav="eventos"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                style="font-family: 'Montserrat', sans-serif;"
+            >
+                Eventos
+            </a>
+
+            <a
+                href="{{ url_for('web.buscar', cat='hall') }}"
+                data-nav="hall"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                style="font-family: 'Montserrat', sans-serif;"
+            >
+                Hall de la Fama
+            </a>
+
+            <a
+                href="{{ url_for('web.ranking') }}"
+                data-nav="ranking"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                style="font-family: 'Montserrat', sans-serif;"
+            >
+                Ranking
+            </a>
+
+        </div>
+
+        {# ------------------------------------------------
+             ACCIONES DE LA DERECHA
+        ------------------------------------------------ #}
+
+        <div class="flex items-center gap-3">
+
+            {# Botón "Mi Dashboard": solo con sesión.
+                La URL se resuelve en app.js porque depende
+                del rol del usuario. #}
+
+            <a
+                href="#"
+                data-requires-auth
+                data-nav-dashboard
+                class="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-white/50 text-sm font-semibold text-white hover:bg-white hover:text-simul-red transition-colors"
+                style="font-family: 'Montserrat', sans-serif;"
+            >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="3" y="3" width="7" height="9" rx="1.5" />
+                    <rect x="14" y="3" width="7" height="5" rx="1.5" />
+                    <rect x="14" y="12" width="7" height="9" rx="1.5" />
+                    <rect x="3" y="16" width="7" height="5" rx="1.5" />
+                </svg>
+                Mi Dashboard
+            </a>
+
+            {# Buscador #}
+
+            <a
+                href="{{ url_for('web.buscar') }}"
+                class="p-2 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                title="Buscar"
+                aria-label="Buscar"
+            >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                </svg>
+            </a>
+
+            {# ------------------------------------------------
+                 MENÚ DE USUARIO (con sesión)
+            ------------------------------------------------ #}
+
+            <div class="relative" data-requires-auth>
+
+                <button
+                    id="simul-user-toggle"
+                    type="button"
+                    class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                >
+                    <img
+                        data-user-avatar
+                        src="{{ url_for('static', filename='img/logo-unilibre.png') }}"
+                        alt=""
+                        class="w-7 h-7 rounded-full object-cover ring-2 ring-white/40"
+                    >
+                    <span
+                        data-user-first-name
+                        class="text-sm font-semibold hidden sm:block"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Usuario
+                    </span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
+                </button>
+
+                <div
+                    id="simul-user-menu"
+                    class="hidden absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden"
+                    style="z-index: 50;"
+                >
+
+                    {# Cabecera con puntos y nivel #}
+
+                    <div class="px-4 py-3 border-b border-gray-100">
+                        <p
+                            data-user-name
+                            class="text-sm font-bold text-gray-900"
+                            style="font-family: 'Montserrat', sans-serif;"
+                        >
+                            -
+                        </p>
+                        <p data-user-email class="text-xs text-gray-500">-</p>
+                        <p class="text-xs font-bold mt-1" style="color: #C9A84C;">
+                            ⭐ <span data-user-points>0</span> pts
+                            · Nivel <span data-user-level>0</span>
+                        </p>
+                    </div>
+
+                    <a
+                        href="{{ url_for('web.perfil') }}"
+                        class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        Mi Perfil
+                    </a>
+
+                    <a
+                        href="#"
+                        data-nav-dashboard
+                        class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        Mi Dashboard
+                    </a>
+
+                    {# Atajos propios de cada rol (RNF-SEG-02) #}
+
+                    <a href="{{ url_for('web.mis_aportes') }}"
+                       data-role="student"
+                       class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                        Mis Aportes
+                    </a>
+
+                    <a href="{{ url_for('web.favoritos') }}"
+                       data-role="student"
+                       class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                        Favoritos
+                    </a>
+
+                    <a href="{{ url_for('web.ranking') }}"
+                       data-role="student"
+                       class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                        Ranking
+                    </a>
+
+                    <a href="{{ url_for('web.registrar_contenido') }}"
+                       data-role="teacher"
+                       class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                        Registrar Contenido
+                    </a>
+
+                    <a href="{{ url_for('web.admin_validacion') }}"
+                       data-role="admin"
+                       class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                        Bandeja Validación
+                    </a>
+
+                    <a href="{{ url_for('web.admin_usuarios') }}"
+                       data-role="admin"
+                       class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                        Gestionar Usuarios
+                    </a>
+
+                    <div class="border-t border-gray-100">
+                        <button
+                            id="simul-logout"
+                            type="button"
+                            data-action="logout"
+                            class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                        >
+                            Cerrar sesión
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+
+            {# ------------------------------------------------
+                 SIN SESIÓN → botón de acceso
+            ------------------------------------------------ #}
+
+            <a
+                href="{{ url_for('web.login') }}"
+                data-requires-guest
+                class="btn-primary text-sm px-4 py-2"
+            >
+                Iniciar sesión
+            </a>
+
+        </div>
+
+    </div>
+
+</nav>

@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}Buscar en el Museo | SIMUL{% endblock %}
+
+{% block content %}
+
+{# Catálogo que se filtra en el navegador.
+   Se entrega tal cual llegó del "servidor" para que el JS
+   tenga una única fuente de verdad. #}
+<script>
+    window.SIMUL_CONTENT       = {{ simul_content | tojson }};
+    window.SIMUL_CATEGORY_SLUG = {{ category_slug_map | tojson }};
+    window.SIMUL_CATEGORIES    = {{ categories | tojson }};
+    window.SIMUL_YEARS         = {{ years | tojson }};
+    window.SIMUL_INITIAL_QUERY = {{ initial_query | tojson }};
+    window.SIMUL_INITIAL_CAT   = {{ selected_cat | tojson }};
+</script>
+
+<div class="pt-16 min-h-screen bg-white">
+
+    {# =====================================================
+         ENCABEZADO DE BÚSQUEDA
+    ====================================================== #}
+
+    <div class="bg-[#C8102E] py-10">
+        <div class="max-w-[1440px] mx-auto px-8">
+
+            <h1
+                class="mb-5"
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 800;
+                    font-size: 32px;
+                    color: white;
+                "
+            >
+                Buscar en el Museo
+            </h1>
+
+            <div class="relative max-w-2xl">
+                <svg
+                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                    width="20" height="20" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2"
+                >
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                </svg>
+
+                <input
+                    type="search"
+                    id="search-input"
+                    value="{{ initial_query }}"
+                    placeholder="Buscar proyectos, premios, eventos, personas..."
+                    autocomplete="off"
+                    class="
+                        w-full pl-12 pr-4 py-4 bg-white rounded-xl
+                        text-gray-900 text-base placeholder:text-gray-500
+                        focus:outline-none focus:ring-2 focus:ring-white/50
+                        shadow-lg
+                    "
+                    style="font-family: 'Inter', sans-serif;"
+                >
+            </div>
+
+        </div>
+    </div>
+
+    <div class="max-w-[1440px] mx-auto px-8 py-8 flex gap-8">
+
+        {# ------------------------------------------------
+             FILTROS LATERALES
+        ------------------------------------------------ #}
+
+        <aside class="w-56 shrink-0 hidden lg:block">
+            <div class="sticky top-20">
+
+                <h3
+                    class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4"
+                    style="font-family: 'Montserrat', sans-serif;"
+                >
+                    Filtros
+                </h3>
+
+                <div class="mb-6">
+                    <p
+                        class="text-sm font-semibold text-gray-700 mb-2"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Categoría
+                    </p>
+
+                    {% for cat in categories %}
+                        <button
+                            type="button"
+                            data-filter-category="{{ cat }}"
+                            class="
+                                w-full text-left px-3 py-2 rounded-lg
+                                text-sm transition-colors mb-0.5
+                                {% if cat == 'Todos' %}bg-[#C8102E] text-white font-semibold
+                                {% else %}text-gray-600 hover:bg-gray-100{% endif %}
+                            "
+                            style="font-family: 'Inter', sans-serif;"
+                        >
+                            {{ cat }}
+                        </button>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    <p
+                        class="text-sm font-semibold text-gray-700 mb-2"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Año
+                    </p>
+
+                    {% for year in years %}
+                        <button
+                            type="button"
+                            data-filter-year="{{ year }}"
+                            class="
+                                w-full text-left px-3 py-2 rounded-lg
+                                text-sm transition-colors mb-0.5
+                                {% if year == 'Todos' %}bg-[#C8102E] text-white font-semibold
+                                {% else %}text-gray-600 hover:bg-gray-100{% endif %}
+                            "
+                            style="font-family: 'Inter', sans-serif;"
+                        >
+                            {{ year }}
+                        </button>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </aside>
+
+        {# ------------------------------------------------
+             RESULTADOS
+        ------------------------------------------------ #}
+
+        <div class="flex-1">
+
+            <div class="flex items-center justify-between mb-6">
+
+                <p
+                    id="search-count"
+                    class="text-gray-500 text-sm"
+                    style="font-family: 'Inter', sans-serif;"
+                >
+                    Cargando...
+                </p>
+
+                {# Filtros compacta para móvil #}
+
+                <div class="flex gap-2 lg:hidden">
+                    <select
+                        id="search-cat-mobile"
+                        class="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white"
+                    >
+                        {% for cat in categories %}<option>{{ cat }}</option>{% endfor %}
+                    </select>
+
+                    <select
+                        id="search-year-mobile"
+                        class="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white"
+                    >
+                        {% for year in years %}<option>{{ year }}</option>{% endfor %}
+                    </select>
+                </div>
+
+            </div>
+
+            {# Esqueleto de carga #}
+
+            <div id="search-skeleton" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                {% for _ in range(6) %}
+                    <div class="simul-card overflow-hidden animate-pulse">
+                        <div class="h-44 bg-gray-100"></div>
+                        <div class="p-4">
+                            <div class="h-4 bg-gray-100 rounded mb-2 w-3/4"></div>
+                            <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {# Cuadrícula de resultados (la pinta app.js) #}
+
+            <div
+                id="search-results"
+                class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 hidden"
+            ></div>
+
+            {# Estado vacío #}
+
+            <div id="search-empty" class="hidden flex-col items-center justify-center py-24 text-center">
+                <div class="text-6xl mb-5">🔍</div>
+                <h3
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 700;
+                        font-size: 22px;
+                        color: #1A1A1A;
+                    "
+                >
+                    Sin resultados
+                </h3>
+                <p
+                    class="text-gray-500 mt-2 max-w-sm"
+                    style="font-family: 'Inter', sans-serif;"
+                >
+                    No encontramos contenido que coincida con tu búsqueda.
+                    Prueba con otros términos o ajusta los filtros.
+                </p>
+                <button type="button" id="search-clear" class="btn-secondary mt-6">
+                    Limpiar filtros
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/pages/buscar.js') }}"></script>
+{% endblock %}

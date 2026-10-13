@@ -1,0 +1,107 @@
+{# ==========================================================
+   TARJETA DE CONTENIDO REUTILIZABLE
+
+   Se usa en el detalle de una pieza (bloque "relacionados").
+
+   IMPORTANTE: no envuelve todo en un <a>. El enlace va solo
+   en el pie para que el botón de favorito quede fuera y el
+   HTML siga siendo válido (no se pueden anidar <a>).
+
+   Variables esperadas:
+     item → diccionario con la forma de CONTENT_ITEMS
+
+   Réplica JS de esta tarjeta: SIMUL.contentCardHtml() en
+   app/static/js/app.js
+   ========================================================== #}
+
+<article class="simul-card overflow-hidden group flex flex-col">
+
+    <div class="relative h-44 overflow-hidden bg-gray-100">
+        <img
+            src="{{ item.image }}"
+            alt="{{ item.title }}"
+            loading="lazy"
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        >
+
+        <span class="tag {{ item.categoryTag }} absolute top-3 left-3">
+            {{ item.category }}
+        </span>
+
+        {# Atajo para guardar la pieza sin salir de la vista #}
+
+        <button
+            type="button"
+            data-favorite="{{ item.id }}"
+            class="
+                absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90
+                text-lg leading-none flex items-center justify-center
+                shadow-sm hover:bg-white transition-colors
+            "
+            aria-label="Guardar en favoritos"
+        >
+            ☆
+        </button>
+    </div>
+
+    <div class="p-5 flex-1 flex flex-col">
+
+        <p
+            class="text-xs font-bold mb-2"
+            style="font-family: 'Montserrat', sans-serif; color: #C8102E;"
+        >
+            {{ item.year }}
+            <span class="text-gray-300 mx-1">·</span>
+            <span
+                class="text-gray-500 font-normal"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                {{ item.author }}
+            </span>
+        </p>
+
+        <h3
+            class="line-clamp-2 mb-2"
+            style="
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 700;
+                font-size: 16px;
+                color: #1A1A1A;
+                line-height: 1.35;
+            "
+        >
+            {{ item.title }}
+        </h3>
+
+        <p
+            class="text-gray-500 text-sm line-clamp-2 mb-4"
+            style="font-family: 'Inter', sans-serif;"
+        >
+            {{ item.description }}
+        </p>
+
+        <div class="flex flex-wrap gap-1.5 mt-auto">
+            {% for tag in item.tags[:3] %}
+                <span
+                    class="px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 text-xs"
+                    style="font-family: 'Inter', sans-serif;"
+                >
+                    #{{ tag }}
+                </span>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <a
+        href="{{ url_for('web.detalle_contenido', contenido_id=item.id) }}"
+        class="
+            block px-5 py-3 border-t border-gray-100 text-center
+            text-sm font-semibold hover:bg-gray-50 transition-colors
+        "
+        style="font-family: 'Montserrat', sans-serif; color: #C8102E;"
+    >
+        Ver detalle
+    </a>
+
+</article>

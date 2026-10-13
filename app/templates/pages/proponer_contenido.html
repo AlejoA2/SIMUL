@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+
+{% block title %}Proponer proyecto | SIMUL{% endblock %}
+
+{% block content %}
+
+<div class="pt-16 min-h-screen bg-[#F9FAFB]">
+
+    <div class="max-w-[900px] mx-auto px-6 py-10">
+
+        {# =====================================================
+             ENCABEZADO
+        ====================================================== #}
+
+        <div class="mb-8">
+            <a
+                href="#"
+                data-nav-dashboard
+                class="text-sm text-gray-500 hover:text-[#C8102E] flex items-center gap-1 mb-3"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                ← Dashboard
+            </a>
+
+            <h1
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 800;
+                    font-size: 36px;
+                    color: #1A1A1A;
+                "
+            >
+                Proponer proyecto
+            </h1>
+
+            <p
+                class="text-gray-500 mt-1"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Tu propuesta será revisada por el docente asesor y luego por el
+                administrador antes de publicarse en el museo.
+            </p>
+        </div>
+
+        {# =====================================================
+             FORMULARIO
+        ====================================================== #}
+
+        <form id="proposal-form" novalidate class="simul-card p-8">
+
+            <div class="flex flex-col gap-6">
+
+                {# ---- Nombre del proyecto ---- #}
+
+                <div>
+                    <label
+                        for="prop-name"
+                        class="block mb-2 text-sm font-semibold text-gray-700"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Nombre del proyecto *
+                    </label>
+                    <input
+                        type="text"
+                        id="prop-name"
+                        name="name"
+                        placeholder="Ej: Sistema de monitoreo ambiental con IoT"
+                        class="prop-input w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:border-[#C8102E] focus:ring-[#C8102E]/20"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                    <p class="field-error hidden text-xs text-red-600 mt-1.5"></p>
+                </div>
+
+                {# ---- Año y categoría ---- #}
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+                    <div>
+                        <label
+                            for="prop-year"
+                            class="block mb-2 text-sm font-semibold text-gray-700"
+                            style="font-family: 'Montserrat', sans-serif;"
+                        >
+                            Año *
+                        </label>
+                        <select
+                            id="prop-year"
+                            name="year"
+                            class="prop-input w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:border-[#C8102E] focus:ring-[#C8102E]/20"
+                            style="font-family: 'Inter', sans-serif;"
+                        >
+                            <option value="">Selecciona un año</option>
+                            {% for year in years %}
+                                <option value="{{ year }}">{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="field-error hidden text-xs text-red-600 mt-1.5"></p>
+                    </div>
+
+                    <div>
+                        <label
+                            for="prop-category"
+                            class="block mb-2 text-sm font-semibold text-gray-700"
+                            style="font-family: 'Montserrat', sans-serif;"
+                        >
+                            Tipo de proyecto *
+                        </label>
+                        <select
+                            id="prop-category"
+                            name="category"
+                            class="prop-input w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:border-[#C8102E] focus:ring-[#C8102E]/20"
+                            style="font-family: 'Inter', sans-serif;"
+                        >
+                            <option value="">Selecciona un tipo</option>
+                            {% for category in categories %}
+                                <option value="{{ category }}">{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="field-error hidden text-xs text-red-600 mt-1.5"></p>
+                    </div>
+
+                </div>
+
+                {# ---- Integrantes ---- #}
+
+                <div>
+                    <label
+                        for="prop-members"
+                        class="block mb-2 text-sm font-semibold text-gray-700"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Integrantes *
+                    </label>
+                    <input
+                        type="text"
+                        id="prop-members"
+                        name="members"
+                        placeholder="Nombres separados por coma"
+                        class="prop-input w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:border-[#C8102E] focus:ring-[#C8102E]/20"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                    <p class="field-error hidden text-xs text-red-600 mt-1.5"></p>
+                </div>
+
+                {# ---- Docente asesor ---- #}
+
+                <div>
+                    <label
+                        for="prop-teacher"
+                        class="block mb-2 text-sm font-semibold text-gray-700"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Docente asesor *
+                    </label>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+
+                        <select
+                            id="prop-teacher"
+                            name="teacherId"
+                            class="prop-input flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:border-[#C8102E] focus:ring-[#C8102E]/20"
+                            style="font-family: 'Inter', sans-serif;"
+                        >
+                            <option value="">Selecciona un docente</option>
+                            {% for teacher in teachers %}
+                                <option
+                                    value="{{ teacher.id }}"
+                                    data-name="{{ teacher.name }}"
+                                    data-avatar="{{ teacher.avatar }}"
+                                >
+                                    {{ teacher.name }} — {{ teacher.department }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        {# Vista previa del asesor elegido #}
+
+                        <div
+                            id="teacher-preview"
+                            class="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 shrink-0"
+                        >
+                            <img
+                                id="teacher-avatar"
+                                src=""
+                                alt=""
+                                class="w-9 h-9 rounded-full object-cover"
+                            >
+                            <span
+                                id="teacher-name"
+                                class="text-sm font-semibold text-gray-700"
+                                style="font-family: 'Montserrat', sans-serif;"
+                            ></span>
+                        </div>
+
+                    </div>
+
+                    <p class="field-error hidden text-xs text-red-600 mt-1.5"></p>
+                </div>
+
+                {# ---- Descripción ---- #}
+
+                <div>
+                    <label
+                        for="prop-description"
+                        class="block mb-2 text-sm font-semibold text-gray-700"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Descripción *
+                    </label>
+                    <textarea
+                        id="prop-description"
+                        name="description"
+                        rows="5"
+                        placeholder="Problema que resuelve, metodología, estado actual..."
+                        class="prop-input w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:border-[#C8102E] focus:ring-[#C8102E]/20 resize-none"
+                        style="font-family: 'Inter', sans-serif;"
+                    ></textarea>
+
+                    <div class="flex justify-between items-center mt-1.5">
+                        <p class="field-error hidden text-xs text-red-600"></p>
+                        <span
+                            id="description-counter"
+                            class="text-xs text-gray-400 ml-auto"
+                            style="font-family: 'Inter', sans-serif;"
+                        >
+                            0 / 600
+                        </span>
+                    </div>
+                </div>
+
+                {# ---- Tecnologías ---- #}
+
+                <div>
+                    <label
+                        class="block mb-3 text-sm font-semibold text-gray-700"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Tecnologías utilizadas
+                    </label>
+
+                    <div class="flex flex-wrap gap-2">
+                        {% for tech in technologies %}
+                            <label
+                                class="tech-option cursor-pointer px-3.5 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:border-[#C8102E] transition-colors select-none"
+                                style="font-family: 'Inter', sans-serif;"
+                            >
+                                <input type="checkbox" value="{{ tech }}" class="hidden">
+                                {{ tech }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# ---- Resultados ---- #}
+
+                <div>
+                    <label
+                        for="prop-results"
+                        class="block mb-2 text-sm font-semibold text-gray-700"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Resultados obtenidos *
+                    </label>
+                    <textarea
+                        id="prop-results"
+                        name="results"
+                        rows="3"
+                        placeholder="Premios, métricas, publicaciones o productos generados..."
+                        class="prop-input w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:border-[#C8102E] focus:ring-[#C8102E]/20 resize-none"
+                        style="font-family: 'Inter', sans-serif;"
+                    ></textarea>
+                    <p class="field-error hidden text-xs text-red-600 mt-1.5"></p>
+                </div>
+
+                {# ---- Archivos adjuntos ---- #}
+
+                <div>
+                    <label
+                        class="block mb-3 text-sm font-semibold text-gray-700"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Evidencias
+                    </label>
+
+                    {# Zona de arrastre #}
+
+                    <label
+                        id="dropzone"
+                        class="block border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center cursor-pointer hover:border-[#C8102E] hover:bg-red-50/30 transition-colors"
+                    >
+                        <div class="text-3xl mb-3">📁</div>
+
+                        <p
+                            class="font-bold text-gray-700"
+                            style="font-family: 'Montserrat', sans-serif; font-size: 14px;"
+                        >
+                            Arrastra archivos aquí o haz clic para seleccionar
+                        </p>
+
+                        <p
+                            class="text-xs text-gray-400 mt-1.5"
+                            style="font-family: 'Inter', sans-serif;"
+                        >
+                            PDF, ZIP, PNG, MP4 · máximo 25 MB por archivo
+                        </p>
+
+                        <input
+                            type="file"
+                            id="proposal-files"
+                            name="files"
+                            multiple
+                            class="hidden"
+                        >
+                    </label>
+
+                    {# Lista de archivos con barra de progreso #}
+
+                    <ul id="proposal-files-list" class="mt-4 flex flex-col gap-2"></ul>
+
+                </div>
+
+                {# ---- Envío ---- #}
+
+                <div
+                    id="proposal-error"
+                    class="hidden p-3.5 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700"
+                    style="font-family: 'Inter', sans-serif;"
+                ></div>
+
+                <button
+                    type="submit"
+                    id="proposal-submit"
+                    class="btn-primary w-full py-3.5 text-base mt-2"
+                >
+                    Enviar propuesta
+                </button>
+
+            </div>
+
+            {# ------------------------------------------------
+                 PANTALLA DE ÉXITO
+            ------------------------------------------------ #}
+
+            <div id="proposal-success" class="hidden text-center py-12 animate-fade-in">
+                <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-4xl mx-auto mb-5">
+                    ✅
+                </div>
+
+                <h2
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 800;
+                        font-size: 24px;
+                        color: #1A1A1A;
+                    "
+                >
+                    ¡Propuesta enviada!
+                </h2>
+
+                <p
+                    class="text-gray-500 mt-2 mb-3 max-w-md mx-auto"
+                    style="font-family: 'Inter', sans-serif;"
+                >
+                    Tu docente asesor ya fue notificado. Podrás seguir el estado
+                    de la revisión desde
+                    <a
+                        href="{{ url_for('web.mis_aportes') }}"
+                        class="text-[#C8102E] font-semibold hover:underline"
+                    >
+                        Mis aportes
+                    </a>.
+                </p>
+
+                <p
+                    id="proposal-summary"
+                    class="text-sm text-gray-400 mb-8"
+                    style="font-family: 'Inter', sans-serif;"
+                ></p>
+
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <a href="{{ url_for('web.mis_aportes') }}" class="btn-primary">
+                        Ver mis aportes
+                    </a>
+                    <a href="{{ url_for('web.dashboard_estudiante') }}" class="btn-secondary">
+                        Volver al dashboard
+                    </a>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/pages/proponer_contenido.js') }}"></script>
+{% endblock %}

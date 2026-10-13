@@ -1,0 +1,135 @@
+{# ==========================================================
+   BASE - SIMUL MUSEO DIGITAL INTERACTIVO
+   ==========================================================
+   Estructura común a todas las páginas.
+
+   Bloques disponibles:
+     title         → título del documento
+     hide_nav      → las pantallas de login y registro
+                     necesitan la pantalla completa (sin navbar)
+     content       → contenido de la página
+     page_scripts  → scripts exclusivos de la página
+   ========================================================== #}
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    {# El contenido del museo se puede indexar y compartir #}
+    <meta
+        name="description"
+        content="Museo Digital Interactivo del Programa de Ingenieria de Sistemas de la Universidad Libre."
+    >
+
+    <title>
+        {% block title %}SIMUL | Museo Digital{% endblock %}
+    </title>
+
+    {# ----------------------------------------------------------
+         TIPOGRAFÍAS
+         Montserrat para títulos, Inter para texto corrido
+         (idénticas al prototipo de Figma).
+       ---------------------------------------------------------- #}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet"
+    >
+
+    {# ----------------------------------------------------------
+         TAILWIND CSS (CDN)
+
+         En producción se recomienda compilar Tailwind durante
+         el proceso de construcción. La paleta institutional
+         se declara aquí para poder usar clases como
+         `bg-simul-red` o `text-simul-gold-light`.
+       ---------------------------------------------------------- #}
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        simul: {
+                            red:        '#C8102E',
+                            'red-dark':  '#A00D24',
+                            'red-light': '#E8153A',
+                            gold:        '#C9A84C',
+                            'gold-light': '#E2C06A',
+                            'gold-dark':  '#A88535',
+                            black:       '#1A1A1A',
+                            gray:        '#6B7280',
+                            'gray-light': '#F4F4F5',
+                            border:      '#E5E7EB'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Montserrat', 'sans-serif'],
+                        body:    ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+
+    {# CSS propio: botones, tarjetas, etiquetas y animaciones #}
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/app.css') }}"
+    >
+
+</head>
+
+<body class="min-h-screen bg-white">
+
+
+    {# =====================================================
+         NAVBAR
+         Se omite en login y registro, que ocupan la
+         pantalla completa.
+    ====================================================== #}
+
+    {% if not hide_nav %}
+        {% include "partials/_navbar.html" %}
+    {% endif %}
+
+
+    {# =====================================================
+         CONTENIDO PRINCIPAL
+    ====================================================== #}
+
+    {% block content %}{% endblock %}
+
+
+    {# =====================================================
+         JAVASCRIPT
+
+         store.js  → estado en localStorage
+         app.js    → navbar, toasts, modales, guardas
+
+         Cada bloque `page_script` recibe sus datos como JSON
+         desde Python (ver app/routes/web_routes.py).
+    ====================================================== #}
+
+    <script src="{{ url_for('static', filename='js/store.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+    {% block page_scripts %}{% endblock %}
+
+</body>
+
+</html>

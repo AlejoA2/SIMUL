@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Mis aportes | SIMUL{% endblock %}
+
+{% block content %}
+
+<div class="pt-16 min-h-screen bg-[#F9FAFB]">
+
+    <div class="max-w-[1440px] mx-auto px-8 py-10">
+
+        {# =====================================================
+             ENCABEZADO
+        ====================================================== #}
+
+        <div class="mb-8">
+            <a
+                href="#"
+                data-nav-dashboard
+                class="text-sm text-gray-500 hover:text-[#C8102E] flex items-center gap-1 mb-3"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                ← Dashboard
+            </a>
+
+            <h1
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 800;
+                    font-size: 36px;
+                    color: #1A1A1A;
+                "
+            >
+                Mis aportes
+            </h1>
+
+            <p
+                class="text-gray-500 mt-1"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Historial del contenido que has propuesto al museo
+            </p>
+        </div>
+
+        {# =====================================================
+             RESUMEN
+        ====================================================== #}
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+
+            <div class="simul-card p-5">
+                <span class="tag tag-publicado">Publicado</span>
+                <p
+                    class="text-3xl font-black mt-3"
+                    style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                >
+                    {{ items | selectattr('status', 'equalto', 'publicado') | list | length }}
+                </p>
+            </div>
+
+            <div class="simul-card p-5">
+                <span class="tag tag-pendiente">Pendiente</span>
+                <p
+                    class="text-3xl font-black mt-3"
+                    style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                >
+                    {{ items | selectattr('status', 'equalto', 'pendiente') | list | length }}
+                </p>
+            </div>
+
+            <div class="simul-card p-5">
+                <span class="tag tag-rechazado">Rechazado</span>
+                <p
+                    class="text-3xl font-black mt-3"
+                    style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                >
+                    {{ items | selectattr('status', 'equalto', 'rechazado') | list | length }}
+                </p>
+            </div>
+
+        </div>
+
+        {# =====================================================
+             LISTADO
+        ====================================================== #}
+
+        <div class="simul-card overflow-hidden">
+
+            <div
+                class="grid grid-cols-[1fr_120px_130px_110px] gap-4 px-5 py-3 border-b border-gray-100 bg-gray-50"
+                style="font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #6B7280;"
+            >
+                <span>Título</span>
+                <span>Tipo</span>
+                <span>Estado</span>
+                <span class="text-right">Fecha</span>
+            </div>
+
+            {% for item in items %}
+                <div
+                    class="grid grid-cols-[1fr_120px_130px_110px] gap-4 px-5 py-4 items-center border-b border-gray-50"
+                >
+                    <div class="min-w-0">
+                        <p
+                            class="text-sm font-semibold text-gray-800 truncate"
+                            style="font-family: 'Montserrat', sans-serif;"
+                        >
+                            {{ item.title }}
+                        </p>
+
+                        {# Botón para leer las observaciones del
+                           rechazo (RNF-SEG-04). Solo el autor
+                           y el administrador pueden verlas. #}
+
+                        {% if item.status == 'rechazado' %}
+                            <button
+                                type="button"
+                                data-observations="{{ item.observations }}"
+                                data-title="{{ item.title }}"
+                                class="text-xs font-semibold mt-1 hover:underline"
+                                style="font-family: 'Inter', sans-serif; color: #C8102E;"
+                            >
+                                Ver observaciones del revisor
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <span class="tag tag-blue">{{ item.type }}</span>
+
+                    <span class="tag tag-{{ item.status }}">
+                        {{ item.status | capitalize }}
+                    </span>
+
+                    <span
+                        class="text-sm text-gray-500 text-right"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        {{ item.date }}
+                    </span>
+
+                </div>
+            {% endfor %}
+
+        </div>
+
+        {# =====================================================
+             ESTADO VACÍO
+        ====================================================== #}
+
+        <div id="contributions-empty" class="hidden flex-col items-center justify-center py-24 text-center">
+            <div class="text-6xl mb-5">📝</div>
+
+            <h3
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 700;
+                    font-size: 22px;
+                    color: #1A1A1A;
+                "
+            >
+                Aún no has propuesto contenido
+            </h3>
+
+            <p
+                class="text-gray-500 mt-2 max-w-sm"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Comparte un proyecto, un premio o un evento con la comunidad del programa.
+            </p>
+
+            <a href="{{ url_for('web.proponer_contenido') }}" class="btn-primary mt-6">
+                Proponer mi primer proyecto
+            </a>
+        </div>
+
+        {# =====================================================
+             LLAMADA FINAL
+        ====================================================== #}
+
+        <div class="mt-10 text-center">
+            <a href="{{ url_for('web.proponer_contenido') }}" class="btn-primary inline-block px-8 py-3.5">
+                + Proponer nuevo proyecto
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/pages/mis_aportes.js') }}"></script>
+{% endblock %}

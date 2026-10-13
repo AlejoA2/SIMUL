@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}Mi perfil | SIMUL{% endblock %}
+
+{% block content %}
+
+<script>
+    window.SIMUL_ROLE_LABELS = {{ role_labels | tojson }};
+    window.SIMUL_BADGES_CATALOG = {{ badges_catalog | tojson }};
+</script>
+
+<div class="pt-16 min-h-screen bg-[#F9FAFB]">
+
+    <div class="max-w-[1440px] mx-auto px-8 py-10">
+
+        {# =====================================================
+             ENCABEZADO
+        ====================================================== #}
+
+        <div class="mb-8">
+            <a
+                href="#"
+                data-nav-dashboard
+                class="text-sm text-gray-500 hover:text-[#C8102E] flex items-center gap-1 mb-3"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                ← Dashboard
+            </a>
+
+            <h1
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 800;
+                    font-size: 36px;
+                    color: #1A1A1A;
+                "
+            >
+                Mi Perfil
+            </h1>
+
+            <p
+                class="text-gray-500 mt-1"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Tu información pública dentro del museo
+            </p>
+        </div>
+
+        {# =====================================================
+             TARJETA DE IDENTIDAD
+        ====================================================== #}
+
+        <div class="simul-card overflow-hidden mb-8">
+
+            <div class="profile-banner" style="height: 120px;"></div>
+
+            <div class="px-8 pb-8">
+
+                <div class="flex flex-col sm:flex-row sm:items-end gap-5 -mt-12 mb-6">
+
+                    <img
+                        data-user-avatar
+                        src="{{ demo.avatar }}"
+                        alt="{{ demo.name }}"
+                        class="w-24 h-24 rounded-2xl object-cover ring-4 ring-white shadow-lg"
+                    >
+
+                    <div class="flex-1 sm:pb-2">
+                        <h2
+                            data-user-name
+                            style="
+                                font-family: 'Montserrat', sans-serif;
+                                font-weight: 800;
+                                font-size: 24px;
+                                color: #1A1A1A;
+                            "
+                        >
+                            {{ demo.name }}
+                        </h2>
+
+                        <p
+                            data-user-email
+                            class="text-sm text-gray-500"
+                            style="font-family: 'Inter', sans-serif;"
+                        >
+                            {{ demo.email }}
+                        </p>
+                    </div>
+
+                    <span
+                        data-user-role-label
+                        class="tag tag-red sm:mb-2"
+                        style="font-size: 13px; padding: 6px 14px;"
+                    >
+                        Estudiante
+                    </span>
+
+                </div>
+
+                {# ---- Descripción editable ---- #}
+
+                <div class="border-t border-gray-100 pt-6">
+
+                    <div class="flex items-center justify-between mb-3">
+                        <h3
+                            style="
+                                font-family: 'Montserrat', sans-serif;
+                                font-weight: 700;
+                                font-size: 15px;
+                                color: #1A1A1A;
+                            "
+                        >
+                            Acerca de mí
+                        </h3>
+
+                        <button
+                            type="button"
+                            id="edit-description"
+                            class="text-sm font-semibold hover:underline"
+                            style="font-family: 'Montserrat', sans-serif; color: #C8102E;"
+                        >
+                            Editar
+                        </button>
+                    </div>
+
+                    <p
+                        data-user-description
+                        class="text-gray-600 leading-relaxed"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        {{ demo.description }}
+                    </p>
+
+                    {# Formulario de edición (oculto por defecto) #}
+
+                    <div id="description-editor" class="hidden mt-3">
+                        <textarea
+                            id="description-input"
+                            rows="4"
+                            class="
+                                w-full px-4 py-3 border border-gray-200 rounded-xl
+                                text-sm focus:outline-none focus:ring-2
+                                focus:border-[#C8102E] focus:ring-[#C8102E]/20
+                                resize-none
+                            "
+                            style="font-family: 'Inter', sans-serif;"
+                        >{{ demo.description }}</textarea>
+
+                        <div class="flex gap-3 mt-3">
+                            <button type="button" id="description-save" class="btn-primary">
+                                Guardar
+                            </button>
+                            <button type="button" id="description-cancel" class="btn-secondary">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {# =====================================================
+             GAMIFICACIÓN + INSIGNIAS
+        ====================================================== #}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            {# ---- Puntos ---- #}
+
+            <div class="lg:col-span-2">
+
+                <div class="simul-card p-6 mb-6">
+                    <h3
+                        class="mb-5"
+                        style="
+                            font-family: 'Montserrat', sans-serif;
+                            font-weight: 700;
+                            font-size: 16px;
+                            color: #1A1A1A;
+                        "
+                    >
+                        Progreso de gamificación
+                    </h3>
+
+                    <div class="grid grid-cols-3 gap-5 mb-6 text-center">
+                        <div>
+                            <p
+                                class="text-2xl font-black"
+                                style="font-family: 'Montserrat', sans-serif; color: #C8102E;"
+                            >
+                                <span data-user-points>{{ demo.points }}</span>
+                            </p>
+                            <p class="text-xs text-gray-500">Puntos</p>
+                        </div>
+                        <div>
+                            <p
+                                class="text-2xl font-black"
+                                style="font-family: 'Montserrat', sans-serif; color: #C9A84C;"
+                            >
+                                <span data-user-level>{{ demo.level }}</span>
+                            </p>
+                            <p class="text-xs text-gray-500">Nivel</p>
+                        </div>
+                        <div>
+                            <p
+                                class="text-2xl font-black"
+                                style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                            >
+                                {{ demo.badges | length }}
+                            </p>
+                            <p class="text-xs text-gray-500">Insignias</p>
+                        </div>
+                    </div>
+
+                    <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
+                        <div class="gold-bar h-full" style="width: 62%;"></div>
+                    </div>
+
+                    <p
+                        class="text-xs text-gray-400 mt-2 text-right"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        1.500 pts para el Nivel 5 — Innovador
+                    </p>
+                </div>
+
+                {# ---- Insignias conseguidas ---- #}
+
+                <div class="simul-card p-6">
+                    <h3
+                        class="mb-5"
+                        style="
+                            font-family: 'Montserrat', sans-serif;
+                            font-weight: 700;
+                            font-size: 16px;
+                            color: #1A1A1A;
+                        "
+                    >
+                        Insignias conseguidas
+                    </h3>
+
+                    <div data-user-badges class="flex flex-wrap gap-2"></div>
+                </div>
+
+            </div>
+
+            {# ---- Catálogo de insignias ---- #}
+
+            <div>
+                <h3
+                    class="mb-4"
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 700;
+                        font-size: 16px;
+                        color: #1A1A1A;
+                    "
+                >
+                    Catálogo de insignias
+                </h3>
+
+                <div class="simul-card overflow-hidden">
+                    {% for insignia in badges_catalog %}
+                        <div class="flex items-center gap-3 px-5 py-3.5 border-b border-gray-50">
+                            <span class="text-xl">{{ insignia.icon }}</span>
+
+                            <span class="flex-1">
+                                <span
+                                    class="block text-sm font-semibold text-gray-800"
+                                    style="font-family: 'Montserrat', sans-serif;"
+                                >
+                                    {{ insignia.name }}
+                                </span>
+                                <span
+                                    class="block text-xs text-gray-400"
+                                    style="font-family: 'Inter', sans-serif;"
+                                >
+                                    {{ '{:,}'.format(insignia.puntos_requeridos) }} puntos
+                                </span>
+                            </span>
+
+                            <span
+                                class="tag tag-{{ 'publicado' if insignia.puntos_requeridos <= demo.points else 'pendiente' }}"
+                            >
+                                {{ '✓' if insignia.puntos_requeridos <= demo.points else '🔒' }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+        {# =====================================================
+             SEGURIDAD
+        ====================================================== #}
+
+        <div class="mt-8 p-6 rounded-2xl bg-[#F9FAFB] border border-gray-200">
+            <h3
+                class="mb-2"
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 700;
+                    font-size: 15px;
+                    color: #1A1A1A;
+                "
+            >
+                Seguridad de la cuenta
+            </h3>
+
+            <p
+                class="text-sm text-gray-500 mb-4"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Cambiar contraseña y cerrar sesión en todos los dispositivos.
+            </p>
+
+            <button type="button" data-action="logout" class="btn-secondary">
+                Cerrar sesión en este dispositivo
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/pages/perfil.js') }}"></script>
+{% endblock %}

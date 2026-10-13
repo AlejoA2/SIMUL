@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Bandeja de validación | SIMUL{% endblock %}
+
+{% block content %}
+
+<script>
+    window.SIMUL_QUEUE = {{ simul_queue | tojson }};
+</script>
+
+<div class="pt-16 min-h-screen bg-[#F9FAFB]">
+
+    <div class="max-w-[1440px] mx-auto px-8 py-10">
+
+        {# =====================================================
+             ENCABEZADO
+        ====================================================== #}
+
+        <div class="mb-8">
+            <a
+                href="#"
+                data-nav-dashboard
+                class="text-sm text-gray-500 hover:text-[#C8102E] flex items-center gap-1 mb-3"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                ← Panel de administración
+            </a>
+
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1
+                        style="
+                            font-family: 'Montserrat', sans-serif;
+                            font-weight: 800;
+                            font-size: 36px;
+                            color: #1A1A1A;
+                        "
+                    >
+                        Bandeja de Validación
+                    </h1>
+
+                    <p
+                        class="text-gray-500 mt-1"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        Revisa, aprueba o rechaza el contenido propuesto (RF-VAL-01)
+                    </p>
+                </div>
+
+                <span
+                    id="queue-counter"
+                    class="px-4 py-2 rounded-xl text-sm font-bold"
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        background: #FEF3C7;
+                        color: #92400E;
+                    "
+                >
+                    {{ simul_queue | length }} pendientes
+                </span>
+            </div>
+        </div>
+
+        {# =====================================================
+             FILTROS POR TIPO
+        ====================================================== #}
+
+        <div id="queue-filters" class="flex flex-wrap gap-2 mb-6">
+            <button
+                type="button"
+                data-queue-filter="Todos"
+                class="queue-filter px-4 py-2 rounded-lg text-sm font-semibold"
+                style="font-family: 'Montserrat', sans-serif; background: #C8102E; color: white;"
+            >
+                Todos
+            </button>
+
+            {% for tipo in simul_queue | map(attribute='type') | unique %}
+                <button
+                    type="button"
+                    data-queue-filter="{{ tipo }}"
+                    class="queue-filter px-4 py-2 rounded-lg text-sm font-semibold bg-white text-gray-600 border border-gray-200 hover:border-[#C8102E] transition-colors"
+                    style="font-family: 'Montserrat', sans-serif;"
+                >
+                    {{ tipo }}
+                </button>
+            {% endfor %}
+        </div>
+
+        {# =====================================================
+             COLA DE REVISIÓN
+        ====================================================== #}
+
+        <div id="queue-list" class="flex flex-col gap-4"></div>
+
+        {# =====================================================
+             COLA VACÍA
+        ====================================================== #}
+
+        <div id="queue-empty" class="hidden flex-col items-center justify-center py-28 text-center">
+            <div class="text-6xl mb-5">🎉</div>
+
+            <h2
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 700;
+                    font-size: 22px;
+                    color: #1A1A1A;
+                "
+            >
+                La bandeja está vacía
+            </h2>
+
+            <p
+                class="text-gray-500 mt-2 max-w-sm"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                No hay contenido pendiente de revisión. Todo el material del museo
+                está al día.
+            </p>
+
+            <a href="{{ url_for('web.admin_contenido') }}" class="btn-primary mt-6">
+                Gestionar contenido
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/pages/admin_validacion.js') }}"></script>
+{% endblock %}

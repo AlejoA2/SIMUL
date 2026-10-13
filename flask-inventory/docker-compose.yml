@@ -1,0 +1,41 @@
+services:
+  app:
+    build: .
+    container_name: flask_inventory_app
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: mysql+pymysql://inventory_user:inventory_password@db:3306/inventory_db
+      JWT_SECRET_KEY: super-secret-key
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  db:
+    image: mysql:8.4
+    container_name: flask_inventory_db
+    environment:
+      MYSQL_DATABASE: inventory_db
+      MYSQL_USER: inventory_user
+      MYSQL_PASSWORD: inventory_password
+      MYSQL_ROOT_PASSWORD: root_password 
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped 
+    healthcheck:
+      test: [
+        "CMD", 
+        "mysqladmin",
+        "ping",
+        "-h", 
+        "localhost",
+        "-uroot",
+        "-proot_password"]
+      interval: 5s
+      timeout: 2s
+      retries: 20
+
+volumes:
+  mysql_data:

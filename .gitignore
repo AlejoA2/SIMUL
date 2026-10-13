@@ -1,0 +1,21 @@
+#python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+#entornos virtuales
+.venv/
+venv/
+
+# variables de entorno
+.env
+
+# VS code
+.vscode/
+
+#testing
+.pytest_cache/
+
+#Base de datos
+mysql_data/

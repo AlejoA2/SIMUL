@@ -1,0 +1,68 @@
+{# ==========================================================
+   404 - CONTENIDO NO ENCONTRADO
+
+   El servidor responde con un 404 real cuando el id no
+   existe en el catálogo (ver web_routes.detalle_contenido).
+   ========================================================== #}
+
+{% extends "base.html" %}
+
+{% block title %}Contenido no encontrado | SIMUL{% endblock %}
+
+{% block content %}
+
+<div class="pt-16 min-h-screen bg-[#F9FAFB] flex items-center justify-center">
+
+    <div class="max-w-lg w-full mx-auto px-6 py-12 text-center animate-fade-in">
+
+        <div class="text-7xl mb-6">🗿</div>
+
+        <p
+            class="text-[#C8102E] font-bold text-sm tracking-widest uppercase mb-2"
+            style="font-family: 'Montserrat', sans-serif;"
+        >
+            Error 404
+        </p>
+
+        <h1
+            style="
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 900;
+                font-size: 32px;
+                color: #1A1A1A;
+            "
+        >
+            Contenido no encontrado
+        </h1>
+
+        <p
+            class="text-gray-500 mt-3 mb-8"
+            style="font-family: 'Inter', sans-serif;"
+        >
+            La pieza que buscas no existe o fue retirada del museo.
+            Puede que el identificador
+            <code class="bg-gray-100 px-2 py-1 rounded text-sm">#{{ contenido_id }}</code>
+            sea incorrecto.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a
+                href="{{ url_for('web.explorar') }}"
+                class="btn-primary inline-block text-center"
+            >
+                Explorar el museo
+            </a>
+
+            <a
+                href="{{ url_for('web.buscar') }}"
+                class="btn-secondary inline-block text-center"
+            >
+                Buscar contenido
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

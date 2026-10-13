@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+
+{# Sin navbar: el login ocupa toda la pantalla. #}
+{% set hide_nav = true %}
+
+{% block title %}Iniciar sesión | SIMUL{% endblock %}
+
+{% block content %}
+
+<script>
+    /* Datos de los perfiles de demostración. En producción
+       estos usuarios los devuelve POST /api/auth/login y la
+       contraseña nunca viaja al navegador. */
+    window.SIMUL_ROLE_USERS = {{ roles | tojson }};
+    window.SIMUL_ROLE_EMAILS = {
+        student: {{ roles['student'].email | tojson }},
+        teacher: {{ roles['teacher'].email | tojson }},
+        admin:   {{ roles['admin'].email | tojson }}
+    };
+    window.SIMUL_DEMO_PASSWORD = {{ demo_password | tojson }};
+</script>
+
+<div class="min-h-screen flex">
+
+    {# =====================================================
+         PANEL IZQUIERDO - IDENTIDAD
+    ====================================================== #}
+
+    <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#C8102E]">
+
+        <div
+            class="absolute inset-0 opacity-20"
+            style="
+                background-image: url('{{ url_for('static', filename='img/logo-unilibre.png') }}');
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+            "
+        ></div>
+
+        <div
+            class="absolute inset-0"
+            style="background: linear-gradient(135deg, rgba(200,16,46,0.95) 45%, rgba(139,0,0,0.9));"
+        ></div>
+
+        <div class="relative flex flex-col justify-center px-16 text-white">
+
+            <img
+                src="{{ url_for('static', filename='img/logo-unilibre.png') }}"
+                alt="Universidad Libre"
+                class="h-16 w-auto object-contain mb-10 bg-white/95 rounded-xl p-2"
+            >
+
+            <h1
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 900;
+                    font-size: 48px;
+                    line-height: 1.1;
+                    letter-spacing: -0.03em;
+                "
+            >
+                Museo Digital<br>
+                <span style="color: #E2C06A;">Interactivo</span>
+            </h1>
+
+            <p
+                class="mt-6 text-red-100 text-lg max-w-md leading-relaxed"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                35 años de historia, premios, proyectos y personas que han
+                definido al Programa de Ingeniería de Sistemas.
+            </p>
+
+            <div class="mt-12 flex gap-8">
+                <div>
+                    <div
+                        style="
+                            font-family: 'Montserrat', sans-serif;
+                            font-weight: 900;
+                            font-size: 30px;
+                            color: #E2C06A;
+                        "
+                    >
+                        35+
+                    </div>
+                    <div class="text-sm text-red-100">Años</div>
+                </div>
+
+                <div>
+                    <div
+                        style="
+                            font-family: 'Montserrat', sans-serif;
+                            font-weight: 900;
+                            font-size: 30px;
+                            color: #E2C06A;
+                        "
+                    >
+                        4.800+
+                    </div>
+                    <div class="text-sm text-red-100">Egresados</div>
+                </div>
+
+                <div>
+                    <div
+                        style="
+                            font-family: 'Montserrat', sans-serif;
+                            font-weight: 900;
+                            font-size: 30px;
+                            color: #E2C06A;
+                        "
+                    >
+                        120+
+                    </div>
+                    <div class="text-sm text-red-100">Premios</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    {# =====================================================
+         PANEL DERECHO - FORMULARIO
+    ====================================================== #}
+
+    <div class="w-full lg:w-1/2 flex items-center justify-center bg-white px-6 py-12">
+
+        <div class="w-full max-w-md">
+
+            {# Logotipo visible en móvil #}
+
+            <div class="lg:hidden text-center mb-10">
+                <img
+                    src="{{ url_for('static', filename='img/logo-unilibre.png') }}"
+                    alt="Universidad Libre"
+                    class="h-14 w-auto object-contain mx-auto mb-4"
+                >
+                <p
+                    class="font-black text-2xl"
+                    style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                >
+                    SIMUL
+                </p>
+            </div>
+
+            <h2
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 800;
+                    font-size: 30px;
+                    color: #1A1A1A;
+                    margin-bottom: 6px;
+                "
+            >
+                Inicia sesión
+            </h2>
+
+            <p
+                class="text-gray-500 mb-8"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Selecciona tu rol para acceder al museo.
+            </p>
+
+            {# ------------------------------------------------
+                 SELECCIÓN DE ROL  (RF-USR-02)
+            ------------------------------------------------ #}
+
+            <div class="flex flex-col gap-3 mb-6" id="role-picker">
+
+                <button
+                    type="button"
+                    data-role-option="student"
+                    class="role-option text-left p-4 rounded-xl border-2 transition-all"
+                >
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🎓</span>
+                        <span class="flex-1">
+                            <span
+                                class="block font-bold"
+                                style="font-family: 'Montserrat', sans-serif; font-size: 14px;"
+                            >
+                                Estudiante / Egresado
+                            </span>
+                            <span
+                                class="block text-xs text-gray-500 mt-0.5"
+                                style="font-family: 'Inter', sans-serif;"
+                            >
+                                Explora, propone y comparte contenido
+                            </span>
+                        </span>
+                        <span class="role-check hidden text-lg">✓</span>
+                    </div>
+                </button>
+
+                <button
+                    type="button"
+                    data-role-option="teacher"
+                    class="role-option text-left p-4 rounded-xl border-2 transition-all"
+                >
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">👨‍🏫</span>
+                        <span class="flex-1">
+                            <span
+                                class="block font-bold"
+                                style="font-family: 'Montserrat', sans-serif; font-size: 14px;"
+                            >
+                                Docente
+                            </span>
+                            <span
+                                class="block text-xs text-gray-500 mt-0.5"
+                                style="font-family: 'Inter', sans-serif;"
+                            >
+                                Registra y gestiona contenido institucional
+                            </span>
+                        </span>
+                        <span class="role-check hidden text-lg">✓</span>
+                    </div>
+                </button>
+
+                <button
+                    type="button"
+                    data-role-option="admin"
+                    class="role-option text-left p-4 rounded-xl border-2 transition-all"
+                >
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">⚙️</span>
+                        <span class="flex-1">
+                            <span
+                                class="block font-bold"
+                                style="font-family: 'Montserrat', sans-serif; font-size: 14px;"
+                            >
+                                Administrador
+                            </span>
+                            <span
+                                class="block text-xs text-gray-500 mt-0.5"
+                                style="font-family: 'Inter', sans-serif;"
+                            >
+                                Valida contenido y gestiona la plataforma
+                            </span>
+                        </span>
+                        <span class="role-check hidden text-lg">✓</span>
+                    </div>
+                </button>
+
+            </div>
+
+            {# ------------------------------------------------
+                 CREDENCIALES
+            ------------------------------------------------ #}
+
+            <form id="login-form" novalidate>
+
+                <div class="mb-4">
+                    <label
+                        for="login-email"
+                        class="block mb-2 text-sm font-semibold text-gray-700"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Correo electrónico
+                    </label>
+
+                    <input
+                        type="email"
+                        id="login-email"
+                        name="email"
+                        autocomplete="email"
+                        class="
+                            w-full px-4 py-3 border rounded-xl text-sm
+                            focus:outline-none focus:ring-2
+                            border-gray-200 focus:border-[#C8102E] focus:ring-[#C8102E]/20
+                        "
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+
+                    <p class="field-error hidden text-xs text-red-600 mt-1.5"></p>
+                </div>
+
+                <div class="mb-5">
+                    <label
+                        for="login-password"
+                        class="block mb-2 text-sm font-semibold text-gray-700"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Contraseña
+                    </label>
+
+                    <div class="relative">
+                        <input
+                            type="password"
+                            id="login-password"
+                            name="password"
+                            autocomplete="current-password"
+                            class="
+                                w-full px-4 py-3 border rounded-xl text-sm pr-12
+                                focus:outline-none focus:ring-2
+                                border-gray-200 focus:border-[#C8102E] focus:ring-[#C8102E]/20
+                            "
+                            style="font-family: 'Inter', sans-serif;"
+                        >
+
+                        <button
+                            type="button"
+                            id="toggle-password"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                            aria-label="Mostrar contraseña"
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <p class="field-error hidden text-xs text-red-600 mt-1.5"></p>
+                </div>
+
+                {# Error general del formulario #}
+
+                <div
+                    id="login-error"
+                    class="hidden mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700"
+                    style="font-family: 'Inter', sans-serif;"
+                ></div>
+
+                <button
+                    type="submit"
+                    id="login-submit"
+                    class="btn-primary w-full py-3.5 text-base"
+                >
+                    Iniciar sesión
+                </button>
+
+            </form>
+
+            {# ------------------------------------------------
+                 NOTA DE DEMOSTRACIÓN
+            ------------------------------------------------ #}
+
+            {# Alerta de modo demostración eliminada por solicitud #}
+
+            <p
+                class="text-center text-sm text-gray-500 mt-8"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                ¿Aún no tienes cuenta?
+                <a
+                    href="{{ url_for('web.registro') }}"
+                    class="text-[#C8102E] font-semibold hover:underline"
+                >
+                    Regístrate aquí
+                </a>
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/pages/login.js') }}"></script>
+{% endblock %}

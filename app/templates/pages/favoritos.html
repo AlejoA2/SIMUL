@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Mis favoritos | SIMUL{% endblock %}
+
+{% block content %}
+
+{# El catálogo y la semilla de favoritos viajan al navegador.
+   `store.js` guarda la lista real en localStorage. #}
+<script>
+    window.SIMUL_CONTENT   = {{ simul_content | tojson }};
+    window.SIMUL_REACTIONS = {{ simul_reactions | tojson }};
+    window.SIMUL_SEED_FAVORITES = {{ seed_favorites | tojson }};
+</script>
+
+<div class="pt-16 min-h-screen bg-[#F9FAFB]">
+
+    <div class="max-w-[1440px] mx-auto px-8 py-10">
+
+        {# =====================================================
+             ENCABEZADO
+        ====================================================== #}
+
+        <div class="mb-8">
+            <a
+                href="#"
+                data-nav-dashboard
+                class="text-sm text-gray-500 hover:text-[#C8102E] flex items-center gap-1 mb-3"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                ← Dashboard
+            </a>
+
+            <h1
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 800;
+                    font-size: 36px;
+                    color: #1A1A1A;
+                "
+            >
+                Mis Favoritos
+            </h1>
+
+            <p
+                class="text-gray-500 mt-1"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Contenido que guardaste para consultar más tarde
+            </p>
+        </div>
+
+        {# =====================================================
+             CUADRÍGILA  (la pinta app.js)
+        ====================================================== #}
+
+        <div
+            id="favorites-grid"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+        ></div>
+
+        {# =====================================================
+             ESTADO VACÍO
+        ====================================================== #}
+
+        <div id="favorites-empty" class="hidden flex-col items-center justify-center py-28 text-center">
+
+            <div class="text-6xl mb-5">⭐</div>
+
+            <h3
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 700;
+                    font-size: 22px;
+                    color: #1A1A1A;
+                "
+            >
+                Aún no tienes favoritos
+            </h3>
+
+            <p
+                class="text-gray-500 mt-2 max-w-sm"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Guarda contenido del museo con el botón ☆ para encontrarlo
+                fácilmente aquí.
+            </p>
+
+            <a href="{{ url_for('web.explorar') }}" class="btn-primary mt-6">
+                Explorar el museo
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/pages/favoritos.js') }}"></script>
+{% endblock %}

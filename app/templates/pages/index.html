@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}SIMUL | Museo Digital Interactivo{% endblock %}
+
+{% block content %}
+
+<div class="pt-16 min-h-screen bg-white">
+
+    {# =====================================================
+         BANNER PRINCIPAL
+    ====================================================== #}
+
+    <section
+        class="relative overflow-hidden bg-[#C8102E]"
+        style="min-height: 520px;"
+    >
+
+        <div
+            class="absolute inset-0 opacity-15"
+            style="
+                background-image: url('{{ hero_image }}');
+                background-size: cover;
+                background-position: center;
+            "
+        ></div>
+
+        <div
+            class="absolute inset-0"
+            style="background: linear-gradient(135deg, rgba(200,16,46,0.95) 50%, rgba(160,13,36,0.8));"
+        ></div>
+
+        <div class="relative max-w-[1440px] mx-auto px-8 py-24 flex flex-col lg:flex-row items-center gap-12">
+
+            <div class="flex-1 text-white">
+
+                <div
+                    class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-sm font-medium mb-6"
+                    style="font-family: 'Montserrat', sans-serif;"
+                >
+                    <span style="color: #C9A84C;">✦</span>
+                    Museo Digital Interactivo
+                </div>
+
+                <h1
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 900;
+                        font-size: clamp(40px, 5vw, 68px);
+                        line-height: 1.05;
+                        letter-spacing: -0.03em;
+                    "
+                >
+                    35 años construyendo<br>
+                    <span style="color: #E2C06A;">el futuro digital</span>
+                </h1>
+
+                <p
+                    class="mt-6 text-red-100 text-lg max-w-xl leading-relaxed"
+                    style="font-family: 'Inter', sans-serif;"
+                >
+                    Explora la historia, logros, proyectos y personas que han
+                    definido al Programa de Ingeniería de Sistemas de la
+                    Universidad Libre.
+                </p>
+
+                <div class="flex gap-4 mt-8 flex-wrap">
+                    <a
+                        href="{{ url_for('web.explorar') }}"
+                        class="px-7 py-3.5 bg-white text-[#C8102E] rounded-xl font-bold text-base hover:bg-red-50 transition-colors"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Explorar el Museo
+                    </a>
+
+                    <a
+                        href="{{ url_for('web.buscar') }}"
+                        class="px-7 py-3.5 border-2 border-white/50 text-white rounded-xl font-semibold text-base hover:bg-white/10 transition-colors"
+                        style="font-family: 'Montserrat', sans-serif;"
+                    >
+                        Buscar contenido
+                    </a>
+                </div>
+
+            </div>
+
+            {# Indicadores del programa (RF-DSH-03) #}
+
+            <div class="grid grid-cols-2 gap-4 lg:gap-5">
+                {% for stat in stats %}
+                    <div class="bg-white/10 border border-white/20 rounded-2xl p-5 text-white text-center backdrop-blur-sm">
+                        <div
+                            style="
+                                font-family: 'Montserrat', sans-serif;
+                                font-weight: 900;
+                                font-size: 36px;
+                                color: #E2C06A;
+                            "
+                        >
+                            {{ stat.value }}
+                        </div>
+                        <div
+                            class="text-sm text-red-100 mt-1 font-medium"
+                            style="font-family: 'Inter', sans-serif;"
+                        >
+                            {{ stat.label }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+
+    </section>
+
+    {# =====================================================
+         ACCESO RÁPIDO POR CATEGORÍA
+    ====================================================== #}
+
+    <section class="max-w-[1440px] mx-auto px-8 py-20">
+
+        <div class="flex items-end justify-between mb-10">
+            <div>
+                <p
+                    class="text-[#C8102E] font-bold text-sm tracking-widest mb-2 uppercase"
+                    style="font-family: 'Montserrat', sans-serif;"
+                >
+                    Acceso rápido
+                </p>
+                <h2
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 800;
+                        font-size: 36px;
+                        color: #1A1A1A;
+                    "
+                >
+                    Explora el museo
+                </h2>
+            </div>
+
+            <a href="{{ url_for('web.explorar') }}" class="btn-secondary hidden md:block">
+                Ver todo
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            {% for item in quick_access %}
+                <a
+                    href="{{ url_for('web.buscar', cat=item.cat) }}"
+                    class="simul-card overflow-hidden text-left group block"
+                >
+                    <div class="relative h-48 overflow-hidden bg-gray-100">
+                        <img
+                            src="{{ item.image }}"
+                            alt="{{ item.title }}"
+                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            loading="lazy"
+                        >
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div class="absolute bottom-4 left-4 text-3xl">{{ item.icon }}</div>
+                    </div>
+
+                    <div class="p-5">
+                        <h3
+                            style="
+                                font-family: 'Montserrat', sans-serif;
+                                font-weight: 700;
+                                font-size: 17px;
+                                color: #1A1A1A;
+                            "
+                        >
+                            {{ item.title }}
+                        </h3>
+                        <p
+                            class="text-gray-500 text-sm mt-1.5 leading-relaxed"
+                            style="font-family: 'Inter', sans-serif;"
+                        >
+                            {{ item.desc }}
+                        </p>
+                        <div
+                            class="flex items-center gap-1 mt-4 text-[#C8102E] text-sm font-semibold"
+                            style="font-family: 'Montserrat', sans-serif;"
+                        >
+                            Explorar
+                            <span class="transition-transform group-hover:translate-x-1">→</span>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+    {# =====================================================
+         HALL DE LA FAMA
+    ====================================================== #}
+
+    <section class="bg-[#1A1A1A] py-20">
+
+        <div class="max-w-[1440px] mx-auto px-8">
+
+            <div class="text-center mb-12">
+                <p
+                    class="font-bold text-sm tracking-widest mb-2 uppercase"
+                    style="font-family: 'Montserrat', sans-serif; color: #C9A84C;"
+                >
+                    Legado
+                </p>
+                <h2
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 800;
+                        font-size: 36px;
+                        color: white;
+                    "
+                >
+                    Hall de la Fama
+                </h2>
+                <p
+                    class="text-gray-400 mt-3 text-base"
+                    style="font-family: 'Inter', sans-serif;"
+                >
+                    Personas que han marcado la historia del programa
+                </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                {% for persona in hall_preview %}
+                    <a
+                        href="{{ url_for('web.buscar', cat='hall') }}"
+                        class="flex flex-col items-center gap-3 group"
+                    >
+                        <div class="w-24 h-24 rounded-full overflow-hidden ring-4 ring-[#C9A84C]/40 group-hover:ring-[#C9A84C] transition-all">
+                            <img
+                                src="{{ persona.image }}"
+                                alt="{{ persona.name }}"
+                                class="w-full h-full object-cover"
+                                loading="lazy"
+                            >
+                        </div>
+                        <div class="text-center">
+                            <p
+                                class="text-white font-bold"
+                                style="font-family: 'Montserrat', sans-serif;"
+                            >
+                                {{ persona.name }}
+                            </p>
+                            <p
+                                class="text-gray-400 text-sm"
+                                style="font-family: 'Inter', sans-serif;"
+                            >
+                                {{ persona.role }}
+                            </p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+
+            <div class="text-center mt-10">
+                <a href="{{ url_for('web.buscar', cat='hall') }}" class="btn-gold">
+                    Ver Hall de la Fama completo
+                </a>
+            </div>
+
+        </div>
+
+    </section>
+
+    {# =====================================================
+         LLAMADA A LA ACCIÓN
+    ====================================================== #}
+
+    <section class="py-16 bg-[#F9FAFB]">
+        <div class="max-w-[1440px] mx-auto px-8 text-center">
+            <h2
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 800;
+                    font-size: 32px;
+                    color: #1A1A1A;
+                "
+            >
+                ¿Haces parte del programa?
+            </h2>
+            <p
+                class="text-gray-500 mt-3 text-base max-w-xl mx-auto"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Inicia sesión para comentar, guardar contenido en favoritos,
+                proponer proyectos y participar en el ranking de gamificación.
+            </p>
+            <a
+                href="{{ url_for('web.login') }}"
+                data-requires-guest
+                class="btn-primary mt-8 text-base px-8 py-4 inline-block"
+            >
+                Iniciar sesión
+            </a>
+        </div>
+    </section>
+
+</div>
+
+{% endblock %}

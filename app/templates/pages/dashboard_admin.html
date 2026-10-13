@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de administración | SIMUL{% endblock %}
+
+{% block content %}
+
+<script>
+    window.SIMUL_ROLE_LABELS = {{ role_labels | tojson }};
+</script>
+
+<div class="pt-16 min-h-screen bg-[#F9FAFB]">
+
+    <div class="max-w-[1440px] mx-auto px-8 py-10">
+
+        {# =====================================================
+             ENCABEZADO
+        ====================================================== #}
+
+        <div class="flex items-center justify-between mb-8">
+
+            <div class="flex items-center gap-4">
+                <img
+                    data-user-avatar
+                    src="{{ demo.avatar }}"
+                    alt="{{ demo.name }}"
+                    class="w-14 h-14 rounded-2xl object-cover ring-4 ring-[#C8102E]/20"
+                >
+
+                <div>
+                    <p
+                        class="text-sm text-gray-500"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        Panel de administración
+                    </p>
+
+                    <h1
+                        data-user-name
+                        style="
+                            font-family: 'Montserrat', sans-serif;
+                            font-weight: 800;
+                            font-size: 28px;
+                            color: #1A1A1A;
+                        "
+                    >
+                        {{ demo.name }}
+                    </h1>
+
+                    <p
+                        class="text-sm text-gray-400"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        <span data-user-email>{{ demo.email }}</span>
+                        · Administrador
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex gap-3 hidden sm:flex">
+                <a href="{{ url_for('web.admin_validacion') }}" class="btn-primary">
+                    Bandeja de validación
+                    {% if pendientes %}
+                        <span
+                            class="ml-1 px-2 py-0.5 rounded-full bg-white/25 text-xs"
+                        >{{ pendientes }}</span>
+                    {% endif %}
+                </a>
+            </div>
+
+        </div>
+
+        {# =====================================================
+             INDICADORES  (RF-DSH-03)
+        ====================================================== #}
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+
+            {% for kpi in kpis %}
+                <div class="simul-card p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div
+                            class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+                            style="background: {{ kpi.color }}15;"
+                        >
+                            {{ kpi.icon }}
+                        </div>
+
+                        <span
+                            class="text-xs font-bold px-2.5 py-1 rounded-full"
+                            style="background: #D1FAE5; color: #065F46;"
+                        >
+                            {{ kpi.change }}
+                        </span>
+                    </div>
+
+                    <p
+                        class="text-3xl font-black mb-1"
+                        style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                    >
+                        {{ '{:,}'.format(kpi.value) }}
+                    </p>
+
+                    <p
+                        class="text-sm text-gray-500"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        {{ kpi.label }}
+                    </p>
+                </div>
+            {% endfor %}
+
+        </div>
+
+        {# =====================================================
+             GRÁFICO MENSUAL DE CONTENIDO
+        ====================================================== #}
+
+        <div class="simul-card p-6 mb-8">
+
+            <div class="flex items-center justify-between mb-8">
+                <h2
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 800;
+                        font-size: 18px;
+                        color: #1A1A1A;
+                    "
+                >
+                    Contenido registrado por mes
+                </h2>
+
+                <span
+                    class="text-sm text-gray-500"
+                    style="font-family: 'Inter', sans-serif;"
+                >
+                    Total 2024:
+                    <strong class="text-gray-800">{{ monthly | sum }}</strong> piezas
+                </span>
+            </div>
+
+            {% set maximo = monthly | max %}
+
+            <div class="flex items-end gap-2 sm:gap-3" style="height: 200px;">
+                {% for valor in monthly %}
+                    <div class="bar-slot flex-1 flex flex-col items-center justify-end gap-2 h-full">
+
+                        <span
+                            class="bar-value text-xs font-bold"
+                            style="font-family: 'Montserrat', sans-serif; color: #C8102E;"
+                        >
+                            {{ valor }}
+                        </span>
+
+                        <div
+                            class="w-full rounded-t-lg transition-all duration-500"
+                            style="
+                                height: {{ (valor / maximo * 100) | round(1) }}%;
+                                background: linear-gradient(180deg, #C8102E 0%, #A00D24 100%);
+                                min-height: 6px;
+                            "
+                            title="{{ months[loop.index0] }}: {{ valor }}"
+                        ></div>
+
+                        <span
+                            class="text-xs text-gray-400"
+                            style="font-family: 'Inter', sans-serif;"
+                        >
+                            {{ months[loop.index0] }}
+                        </span>
+
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+
+        {# =====================================================
+             IMPACTO + ATAJOS DE ADMINISTRACIÓN
+        ====================================================== #}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            {# ---- Métricas de impacto ---- #}
+
+            <div class="lg:col-span-2">
+                <h2
+                    class="mb-4"
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 800;
+                        font-size: 20px;
+                        color: #1A1A1A;
+                    "
+                >
+                    Impacto del programa
+                </h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+                    {% for metrica in impact %}
+                        <div class="simul-card p-6">
+                            <p
+                                class="text-3xl font-black mb-1"
+                                style="font-family: 'Montserrat', sans-serif; color: #C9A84C;"
+                            >
+                                {{ metrica.value }}
+                            </p>
+
+                            <p
+                                class="text-sm font-semibold text-gray-800"
+                                style="font-family: 'Montserrat', sans-serif;"
+                            >
+                                {{ metrica.label }}
+                            </p>
+
+                            <p
+                                class="text-xs text-gray-400 mt-1"
+                                style="font-family: 'Inter', sans-serif;"
+                            >
+                                {{ metrica.sub }}
+                            </p>
+                        </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+
+            {# ---- Herramientas ---- #}
+
+            <div>
+                <h2
+                    class="mb-4"
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 800;
+                        font-size: 20px;
+                        color: #1A1A1A;
+                    "
+                >
+                    Herramientas
+                </h2>
+
+                <div class="flex flex-col gap-3">
+
+                    <a href="{{ url_for('web.admin_validacion') }}" class="simul-card p-5 flex items-center gap-4">
+                        <span class="text-2xl">📥</span>
+                        <span class="flex-1">
+                            <span class="block font-bold text-gray-800" style="font-family: 'Montserrat', sans-serif; font-size: 14px;">
+                                Bandeja de validación
+                            </span>
+                            <span class="block text-xs text-gray-500" style="font-family: 'Inter', sans-serif;">
+                                {{ pendientes }} piezas esperando revisión
+                            </span>
+                        </span>
+                        <span
+                            class="px-2.5 py-1 rounded-full text-xs font-bold"
+                            style="background: #FEF3C7; color: #92400E;"
+                        >
+                            {{ pendientes }}
+                        </span>
+                    </a>
+
+                    <a href="{{ url_for('web.admin_contenido') }}" class="simul-card p-5 flex items-center gap-4">
+                        <span class="text-2xl">🗂️</span>
+                        <span class="flex-1">
+                            <span class="block font-bold text-gray-800" style="font-family: 'Montserrat', sans-serif; font-size: 14px;">
+                                Gestionar contenido
+                            </span>
+                            <span class="block text-xs text-gray-500" style="font-family: 'Inter', sans-serif;">
+                                Despublicar o eliminar piezas
+                            </span>
+                        </span>
+                    </a>
+
+                    <a href="{{ url_for('web.admin_usuarios') }}" class="simul-card p-5 flex items-center gap-4">
+                        <span class="text-2xl">👥</span>
+                        <span class="flex-1">
+                            <span class="block font-bold text-gray-800" style="font-family: 'Montserrat', sans-serif; font-size: 14px;">
+                                Gestionar usuarios
+                            </span>
+                            <span class="block text-xs text-gray-500" style="font-family: 'Inter', sans-serif;">
+                                Roles, activations y accesos
+                            </span>
+                        </span>
+                    </a>
+
+                    <a href="{{ url_for('web.perfil') }}" class="simul-card p-5 flex items-center gap-4">
+                        <span class="text-2xl">⚙️</span>
+                        <span class="flex-1">
+                            <span class="block font-bold text-gray-800" style="font-family: 'Montserrat', sans-serif; font-size: 14px;">
+                                Mi perfil
+                            </span>
+                            <span class="block text-xs text-gray-500" style="font-family: 'Inter', sans-serif;">
+                                Datos personales y privacidad
+                            </span>
+                        </span>
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

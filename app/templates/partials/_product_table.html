@@ -1,0 +1,95 @@
+<div
+    class="overflow-hidden
+           rounded-2xl
+           bg-white
+           shadow-lg"
+>
+
+
+    <div
+        class="border-b p-6"
+    >
+
+        <h2
+            class="text-2xl
+                   font-bold"
+        >
+
+            Inventario
+
+        </h2>
+
+
+        <p
+            class="text-sm
+                   text-slate-500"
+        >
+
+            Datos obtenidos mediante Axios
+            desde la API REST.
+
+        </p>
+
+    </div>
+
+
+    <div
+        class="overflow-x-auto"
+    >
+
+        <table
+            class="w-full text-left"
+        >
+
+            <thead
+                class="bg-slate-50"
+            >
+
+                <tr>
+
+                    <th class="px-4 py-4">
+                        ID
+                    </th>
+
+                    <th class="px-4 py-4">
+                        Producto
+                    </th>
+
+                    <th class="px-4 py-4">
+                        Descripción
+                    </th>
+
+                    <th class="px-4 py-4">
+                        Precio
+                    </th>
+
+                    <th class="px-4 py-4">
+                        Stock
+                    </th>
+
+                    <th class="px-4 py-4">
+                        Acciones
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody
+                id="products-body"
+            >
+
+                <!--
+                    JavaScript insertará aquí
+                    los productos provenientes
+                    de Flask.
+                -->
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

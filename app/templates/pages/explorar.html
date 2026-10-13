@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Explorar contenido | SIMUL{% endblock %}
+
+{% block content %}
+
+<div class="pt-16 min-h-screen bg-white">
+
+    {# =====================================================
+         ENCABEZADO
+    ====================================================== #}
+
+    <div class="bg-[#F9FAFB] border-b border-gray-100">
+        <div class="max-w-[1440px] mx-auto px-8 py-12">
+            <p
+                class="text-[#C8102E] font-bold text-sm tracking-widest mb-2 uppercase"
+                style="font-family: 'Montserrat', sans-serif;"
+            >
+                Museo Digital
+            </p>
+            <h1
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 900;
+                    font-size: 44px;
+                    color: #1A1A1A;
+                "
+            >
+                Explorar contenido
+            </h1>
+            <p
+                class="text-gray-500 mt-3 text-lg max-w-xl"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Selecciona una categoría para explorar el archivo histórico
+                del Programa de Ingeniería de Sistemas.
+            </p>
+        </div>
+    </div>
+
+    {# =====================================================
+         CATEGORÍAS  (RF-EXP-01)
+    ====================================================== #}
+
+    <div class="max-w-[1440px] mx-auto px-8 py-16">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+
+            {% for cat in categories %}
+                <a
+                    href="{{ url_for('web.buscar', cat=cat.id) }}"
+                    data-cat="{{ cat.id }}"
+                    class="simul-card p-6 text-left block transition-all
+                           {% if selected_cat == cat.id %}ring-2 ring-[#C8102E]{% endif %}"
+                >
+
+                    <div
+                        class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-4"
+                        style="background: {{ cat.color }}15;"
+                    >
+                        {{ cat.icon }}
+                    </div>
+
+                    <h3
+                        style="
+                            font-family: 'Montserrat', sans-serif;
+                            font-weight: 700;
+                            font-size: 18px;
+                            color: #1A1A1A;
+                        "
+                    >
+                        {{ cat.label }}
+                    </h3>
+
+                    <p
+                        class="text-gray-500 text-sm mt-2 leading-relaxed"
+                        style="font-family: 'Inter', sans-serif;"
+                    >
+                        {{ cat.desc }}
+                    </p>
+
+                    <div class="flex items-center justify-between mt-5">
+                        <span
+                            class="text-sm font-semibold"
+                            style="color: {{ cat.color }}; font-family: 'Montserrat', sans-serif;"
+                        >
+                            {{ cat.count }} registros
+                        </span>
+                        <span class="text-gray-300">→</span>
+                    </div>
+
+                </a>
+            {% endfor %}
+
+        </div>
+
+        {# Llamada al buscador avanzado #}
+
+        <div class="mt-16 bg-[#FEF2F2] rounded-2xl p-8 flex flex-col sm:flex-row items-center gap-6">
+            <div class="flex-1">
+                <h3
+                    style="
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 700;
+                        font-size: 22px;
+                        color: #1A1A1A;
+                    "
+                >
+                    ¿Buscas algo específico?
+                </h3>
+                <p
+                    class="text-gray-500 mt-2"
+                    style="font-family: 'Inter', sans-serif;"
+                >
+                    Usa el buscador avanzado con filtros por año, autor, tipo y más.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('web.buscar') }}"
+                class="btn-primary text-base px-8 py-3 shrink-0 inline-block"
+            >
+                Ir al buscador
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

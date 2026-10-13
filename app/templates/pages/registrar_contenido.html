@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar contenido | SIMUL{% endblock %}
+
+{% block content %}
+
+{# Formularios dinámicos: el JS elige los campos según el
+   tipo de contenido (RF-COM-02). #}
+<script>
+    window.SIMUL_TEACHER_FORMS = {{ forms | tojson }};
+</script>
+
+<div class="pt-16 min-h-screen bg-[#F9FAFB]">
+
+    <div class="max-w-[900px] mx-auto px-6 py-10">
+
+        {# =====================================================
+             ENCABEZADO
+        ====================================================== #}
+
+        <div class="mb-8">
+            <a
+                href="#"
+                data-nav-dashboard
+                class="text-sm text-gray-500 hover:text-[#C8102E] flex items-center gap-1 mb-3"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                ← Panel docente
+            </a>
+
+            <h1
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 800;
+                    font-size: 36px;
+                    color: #1A1A1A;
+                "
+            >
+                Registrar contenido
+            </h1>
+
+            <p
+                class="text-gray-500 mt-1"
+                style="font-family: 'Inter', sans-serif;"
+            >
+                Registra una pieza del museo. El contenido queda pendiente hasta
+                que el administrador lo valide.
+            </p>
+        </div>
+
+        {# =====================================================
+             TIPO DE CONTENIDO
+        ====================================================== #}
+
+        <p
+            class="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider"
+            style="font-family: 'Montserrat', sans-serif;"
+        >
+            ¿Qué quieres registrar?
+        </p>
+
+        <div
+            id="content-type-picker"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"
+        >
+            {% for tipo in content_types %}
+                <button
+                    type="button"
+                    data-content-type="{{ tipo.id }}"
+                    class="type-option text-left p-5 rounded-2xl border-2 border-gray-200 hover:border-[#C8102E] transition-all"
+                >
+                    <div class="text-2xl mb-2">{{ tipo.icon }}</div>
+
+                    <div
+                        class="font-bold text-sm mb-1"
+                        style="font-family: 'Montserrat', sans-serif; color: #1A1A1A;"
+                    >
+                        {{ tipo.label }}
+                    </div>
+
+                    <div class="text-xs text-gray-500" style="font-family: 'Inter', sans-serif;">
+                        {{ tipo.desc }}
+                    </div>
+                </button>
+            {% endfor %}
+        </div>
+
+        {# =====================================================
+             CAMPOS DINÁMICOS
+        ====================================================== #}
+
+        <form id="register-content-form" novalidate class="simul-card p-8 hidden">
+
+            <h2
+                id="form-title"
+                class="mb-6"
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 700;
+                    font-size: 18px;
+                    color: #1A1A1A;
+                "
+            >
+                Completa la información
+            </h2>
+
+            {# app.js inyecta aquí los campos del tipo elegido #}
+
+            <div id="dynamic-fields" class="flex flex-col gap-5"></div>
+
+            <div
+                id="content-error"
+                class="hidden mt-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700"
+                style="font-family: 'Inter', sans-serif;"
+            ></div>
+
+            <div class="flex flex-col sm:flex-row gap-3 mt-6">
+                <button type="submit" id="content-submit" class="btn-primary flex-1">
+                    Registrar contenido
+                </button>
+
+                <a href="{{ url_for('web.adjuntar_evidencias') }}" class="btn-secondary text-center">
+                    Adjuntar evidencias
+                </a>
+            </div>
+
+        </form>
+
+        {# =====================================================
+             AYUDA PARA EL DOCENTE
+        ====================================================== #}
+
+        <div class="mt-8 p-6 rounded-2xl bg-[#1A1A1A] text-white">
+            <h2
+                class="mb-4"
+                style="
+                    font-family: 'Montserrat', sans-serif;
+                    font-weight: 700;
+                    font-size: 15px;
+                    color: #E2C06A;
+                "
+            >
+                Antes de registrar, ten en cuenta
+            </h2>
+
+            <ul class="flex flex-col gap-2.5 text-sm">
+                <li class="flex gap-2.5">
+                    <span style="color: #E2C06A;">✦</span>
+                    <span class="text-gray-300" style="font-family: 'Inter', sans-serif;">
+                        Cada imagen debe llevar su texto alternativo para que el museo
+                        sea accesible (RNF-ACC-01).
+                    </span>
+                </li>
+                <li class="flex gap-2.5">
+                    <span style="color: #E2C06A;">✦</span>
+                    <span class="text-gray-300" style="font-family: 'Inter', sans-serif;">
+                        Un rechazo siempre incluye observaciones: se guardan en el
+                        historial del aporte para que puedas corregirlo (RNF-SEG-04).
+                    </span>
+                </li>
+                <li class="flex gap-2.5">
+                    <span style="color: #E2C06A;">✦</span>
+                    <span class="text-gray-300" style="font-family: 'Inter', sans-serif;">
+                        El contenido publicado alimenta la búsqueda transversal y la
+                        línea del tiempo del museo.
+                    </span>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/pages/registrar_contenido.js') }}"></script>
+{% endblock %}
