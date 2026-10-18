@@ -77,15 +77,18 @@ del profesor (`name, price, stock`). **No modela el dominio del museo**, que nec
 | CSS (`app/static/css/*.css`) | 1 | 247 |
 | Configuración e infraestructura | 8 | 151 |
 | Pruebas (`tests/`) | 1 | 15 |
-| **Total (excl. `flask-inventory/`, `docs/` y binarios)** | **76** | **13.825** |
+| **Total (excl. `docs/` y binarios)** | **76** | **13.825** |
 
-> **Nota de alcance.** El total excluye `flask-inventory/` (andamiaje abandonado),
-> `docs/` (esta documentación), las imágenes (`logo-unilibre.png`) y la base SQLite
-> de ejemplo (`instance/inventory.db`). **5 plantillas están huérfanas** (no las
-> renderiza ninguna ruta): `templates/index.html`, `partials/_auth.html`,
-> `partials/_product_form.html`, `partials/_product_table.html` y
-> `partials/_alerts.html` (0 bytes) — restos del template de inventario. Las 21
-> rutas del museo solo renderizan `pages/*.html`.
+> **Nota de alcance.** El total excluye `docs/` (esta documentación), las imágenes
+> (`logo-unilibre.png`) y la base SQLite de ejemplo (`instance/inventory.db`).
+> **5 plantillas están huérfanas** (no las renderiza ninguna ruta):
+> `templates/index.html`, `partials/_auth.html`, `partials/_product_form.html`,
+> `partials/_product_table.html` y `partials/_alerts.html` (0 bytes) — restos del
+> template de inventario. Las 21 rutas del museo solo renderizan `pages/*.html`.
+>
+> Las carpetas residuales `flask-inventory/` (esqueleto vacío de la plantilla
+> original) y `SIMUL/` (gitlink de submódulo roto) **ya se eliminaron** del repo
+> (commit `83fbfb5`).
 
 ---
 
@@ -974,10 +977,9 @@ en la imagen. Inofensivo (no se usa con MySQL) pero ensucia la imagen.
 | Hallazgo | Detalle |
 |---|---|
 | **`api.js` huérfano** | No se incluye en ninguna plantilla y no se carga `axios` → el cliente JWT está **muerto**. |
-| **`_alerts.html` vacío** (0 B) | Incluido en algún template pero sin contenido. |
+| **`_alerts.html` vacío** (0 B) | Archivo de 0 bytes, **no incluido en ninguna plantilla** (huérfano). |
 | **Filtros por nombre hardcodeados** | `web_routes.py:198` (`"Valentina"`) y `336-337` (`"Patiño"/"Patino"/"Ruiz"`). |
-| **`flask-inventory/`** | Restos del template original: 4 archivos **0 bytes** + copias de dockerfile/compose. Basura. |
-| **`SIMUL/`** (raíz) | Carpeta **vacía**. |
+| **`flask-inventory/` y `SIMUL/`** | Restos de armado (esqueleto de plantilla y submódulo roto). **✅ Eliminados** en `83fbfb5`. |
 | **Sin manejo de excepciones en BD** | Ningún `try/except` alrededor de `commit()` → un `IntegrityError` se convierte en **500** sin cuerpo útil. |
 | **`db.create_all()` no migra** | Cambia la estructura de tablas solo si son nuevas. **No altera columnas existentes** → hará falta Alembic. |
 | **Tailwind por CDN** | `base.html:59` — el propio código avisa que debe compilarse para producción. |
