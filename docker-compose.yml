@@ -1,35 +1,52 @@
+# ============================================================
+# SIMUL · Museo Digital Interactivo
+# Backend FastAPI + MySQL 8.4
+#
+#   docker compose up --build
+#
+#   API + Swagger : http://localhost:5000/docs
+#   MySQL         : localhost:3307  (usuario simul_user)
+#
+# El contenedor "app" espera a que MySQL esté sano
+# (healthcheck) y crea las 25 tablas al arrancar.
+# ============================================================
 services:
   app:
     build: .
-    container_name: flask_inventory_app
+    container_name: simul_app
     ports:
       - "5000:5000"
     environment:
-      DATABASE_URL: mysql+pymysql://inventory_user:inventory_password@db:3306/inventory_db
-      JWT_SECRET_KEY: super-secret-key
+      DATABASE_URL: mysql+pymysql://simul_user:simul_password@db:3306/simul_db
+      JWT_SECRET_KEY: simul-dev-secret-key-cambiar-en-produccion-2026
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
+
   db:
     image: mysql:8.4
-    container_name: flask_inventory_db
+    container_name: simul_db
     environment:
-      MYSQL_DATABASE: inventory_db
-      MYSQL_USER: inventory_user
-      MYSQL_PASSWORD: inventory_password
-      MYSQL_ROOT_PASSWORD: root_password 
+      MYSQL_DATABASE: simul_db
+      MYSQL_USER: simul_user
+      MYSQL_PASSWORD: simul_password
+      MYSQL_ROOT_PASSWORD: root_password
     ports:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-    restart: unless-stopped 
+      # El DDL del diseño E-R se ejecuta la primera vez que
+      # se crea el volumen: crea las 25 tablas y las 2 vistas
+      # exactamente como están documentadas.
+      - ./db/DDL.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    restart: unless-stopped
     healthcheck:
       test: [
-        "CMD", 
+        "CMD",
         "mysqladmin",
         "ping",
-        "-h", 
+        "-h",
         "localhost",
         "-uroot",
         "-proot_password"]

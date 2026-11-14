@@ -7,6 +7,16 @@ class Notificacion(db.Model):
 
     __tablename__ = "notificacion"
 
+    # Índice compuesto del DDL: (id_usuario, leida) — la
+    # consulta típica es "mis notificaciones sin leer".
+    __table_args__ = (
+        db.Index(
+            "idx_notif_usuario_leida",
+            "id_usuario",
+            "leida"
+        ),
+    )
+
     id_notif = db.Column(
         db.Integer,
         primary_key=True
@@ -15,8 +25,7 @@ class Notificacion(db.Model):
     id_usuario = db.Column(
         db.Integer,
         db.ForeignKey("usuario.id_usuario"),
-        nullable=False,
-        index=True
+        nullable=False
     )
 
     id_contenido = db.Column(

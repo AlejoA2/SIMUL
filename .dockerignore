@@ -19,6 +19,10 @@ venv/
 
 #Base de datos
 mysql_data/
+instance/
+*.db
+*.sqlite
+*.sqlite3
 
 #Git
 .git/

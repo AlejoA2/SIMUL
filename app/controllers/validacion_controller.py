@@ -68,7 +68,24 @@ class ValidacionController:
 
         """
         GET /api/museo/validacion/<id>/historial
+        (@jwt_required, solo admin)
         """
+
+        usuario = usuario_actual()
+
+        if not usuario:
+
+            return error(
+                "No autenticado",
+                401
+            )
+
+        if usuario.rol_nombre != "admin":
+
+            return error(
+                "Se requiere rol administrador",
+                403
+            )
 
         return service.historial(contenido_id)
 

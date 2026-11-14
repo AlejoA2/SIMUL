@@ -8,17 +8,17 @@ class Config:
     # fuera de Docker se usa SQLite como respaldo local.
     DATABASE_URL = os.getenv(
         "DATABASE_URL",
-        "sqlite:///inventory.db"
+        "sqlite:///instance/simul.db"
     )
 
     SECRET_KEY = os.getenv(
         "SECRET_KEY",
-        "development-secret"
+        "simul-development-secret-key-change-me"
     )
 
     JWT_SECRET_KEY = os.getenv(
         "JWT_SECRET_KEY",
-        "development-secret"
+        "simul-development-secret-key-change-me"
     )
 
     JWT_ACCESS_TOKEN_EXPIRES = int(

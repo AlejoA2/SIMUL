@@ -2,14 +2,14 @@
 -- SIMUL · Museo Digital Interactivo
 -- DDL MySQL 8.4 — Modelo Entidad-Relación (25 tablas)
 -- Fuente: diagrama proyectosimul(desenredado).drawio
--- Base: inventory_db (la del docker-compose del profesor)
+-- Base: simul_db (definida en docker-compose.yml)
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS inventory_db
+CREATE DATABASE IF NOT EXISTS simul_db
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE inventory_db;
+USE simul_db;
 
 SET FOREIGN_KEY_CHECKS = 0;
 

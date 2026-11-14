@@ -1,11 +1,10 @@
 from datetime import datetime
 
-from werkzeug.security import (
-    generate_password_hash,
-    check_password_hash
-)
-
 from app.extensions import db
+from app.utils.security import (
+    hash_password,
+    verify_password
+)
 
 
 class Usuario(db.Model):
@@ -71,7 +70,8 @@ class Usuario(db.Model):
     puntos_total = db.Column(
         db.Integer,
         nullable=False,
-        default=0
+        default=0,
+        index=True
     )
 
     fecha_registro = db.Column(
@@ -124,15 +124,13 @@ class Usuario(db.Model):
 
     def set_password(self, password):
 
-        self.password_hash = generate_password_hash(
-            password
-        )
+        self.password_hash = hash_password(password)
 
     def check_password(self, password):
 
-        return check_password_hash(
-            self.password_hash,
-            password
+        return verify_password(
+            password,
+            self.password_hash
         )
 
     @property

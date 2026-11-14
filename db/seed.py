@@ -31,8 +31,8 @@ sys.path.insert(
 # importar app.extensions.
 os.environ.setdefault(
     "DATABASE_URL",
-    "mysql+pymysql://inventory_user:inventory_password"
-    "@127.0.0.1:3307/inventory_db"
+    "mysql+pymysql://simul_user:simul_password"
+    "@127.0.0.1:3307/simul_db"
 )
 
 from app.extensions import db, sesion_bd  # noqa: E402

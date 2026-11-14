@@ -4,6 +4,12 @@
 
 > **Parte 1 de la documentación: Arquitectura general y Backend completo.**
 > Contenido analizado leyendo el código fuente real (no hay documentos de diseño previos).
+>
+> > **⚠️ Nota de actualización (tercer corte).** El backend ya está migrado de
+> > Flask a **FastAPI + SQLAlchemy + MySQL**. Las secciones que describen el
+> > backend en Flask (1, 6, 7, 10, 11 y 12) corresponden al estado del segundo
+> > corte y quedan **superadas** por [`BACKEND.md`](BACKEND.md), que describe la
+> > arquitectura y la API actuales.
 
 ---
 

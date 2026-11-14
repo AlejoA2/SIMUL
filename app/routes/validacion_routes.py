@@ -3,7 +3,10 @@ from fastapi import APIRouter, Body, Depends
 from app.controllers.validacion_controller import (
     ValidacionController
 )
-from app.schemas.contenido_schema import DecisionIn
+from app.schemas.contenido_schema import (
+    DecisionIn,
+    RechazoIn
+)
 from app.utils.roles import requiere_usuario
 
 
@@ -67,21 +70,24 @@ def aprobar(
 
 @validacion_router.post(
     "/{contenido_id}/rechazar",
-    summary="Rechazar contenido (con observaciones)"
+    summary="Rechazar contenido (motivo obligatorio)"
 )
 def rechazar(
     contenido_id: int,
-    payload: DecisionIn | None = Body(default=None)
+    payload: RechazoIn
 ):
 
     """
     POST /api/museo/validacion/<id>/rechazar
+
+    El cuerpo debe incluir `observaciones` (RNF-SEG-04):
+    si falta o tiene menos de 5 caracteres, FastAPI
+    responde 422 con el detalle del campo.
     """
 
     return controller.rechazar(
         contenido_id,
-        payload.model_dump(exclude_unset=True)
-        if payload else {}
+        payload.model_dump()
     )
 
 

@@ -56,7 +56,29 @@ class GamificacionController:
 
         """
         GET /api/museo/gamificacion/historial/<id>
+        (@jwt_required: solo el propio usuario o un admin)
         """
+
+        from app.utils.roles import usuario_actual
+
+        usuario = usuario_actual()
+
+        if not usuario:
+
+            return error(
+                "No autenticado",
+                401
+            )
+
+        if (
+            usuario.id_usuario != usuario_id
+            and usuario.rol_nombre != "admin"
+        ):
+
+            return error(
+                "Solo puedes ver tu propio historial",
+                403
+            )
 
         return service.historial(usuario_id)
 

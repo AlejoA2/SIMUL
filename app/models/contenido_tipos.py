@@ -86,7 +86,8 @@ class Proyecto(db.Model):
 
     anio = db.Column(
         YearType,
-        nullable=False
+        nullable=False,
+        index=True
     )
 
     linea_invest = db.Column(

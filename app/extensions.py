@@ -21,6 +21,7 @@ from sqlalchemy import (
     DateTime,
     Enum,
     ForeignKey,
+    Index,
     Integer,
     Numeric,
     SmallInteger,
@@ -30,7 +31,8 @@ from sqlalchemy import (
     TypeDecorator,
     UniqueConstraint,
     create_engine,
-    func
+    func,
+    text
 )
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -79,7 +81,11 @@ class _FachadaDB:
     Text = Text
     TypeDecorator = TypeDecorator
     UniqueConstraint = UniqueConstraint
+    Index = staticmethod(Index)
     func = func
+    # text(): usado por db/seed.py para resetear y para
+    # INSERT IGNORE (estilo MySQL) fuera de las peticiones.
+    text = staticmethod(text)
     # staticmethod: relationship() es una función y, sin
     # esto, db.relationship(...) recibiría db como primer
     # argumento (enlace de descriptor).

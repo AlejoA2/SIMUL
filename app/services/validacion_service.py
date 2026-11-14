@@ -89,15 +89,8 @@ class ValidacionService:
 
             return respuesta
 
+        # Las observaciones son opcionales al aprobar.
         observaciones = self._observaciones(data)
-
-        if observaciones is None:
-
-            return error(
-                "Datos inválidos",
-                422,
-                {"observaciones": ["Requerido"]}
-            )
 
         # ----------------------------------------------------
         # 1. ESTADO DEL CONTENIDO
@@ -178,14 +171,19 @@ class ValidacionService:
 
             return respuesta
 
+        # RNF-SEG-04: el motivo del rechazo es obligatorio.
         observaciones = self._observaciones(data)
 
-        if observaciones is None:
+        if not observaciones:
 
             return error(
                 "Datos inválidos",
                 422,
-                {"observaciones": ["Requerido"]}
+                {
+                    "observaciones": [
+                        "El motivo del rechazo es obligatorio"
+                    ]
+                }
             )
 
         contenido.estado = "rechazado"
@@ -281,15 +279,15 @@ class ValidacionService:
     def _observaciones(self, data):
 
         """Motivo opcional al aprobar, obligatorio al
-        rechazar (RF-SEG-04)."""
+        rechazar (RF-SEG-04). Devuelve siempre una cadena
+        (posiblemente vacía); la obligatoriedad se valida
+        en `rechazar`."""
 
         if not data:
 
             return ""
 
-        texto = str(data.get("observaciones") or "").strip()
-
-        return texto
+        return str(data.get("observaciones") or "").strip()
 
     def _notificar(self, contenido, tipo, mensaje):
 

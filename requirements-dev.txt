@@ -1,0 +1,9 @@
+# ============================================================
+# Dependencias SOLO para desarrollo y pruebas.
+# No se instalan en la imagen Docker (ver Dockerfile).
+#
+#   pip install -r requirements-dev.txt
+#   pytest -q
+# ============================================================
+pytest>=8.0
+httpx>=0.27

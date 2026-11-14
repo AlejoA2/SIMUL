@@ -160,9 +160,26 @@ class ReaccionIn(ModeloSalida):
 
 class DecisionIn(ModeloSalida):
 
-    """POST /api/museo/validacion/<id>/aprobar | /rechazar"""
+    """POST /api/museo/validacion/<id>/aprobar
+
+    Las observaciones son opcionales al aprobar."""
 
     observaciones: str | None = None
+
+
+class RechazoIn(ModeloSalida):
+
+    """POST /api/museo/validacion/<id>/rechazar
+
+    RNF-SEG-04: el motivo del rechazo es obligatorio y
+    queda registrado en `contenido.observaciones` para que
+    el autor lo lea. FastAPI lo exige aquí (422)."""
+
+    observaciones: str = Field(
+        min_length=5,
+        max_length=1000,
+        description="Motivo del rechazo (mínimo 5 caracteres)"
+    )
 
 
 # ============================================================

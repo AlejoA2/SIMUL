@@ -31,7 +31,8 @@ class Contenido(db.Model):
             "hall",
             name="contenido_tipo"
         ),
-        nullable=False
+        nullable=False,
+        index=True
     )
 
     titulo = db.Column(
@@ -41,7 +42,8 @@ class Contenido(db.Model):
 
     categoria = db.Column(
         db.String(80),
-        nullable=False
+        nullable=False,
+        index=True
     )
 
     id_autor = db.Column(
@@ -58,7 +60,8 @@ class Contenido(db.Model):
             name="contenido_estado"
         ),
         nullable=False,
-        default="pendiente"
+        default="pendiente",
+        index=True
     )
 
     observaciones = db.Column(
@@ -75,7 +78,8 @@ class Contenido(db.Model):
     fec_crea = db.Column(
         db.DateTime,
         nullable=False,
-        default=datetime.utcnow
+        default=datetime.utcnow,
+        index=True
     )
 
     fec_valid = db.Column(

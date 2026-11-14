@@ -89,7 +89,12 @@ def mi_historial():
 
 @gamificacion_router.get(
     "/historial/{usuario_id}",
-    summary="Historial de puntos de un usuario"
+    summary="Historial de puntos de un usuario",
+    description=(
+        "Solo el propio usuario o un administrador "
+        "(401 sin sesión, 403 si consulta a otro)."
+    ),
+    dependencies=[Depends(requiere_usuario)]
 )
 def historial(usuario_id: int):
 
