@@ -126,10 +126,14 @@
 
   function despublicar(id) {
     /* Baja lógica: el registro sigue existiendo y conserva su
-       historial de validaciones. */
+       historial de validaciones. Al quedar en estado "pendiente"
+       vuelve automáticamente a la bandeja de validación. */
     Store.setContentStatus(id, 'pendiente');
     pintar();
-    SIMUL.toast('Contenido despublicado', 'info');
+    SIMUL.toast(
+      'Contenido despublicado: vuelve a la bandeja de validación',
+      'info'
+    );
   }
 
   function publicar(id) {

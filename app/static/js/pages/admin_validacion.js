@@ -35,10 +35,51 @@
 
   /* ----------------------------------------------------------
      1. PINTADO DE LA COLA
+
+     La bandeja es la unión de dos fuentes:
+       1. la cola sembrada (`simul.queue`): propuestas que
+          nunca han pasado por validación.
+       2. el catálogo (`simul.content`) con estado "pendiente":
+          por ejemplo un contenido que el admin despublicó
+          desde "Gestionar contenido" y que vuelve a revisión.
+
+     Si ambas fuentes hablan de la misma pieza solo se pinta
+     una vez.
      ---------------------------------------------------------- */
 
+  /** Ficha del catálogo → formato de tarjeta de la bandeja. */
+  function aCola(item) {
+    return {
+      id: item.id,
+      type: item.category,
+      date: String(item.year || ''),
+      title: item.title,
+      author: item.author,
+      description: item.description,
+      image: item.image,
+      tags: item.tags || [],
+      documents: item.documents || []
+    };
+  }
+
+  function todos() {
+    const enCola = Store.getQueue();
+
+    const pendientesDelCatalogo = Store.getContent()
+      .filter(function (item) {
+        if (item.status !== 'pendiente') return false;
+
+        return !enCola.some(function (q) {
+          return String(q.id) === String(item.id);
+        });
+      })
+      .map(aCola);
+
+    return enCola.concat(pendientesDelCatalogo);
+  }
+
   function cola() {
-    const items = Store.getQueue();
+    const items = todos();
 
     return filtro === 'Todos'
       ? items
@@ -143,7 +184,7 @@
 
   function pintar() {
     const items = cola();
-    const total = Store.getQueue().length;
+    const total = todos().length;
 
     LISTA.innerHTML = items.map(tarjeta).join('');
 
@@ -161,14 +202,20 @@
      ---------------------------------------------------------- */
 
   function aprobar(id) {
-    const item = Store.getQueue().find(function (i) {
+    const item = todos().find(function (i) {
       return String(i.id) === String(id);
     });
     if (!item) return;
 
+    /* Si la pieza ya vive en el catálogo (fue despublicada y
+       volvió a la bandeja) se actualiza in situ; si llega
+       directa de la cola sin ficha se crea con prefijo "pub-"
+       para no chocar con los id del catálogo. */
+    const existente = Store.findContent(item.id);
+
     /* La pieza entra al catálogo ya como publicada. */
     Store.upsertContent({
-      id: 'pub-' + item.id,
+      id: existente ? String(item.id) : 'pub-' + item.id,
       title: item.title,
       year: Number(String(item.date).slice(0, 4)) || new Date().getFullYear(),
       category: item.type,
@@ -235,7 +282,7 @@
   }
 
   function rechazar(id) {
-    const item = Store.getQueue().find(function (i) {
+    const item = todos().find(function (i) {
       return String(i.id) === String(id);
     });
     if (!item) return;
@@ -256,9 +303,13 @@
         return;
       }
 
-      /* El motivo queda en la pieza para que el autor lo lea. */
+      /* El motivo queda en la pieza para que el autor lo lea.
+         Si la ficha ya existía en el catálogo se actualiza en
+         lugar de duplicarla. */
       Store.upsertContent({
-        id: 'rech-' + item.id,
+        id: Store.findContent(item.id)
+          ? String(item.id)
+          : 'rech-' + item.id,
         title: item.title,
         year: Number(String(item.date).slice(0, 4)) || new Date().getFullYear(),
         category: item.type,
@@ -330,7 +381,7 @@
       } else if (rechazarBoton) {
         rechazar(rechazarBoton.getAttribute('data-reject'));
       } else if (detalleBoton) {
-        const item = Store.getQueue().find(function (i) {
+        const item = todos().find(function (i) {
           return String(i.id) === detalleBoton.getAttribute('data-preview');
         });
 
