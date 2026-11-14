@@ -32,7 +32,6 @@ from app.schemas.contenido_schema import (
     ContenidoSchema,
     ComentarioSchema,
     EvidenciaSchema,
-    ReaccionConteoSchema,
     AutorSchema
 )
 
@@ -52,8 +51,6 @@ contenido_schema = ContenidoSchema()
 comentario_out_schema = ComentarioSchema()
 
 evidencia_out_schema = EvidenciaSchema()
-
-reaccion_out_schema = ReaccionConteoSchema()
 
 autor_schema = AutorSchema()
 

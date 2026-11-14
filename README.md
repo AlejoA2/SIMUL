@@ -212,9 +212,10 @@ automáticamente en **`/docs`**. Respuestas con sobre uniforme:
 
 ## Base de datos
 
-- `db/DDL.sql` es la implementación del **diseño entidad-relación**:
+- `db/DDL.sql` es la implementación del **diseño entidad-relación** (el diagrama
+  está en [`docs/diagrama-ER.jpeg`](docs/diagrama-ER.jpeg)):
   **25 tablas + 2 vistas** (`v_bandeja_validacion`, `v_ranking`), con claves
-  foráneas, índices y tipos `ENUM`/`YEAR` del diagrama.
+  foráneas, índices y tipos `ENUM`/`YEAR`.
 - `db/seed.py` carga datos de demostración reales del museo.
 - En Docker, el DDL se ejecuta automáticamente la primera vez (init script);
   la app además crea las tablas que falten al arrancar (`create_all`).
@@ -259,7 +260,8 @@ validación con gamificación. Evidencia manual de la API: **Swagger**
 ## Coherencia entre cortes
 
 1. **Corte 1 (requerimientos y diseño).** Los requisitos `RF-*`/`RNF-*` y el
-   diagrama E-R se documentan en `docs/` y se implementan en el código.
+   diagrama E-R ([`docs/diagrama-ER.jpeg`](docs/diagrama-ER.jpeg)) se documentan
+   en `docs/` y se implementan en el código.
 2. **Corte 2 (frontend).** Las 21 páginas Jinja2 y los datos del museo viven en
    `app/templates`, `app/static` y `app/data/simul_data.py`.
 3. **Corte 3 (backend).** La API REST implementa ese mismo dominio sobre MySQL,

@@ -105,15 +105,6 @@ class ContenidoRepository:
             pages=-(-total // per_page)
         )
 
-    def get_por_estado(self, estado):
-
-        return (
-            db.session.query(Contenido)
-            .filter(Contenido.estado == estado)
-            .order_by(Contenido.fec_crea.desc())
-            .all()
-        )
-
     def get_de_usuario(self, usuario_id):
 
         """Contenido creado por un usuario (mis aportes)."""
@@ -214,17 +205,6 @@ class ContenidoRepository:
                 db.func.count(Contenido.id_contenido)
             )
             .group_by(Contenido.tipo)
-            .all()
-        )
-
-    def count_por_estado(self):
-
-        return (
-            db.session.query(
-                Contenido.estado,
-                db.func.count(Contenido.id_contenido)
-            )
-            .group_by(Contenido.estado)
             .all()
         )
 
@@ -383,68 +363,6 @@ class ContenidoRepository:
         return db.session.query(Tec).filter_by(
             nombre=nombre
         ).first()
-
-    def create_tecnologia(self, nombre):
-
-        tecnologia = Tec(nombre=nombre)
-
-        db.session.add(tecnologia)
-
-        db.session.commit()
-
-        return tecnologia
-
-    def vincular_tecnologia(self, proyecto, tecnologia):
-
-        """INSERT en proyecto_tecnologia sin duplicar."""
-
-        existe = db.session.execute(
-            proyecto_tecnologia.select().where(
-                proyecto_tecnologia.c.id_proyecto
-                == proyecto.id_contenido,
-                proyecto_tecnologia.c.id_tec
-                == tecnologia.id_tec
-            )
-        ).first()
-
-        if not existe:
-
-            db.session.execute(
-                proyecto_tecnologia.insert().values(
-                    id_proyecto=proyecto.id_contenido,
-                    id_tec=tecnologia.id_tec
-                )
-            )
-
-            db.session.commit()
-
-    def vincular_integrante(
-        self,
-        proyecto,
-        usuario_id,
-        rol_en_proyecto=None
-    ):
-
-        existe = db.session.execute(
-            proyecto_integrante.select().where(
-                proyecto_integrante.c.id_proyecto
-                == proyecto.id_contenido,
-                proyecto_integrante.c.id_usuario
-                == usuario_id
-            )
-        ).first()
-
-        if not existe:
-
-            db.session.execute(
-                proyecto_integrante.insert().values(
-                    id_proyecto=proyecto.id_contenido,
-                    id_usuario=usuario_id,
-                    rol_en_proyecto=rol_en_proyecto
-                )
-            )
-
-            db.session.commit()
 
     # --------------------------------------------------------
     # FILTROS COMUNES

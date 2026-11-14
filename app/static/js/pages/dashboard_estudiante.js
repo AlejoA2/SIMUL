@@ -24,8 +24,8 @@
      1. APORTES DEL USUARIO
 
      Se buscan por nombre dentro del catálogo, igual que hace
-     el prototipo. Cuando exista el backend esto se reemplaza
-     por GET /api/contenido?autor=<id>.
+     el prototipo. La API REST ya expone el filtro por autor
+     en GET /api/museo/contenido?autor=<id>.
      ---------------------------------------------------------- */
 
   function misAportes(user) {

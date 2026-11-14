@@ -9,8 +9,8 @@
 
 <script>
     /* Datos de los perfiles de demostración. En producción
-       estos usuarios los devuelve POST /api/auth/login y la
-       contraseña nunca viaja al navegador. */
+       estos usuarios los devuelve POST /api/museo/auth/login
+       y la contraseña nunca viaja al navegador. */
     window.SIMUL_ROLE_USERS = {{ roles | tojson }};
     window.SIMUL_ROLE_EMAILS = {
         student: {{ roles['student'].email | tojson }},

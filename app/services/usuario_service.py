@@ -152,23 +152,6 @@ class UsuarioService:
             usuario_schema.dump(usuario)
         )
 
-    def get_usuario(self, usuario_id):
-
-        usuario = self.repository.get_by_id(
-            usuario_id
-        )
-
-        if not usuario:
-
-            return error(
-                "Usuario no encontrado",
-                404
-            )
-
-        return success(
-            usuario_schema.dump(usuario)
-        )
-
     # --------------------------------------------------------
     # GESTIÓN DE USUARIOS (RF-USR-05)
     # --------------------------------------------------------

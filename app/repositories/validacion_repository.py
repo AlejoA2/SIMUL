@@ -20,13 +20,6 @@ class ValidacionRepository:
             .all()
         )
 
-    def get_log(self, log_id):
-
-        return db.session.get(
-            ValidacionLog,
-            log_id
-        )
-
     def get_logs_de(self, contenido_id):
 
         return (

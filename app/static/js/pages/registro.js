@@ -6,8 +6,8 @@
    con requisitos de seguridad, confirmación y aceptación de
    las políticas.
 
-   En la siguiente fase el envío se reemplaza por
-   POST /api/auth/register.
+   La API REST ya expone POST /api/museo/auth/register;
+   esta vista mantiene el registro local de demostración.
    ========================================================== */
 
 (function () {

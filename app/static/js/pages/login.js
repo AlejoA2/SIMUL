@@ -5,16 +5,10 @@
    mantiene ese comportamiento, pero con las validaciones
    reales del formulario (correo válido, contraseña no vacía).
 
-   Cuando exista el backend, este archivo hace:
-
-       const res = await fetch('/api/auth/login', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ email, password })
-       });
-       const { access_token, user } = await res.json();
-
-   y guarda `user` con la misma forma que usa Store hoy.
+   La API REST ya expone el inicio de sesión en
+   POST /api/museo/auth/login (ver Swagger en /docs). Para
+   el alcance de este corte la vista sigue resolviendo los
+   perfiles de demostración con Store/localStorage.
    ========================================================== */
 
 (function () {

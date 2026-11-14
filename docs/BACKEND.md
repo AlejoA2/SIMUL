@@ -70,9 +70,10 @@ sobre SQLAlchemy puro, sin depender de Flask.
 
 ### Correspondencia con el diseño E-R
 
-`db/DDL.sql` implementa el diagrama entidad-relación: **25 tablas + 2 vistas**,
-con claves foráneas, `ENUM` y `YEAR` tal como aparecen en el diagrama. Los
-modelos ORM replican esas mismas tablas, columnas, relaciones e índices.
+`db/DDL.sql` implementa el diagrama entidad-relación
+([`diagrama-ER.jpeg`](diagrama-ER.jpeg)): **25 tablas + 2 vistas**, con claves
+foráneas, `ENUM` y `YEAR` tal como aparecen en el diagrama. Los modelos ORM
+replican esas mismas tablas, columnas, relaciones e índices.
 
 Vistas del diseño:
 

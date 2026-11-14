@@ -225,15 +225,6 @@ class ComentarioOut(ModeloSalida):
     autor: AutorOut | None = None
 
 
-class ReaccionConteoOut(ModeloSalida):
-
-    tipo_reaccion: str
-
-    total: int
-
-    reaccionado: bool
-
-
 class ContenidoOut(ModeloSalida):
 
     id_contenido: int
@@ -274,11 +265,6 @@ class EvidenciaSchema(Esquema):
 class ComentarioSchema(Esquema):
 
     modelo = ComentarioOut
-
-
-class ReaccionConteoSchema(Esquema):
-
-    modelo = ReaccionConteoOut
 
 
 class ContenidoSchema(Esquema):

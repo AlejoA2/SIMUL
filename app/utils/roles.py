@@ -113,24 +113,6 @@ def usuario_actual():
     return _usuario_ctx.get()
 
 
-def es_admin(usuario):
-
-    return (
-        usuario is not None
-        and usuario.rol is not None
-        and usuario.rol.nombre == "admin"
-    )
-
-
-def es_docente(usuario):
-
-    return (
-        usuario is not None
-        and usuario.rol is not None
-        and usuario.rol.nombre == "docente"
-    )
-
-
 # ------------------------------------------------------------
 # DEPENDENCIAS FASTAPI
 # ------------------------------------------------------------

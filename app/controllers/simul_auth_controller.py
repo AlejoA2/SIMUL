@@ -12,8 +12,7 @@ class SimulAuthController:
 
     """
     Autenticación del museo contra la tabla usuario
-    (rol, nivel, puntos). La API del profesor en
-    /api/auth sigue intacta.
+    (rol, nivel, puntos). Se expone bajo /api/museo/auth.
     """
 
     def register(self, payload):

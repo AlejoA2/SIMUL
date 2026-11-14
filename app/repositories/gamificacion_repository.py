@@ -52,13 +52,6 @@ class GamificacionRepository:
             Insignia.puntos_requeridos
         ).all()
 
-    def get_insignia(self, insignia_id):
-
-        return db.session.get(
-            Insignia,
-            insignia_id
-        )
-
     # --------------------------------------------------------
     # USUARIO ↔ INSIGNIA (N:M)
     # --------------------------------------------------------

@@ -54,7 +54,8 @@ El repositorio contiene **dos subsistemas que comparten proceso pero no se habla
                             carga axios en el HTML.
 ```
 
-Lo confirman los propios docstrings:
+Lo confirman los propios docstrings del **segundo corte** (ya actualizados en el
+tercero para reflejar el backend FastAPI y la API `/api/museo/*`):
 
 ```python
 # app/routes/web_routes.py:11
@@ -71,29 +72,30 @@ Lo confirman los propios docstrings:
 del profesor (`name, price, stock`). **No modela el dominio del museo**, que necesita
 `contenido`, `comentario`, `favorito`, `reaccion`, `categoria`, `propuesta`, etc.
 
-### Tamaño del proyecto
+### Tamaño del proyecto (tercer corte)
 
 | Área | Archivos | Líneas |
 |---|---:|---:|
-| Backend Python (`app/**/*.py` + `run.py`) | 19 | 2.837 |
-| ↳ de los cuales `app/data/simul_data.py` (mock) | 1 | 1.186 |
-| Plantillas Jinja (`app/templates/**/*.html`) | 29 | 6.255 |
-| JavaScript del núcleo (`app/static/js/*.js`) | 3 | 967 |
-| JavaScript por página (`app/static/js/pages/*.js`) | 15 | 3.353 |
-| CSS (`app/static/css/*.css`) | 1 | 247 |
+| Backend Python (`app/**/*.py` + `run.py`) | 52 | 6.961 |
+| ↳ de los cuales `app/data/simul_data.py` (mock) | 1 | 1.123 |
+| Plantillas Jinja (`app/templates/**/*.html`) | 24 | 4.797 |
+| JavaScript del núcleo (`app/static/js/*.js`) | 2 | 709 |
+| JavaScript por página (`app/static/js/pages/*.js`) | 15 | 2.744 |
+| CSS (`app/static/css/*.css`) | 1 | 200 |
 | Configuración e infraestructura | 8 | 151 |
-| Pruebas (`tests/`) | 1 | 15 |
-| **Total (excl. `docs/` y binarios)** | **76** | **13.825** |
+| Pruebas (`tests/`) | 3 | 516 |
+| **Total (excl. `docs/` y binarios)** | **105** | **16.078** |
 
 > **Nota de alcance.** El total excluye `docs/` (esta documentación), las imágenes
-> (`logo-unilibre.png`) y la base SQLite de ejemplo (`instance/inventory.db`).
-> **5 plantillas están huérfanas** (no las renderiza ninguna ruta):
-> `templates/index.html`, `partials/_auth.html`, `partials/_product_form.html`,
-> `partials/_product_table.html` y `partials/_alerts.html` (0 bytes) — restos del
-> template de inventario. Las 21 rutas del museo solo renderizan `pages/*.html`.
+> (`docs/diagrama-ER.jpeg`, `logo-unilibre.png`) y las bases de ejemplo. Durante el
+> segundo corte se detectaron **5 plantillas huérfanas** del template de inventario
+> (`templates/index.html`, `partials/_auth.html`, `partials/_product_form.html`,
+> `partials/_product_table.html` y `partials/_alerts.html`); **todas se eliminaron
+> en el tercer corte**, así que hoy ninguna plantilla queda sin usar: las 21 rutas
+> del museo renderizan `pages/*.html`, más `base.html` y 2 parciales reutilizables.
 >
 > Las carpetas residuales `flask-inventory/` (esqueleto vacío de la plantilla
-> original) y `SIMUL/` (gitlink de submódulo roto) **ya se eliminaron** del repo
+> original) y `SIMUL/` (gitlink de submódulo roto) también se eliminaron del repo
 > (commit `83fbfb5`).
 
 ---

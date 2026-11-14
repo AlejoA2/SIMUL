@@ -2,7 +2,6 @@ from datetime import datetime
 
 from app.extensions import db
 
-from app.models.contenido import Contenido
 from app.models.validacion_log import ValidacionLog
 from app.models.notificacion import Notificacion
 

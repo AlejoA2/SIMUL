@@ -2,8 +2,8 @@
    ADJUNTAR EVIDENCIAS  (RNF-ACC-01)
 
    Lista de archivos con barra de progreso simulada. Al enviar
-   confirma que todo terminó de cargar; en la siguiente fase
-   se reemplaza por POST /api/contenido/<id>/evidencias con
+   confirma que todo terminó de cargar; la API REST ya expone
+   POST /api/museo/contenido/<id>/evidencias con
    multipart/form-data.
    ========================================================== */
 

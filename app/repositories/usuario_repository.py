@@ -63,17 +63,6 @@ class UsuarioRepository:
             Usuario.nombre
         ).all()
 
-    def get_by_rol(self, nombre_rol):
-
-        """Usuarios con un rol concreto ('admin', ...)."""
-
-        return (
-            db.session.query(Usuario)
-            .join(Usuario.rol)
-            .filter(Usuario.rol.has(nombre=nombre_rol))
-            .all()
-        )
-
     def count(self):
 
         return db.session.query(Usuario).count()

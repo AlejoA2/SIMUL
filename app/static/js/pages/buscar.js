@@ -5,8 +5,8 @@
    y año. El filtrado ocurre aquí en el navegador sobre el
    catálogo que entrega la vista (RF-EXP-02).
 
-   En la siguiente fase, este archivo se sustituye por las
-   llamadas a GET /api/contenido con query params.
+   La API REST ya expone GET /api/museo/contenido con query
+   params; aquí el filtrado se hace en el navegador.
    ========================================================== */
 
 (function () {

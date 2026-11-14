@@ -37,16 +37,6 @@ class SocialRepository:
     # REACCIONES
     # --------------------------------------------------------
 
-    def get_reacciones(self, contenido_id):
-
-        return (
-            db.session.query(Reaccion)
-            .filter(
-                Reaccion.id_contenido == contenido_id
-            )
-            .all()
-        )
-
     def contar_por_tipo(self, contenido_id):
 
         """[(tipo_reaccion, total)] agregado."""
@@ -138,12 +128,6 @@ class SocialRepository:
         return query.order_by(
             Notificacion.fecha_envio.desc()
         ).all()
-
-    def add_notificacion(self, notificacion):
-
-        db.session.add(notificacion)
-
-        return notificacion
 
     def marcar_leida(self, notificacion):
 

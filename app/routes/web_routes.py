@@ -10,11 +10,12 @@ los templates sigan funcionando tal cual.
 
 Nota sobre los datos
 --------------------
-Este corte es frontend: cada vista lee de
-`app/data/simul_data.py` y entrega además el mismo JSON a
-la página mediante `tojson`. La rewiring a la API REST
-(/api/museo/*) ocurre en el JavaScript de cada página; el
-contexto del servidor queda como datos iniciales.
+Las vistas HTML son el entregable del corte 2: cada una lee
+de `app/data/simul_data.py` y entrega además el mismo JSON a
+la página mediante `tojson`, de modo que el JavaScript
+filtra y busca sin volver a pedirlo al servidor. La API REST
+del corte 3 (/api/museo/*, respaldada por MySQL) es
+independiente y se consume desde Swagger/Postman.
 
 Las páginas privadas (dashboards, administración) no se
 protegen en el servidor porque la sesión vive en
