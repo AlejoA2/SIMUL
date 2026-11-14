@@ -3,38 +3,34 @@
 RUTAS WEB - Museo Digital Interactivo (SIMUL)
 =============================================================
 
-Solo vistas HTML. La API REST del profesor (auth_bp y
-product_bp) sigue intacta y convive con este blueprint.
+Solo vistas HTML (Jinja2 vía FastAPI). Las URLs conservan
+los mismos nombres de endpoint que el template de Flask
+(web.index, web.explorar, ...) para que los `url_for()` de
+los templates sigan funcionando tal cual.
 
 Nota sobre los datos
 --------------------
-Este corte es frontend: todavía no hay base de datos
-conectada, así que cada vista lee de `app/data/simul_data.py`
-y entrega además el mismo JSON a la página mediante
-`tojson`. Cuando se conecte MySQL se sustituye el
-`import` por llamadas a `app/repositories` y el resto del
-proyecto no cambia.
+Este corte es frontend: cada vista lee de
+`app/data/simul_data.py` y entrega además el mismo JSON a
+la página mediante `tojson`. La rewiring a la API REST
+(/api/museo/*) ocurre en el JavaScript de cada página; el
+contexto del servidor queda como datos iniciales.
 
 Las páginas privadas (dashboards, administración) no se
 protegen en el servidor porque la sesión vive en
 localStorage; la guarda real la aplica `guardPage()` en
-app/static/js/app.js. Al migrar a JWT el token viaja en la
-petición y la comprobación pasa a un decorador.
+app/static/js/app.js.
 =============================================================
 """
 
-from flask import (
-    Blueprint,
-    render_template,
-    request
-)
+from fastapi import APIRouter, Request
 
 from app.data import simul_data as data
+from app.utils.templados import renderizar
 
 
-web_bp = Blueprint(
-    "web",
-    __name__
+web_router = APIRouter(
+    include_in_schema=False
 )
 
 
@@ -59,13 +55,14 @@ def _common_context():
 # PÚBLICO
 # ==========================================================
 
-@web_bp.get("/")
-def index():
+@web_router.get("/", name="web.index")
+def index(request: Request):
     """
     Portada del museo: banner, acceso rápido por categoría,
     adelanto del Hall de la Fama y llamada a iniciar sesión.
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/index.html",
         stats=data.HOME_STATS,
         quick_access=data.HOME_QUICK_ACCESS,
@@ -75,31 +72,33 @@ def index():
     )
 
 
-@web_bp.get("/explorar")
-def explorar():
+@web_router.get("/explorar", name="web.explorar")
+def explorar(request: Request):
     """
     Catálogo de categorías del museo (RF-EXP-01).
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/explorar.html",
         categories=data.EXPLORE_CATEGORIES,
-        selected_cat=request.args.get("cat"),
+        selected_cat=request.query_params.get("cat"),
         **_common_context()
     )
 
 
-@web_bp.get("/buscar")
-def buscar():
+@web_router.get("/buscar", name="web.buscar")
+def buscar(request: Request):
     """
     Buscador con filtros por texto, categoría y año
     (RF-EXP-02). El filtrado ocurre en el navegador.
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/buscar.html",
         categories=data.SEARCH_CATEGORIES,
         years=data.SEARCH_YEARS,
-        selected_cat=request.args.get("cat"),
-        initial_query=request.args.get("q", ""),
+        selected_cat=request.query_params.get("cat"),
+        initial_query=request.query_params.get("q", ""),
         **{
             "simul_content": data.CONTENT_ITEMS,
             "category_slug_map": data.CATEGORY_SLUG_MAP,
@@ -108,8 +107,11 @@ def buscar():
     )
 
 
-@web_bp.get("/contenido/<contenido_id>")
-def detalle_contenido(contenido_id):
+@web_router.get(
+    "/contenido/{contenido_id}",
+    name="web.detalle_contenido"
+)
+def detalle_contenido(request: Request, contenido_id: str):
     """
     Detalle de una pieza del museo: galería, reacciones,
     comentarios, participantes, tecnologías y documentos.
@@ -126,18 +128,21 @@ def detalle_contenido(contenido_id):
     )
 
     if item is None:
-        return render_template(
+        return renderizar(
+            request,
             "pages/contenido_no_encontrado.html",
+            status_code=404,
             contenido_id=contenido_id,
             **_common_context()
-        ), 404
+        )
 
     relacionados = [
         c for c in data.CONTENT_ITEMS
         if c["id"] != contenido_id and c["status"] == "publicado"
     ][:3]
 
-    return render_template(
+    return renderizar(
+        request,
         "pages/contenido.html",
         item=item,
         relacionados=relacionados,
@@ -157,14 +162,15 @@ def detalle_contenido(contenido_id):
 # AUTENTICACIÓN
 # ==========================================================
 
-@web_bp.get("/login")
-def login():
+@web_router.get("/login", name="web.login")
+def login(request: Request):
     """
     Inicio de sesión (RF-USR-01).
 
     Ocupa la pantalla completa: no incluye la navbar.
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/login.html",
         roles=data.ROLE_DATA,
         demo_password=data.DEMO_PASSWORD,
@@ -172,12 +178,13 @@ def login():
     )
 
 
-@web_bp.get("/registro")
-def registro():
+@web_router.get("/registro", name="web.registro")
+def registro(request: Request):
     """
     Creación de cuenta (RF-USR-01).
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/registro.html",
         role_data=data.ROLE_DATA,
         **_common_context()
@@ -188,8 +195,11 @@ def registro():
 # ESTUDIANTE  (RF-DSH-01 / RF-DSH-02)
 # ==========================================================
 
-@web_bp.get("/dashboard/estudiante")
-def dashboard_estudiante():
+@web_router.get(
+    "/dashboard/estudiante",
+    name="web.dashboard_estudiante"
+)
+def dashboard_estudiante(request: Request):
     """
     Panel del estudiante: nivel, puntos, aportes y acciones.
     """
@@ -214,7 +224,8 @@ def dashboard_estudiante():
         None
     )
 
-    return render_template(
+    return renderizar(
+        request,
         "pages/dashboard_estudiante.html",
         aportes=aportes,
         activity=data.STUDENT_ACTIVITY,
@@ -231,12 +242,16 @@ def dashboard_estudiante():
     )
 
 
-@web_bp.get("/proponer-contenido")
-def proponer_contenido():
+@web_router.get(
+    "/proponer-contenido",
+    name="web.proponer_contenido"
+)
+def proponer_contenido(request: Request):
     """
     Formulario de propuesta de proyecto (RF-PRY-01).
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/proponer_contenido.html",
         teachers=data.TEACHERS,
         categories=data.PROPOSAL_CATEGORIES,
@@ -247,21 +262,22 @@ def proponer_contenido():
     )
 
 
-@web_bp.get("/mis-aportes")
-def mis_aportes():
+@web_router.get("/mis-aportes", name="web.mis_aportes")
+def mis_aportes(request: Request):
     """
     Historial de aportes con el motivo de los rechazos
     (RF-DSH-02 + RNF-SEG-04).
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/mis_aportes.html",
         items=data.MY_ITEMS,
         **_common_context()
     )
 
 
-@web_bp.get("/favoritos")
-def favoritos():
+@web_router.get("/favoritos", name="web.favoritos")
+def favoritos(request: Request):
     """
     Contenido guardado por el usuario (RF-EXP-04).
     """
@@ -270,7 +286,8 @@ def favoritos():
         if c["status"] == "publicado"
     ][:4]
 
-    return render_template(
+    return renderizar(
+        request,
         "pages/favoritos.html",
         seed_favorites=semilla,
         **{
@@ -281,8 +298,8 @@ def favoritos():
     )
 
 
-@web_bp.get("/ranking")
-def ranking():
+@web_router.get("/ranking", name="web.ranking")
+def ranking(request: Request):
     """
     Clasificación de la comunidad por puntos (RF-GAM-04).
     """
@@ -299,7 +316,8 @@ def ranking():
     ):
         ordenado.append(dict(fila, rank=posicion))
 
-    return render_template(
+    return renderizar(
+        request,
         "pages/ranking.html",
         ranking=ordenado,
         level_names=data.LEVEL_NAMES,
@@ -308,12 +326,13 @@ def ranking():
     )
 
 
-@web_bp.get("/mi-perfil")
-def perfil():
+@web_router.get("/mi-perfil", name="web.perfil")
+def perfil(request: Request):
     """
     Perfil del usuario con descripción editable (RF-USR-03).
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/perfil.html",
         demo=data.ROLE_DATA["student"],
         badges_catalog=data.BADGES_CATALOG,
@@ -325,8 +344,11 @@ def perfil():
 # DOCENTE  (RF-COM-01 / RF-COM-02)
 # ==========================================================
 
-@web_bp.get("/dashboard/docente")
-def dashboard_docente():
+@web_router.get(
+    "/dashboard/docente",
+    name="web.dashboard_docente"
+)
+def dashboard_docente(request: Request):
     """
     Panel del docente: contenido registrado, distribución por
     estado y proyectos que asesora.
@@ -342,7 +364,8 @@ def dashboard_docente():
         for estado in ("publicado", "pendiente", "rechazado")
     }
 
-    return render_template(
+    return renderizar(
+        request,
         "pages/dashboard_docente.html",
         contenido=contenido,
         estados=estados,
@@ -356,13 +379,17 @@ def dashboard_docente():
     )
 
 
-@web_bp.get("/registrar-contenido")
-def registrar_contenido():
+@web_router.get(
+    "/registrar-contenido",
+    name="web.registrar_contenido"
+)
+def registrar_contenido(request: Request):
     """
     Registro de contenido institucional por parte del docente.
     El formulario cambia según el tipo elegido (RF-COM-02).
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/registrar_contenido.html",
         content_types=data.TEACHER_CONTENT_TYPES,
         forms=data.TEACHER_FORMS,
@@ -371,12 +398,16 @@ def registrar_contenido():
     )
 
 
-@web_bp.get("/adjuntar-evidencias")
-def adjuntar_evidencias():
+@web_router.get(
+    "/adjuntar-evidencias",
+    name="web.adjuntar_evidencias"
+)
+def adjuntar_evidencias(request: Request):
     """
     Carga de evidencias que respaldan el contenido (RNF-ACC-01).
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/adjuntar_evidencias.html",
         icons=data.FILE_ICONS,
         demo=data.ROLE_DATA["teacher"],
@@ -388,12 +419,16 @@ def adjuntar_evidencias():
 # ADMINISTRADOR  (RF-VAL / RF-DSH)
 # ==========================================================
 
-@web_bp.get("/dashboard/admin")
-def dashboard_admin():
+@web_router.get(
+    "/dashboard/admin",
+    name="web.dashboard_admin"
+)
+def dashboard_admin(request: Request):
     """
     Panel administrativo con indicadores y gráfico mensual.
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/dashboard_admin.html",
         kpis=data.KPI_DATA,
         monthly=data.MONTHLY_CONTENT,
@@ -405,12 +440,16 @@ def dashboard_admin():
     )
 
 
-@web_bp.get("/admin/contenido")
-def admin_contenido():
+@web_router.get(
+    "/admin/contenido",
+    name="web.admin_contenido"
+)
+def admin_contenido(request: Request):
     """
     Gestión del catálogo completo: ver, despublicar, eliminar.
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/admin_contenido.html",
         **{
             "simul_content": data.CONTENT_ITEMS,
@@ -420,13 +459,17 @@ def admin_contenido():
     )
 
 
-@web_bp.get("/admin/validacion")
-def admin_validacion():
+@web_router.get(
+    "/admin/validacion",
+    name="web.admin_validacion"
+)
+def admin_validacion(request: Request):
     """
     Bandeja de validación: aprobar o rechazar con
     observaciones obligatorias (RF-VAL-01 / RF-VAL-03).
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/admin_validacion.html",
         **{
             "simul_queue": data.VALIDATION_QUEUE,
@@ -436,13 +479,17 @@ def admin_validacion():
     )
 
 
-@web_bp.get("/admin/publicacion")
-def admin_publicacion():
+@web_router.get(
+    "/admin/publicacion",
+    name="web.admin_publicacion"
+)
+def admin_publicacion(request: Request):
     """
     Confirmación de publicación y acciones automáticas
     ejecutadas (RF-VAL-04).
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/admin_publicacion.html",
         checklist=data.PUBLISH_CHECKLIST,
         demo=data.ROLE_DATA["admin"],
@@ -450,12 +497,16 @@ def admin_publicacion():
     )
 
 
-@web_bp.get("/admin/usuarios")
-def admin_usuarios():
+@web_router.get(
+    "/admin/usuarios",
+    name="web.admin_usuarios"
+)
+def admin_usuarios(request: Request):
     """
     Gestión de cuentas: cambio de rol y activación (RF-USR-05).
     """
-    return render_template(
+    return renderizar(
+        request,
         "pages/admin_usuarios.html",
         roles=data.USER_ROLES,
         role_colors=data.ROLE_COLORS,

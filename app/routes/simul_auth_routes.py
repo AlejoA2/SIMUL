@@ -1,24 +1,21 @@
-from flask import (
-    Blueprint,
-    request
-)
-
-from flask_jwt_extended import (
-    jwt_required
-)
+from fastapi import APIRouter, Depends
 
 from app.controllers.simul_auth_controller import (
     SimulAuthController
 )
+from app.schemas.simul_auth_schema import (
+    SimulLoginIn,
+    SimulRegisterIn
+)
+from app.utils.roles import requiere_usuario
 
 
 # ============================================================
-# BLUEPRINT — autenticación del museo
+# APIRouter — autenticación del museo
 # ============================================================
 
-simul_auth_bp = Blueprint(
-    "simul_auth",
-    __name__
+simul_auth_router = APIRouter(
+    tags=["Autenticación"]
 )
 
 
@@ -29,44 +26,50 @@ controller = SimulAuthController()
 # REGISTRO
 # ============================================================
 
-@simul_auth_bp.post("/register")
-def register():
+@simul_auth_router.post(
+    "/register",
+    summary="Registrar cuenta (estudiante o docente)",
+    description=(
+        "Crea una cuenta con nivel 1 y 0 puntos. "
+        "El rol solo admite estudiante|docente: el "
+        "autoregistro como admin se rechaza (422)."
+    )
+)
+def register(payload: SimulRegisterIn):
 
     """
     POST /api/museo/auth/register
     """
 
-    payload = request.get_json(
-        silent=True
-    ) or {}
-
-    return controller.register(payload)
+    return controller.register(payload.model_dump())
 
 
 # ============================================================
 # LOGIN
 # ============================================================
 
-@simul_auth_bp.post("/login")
-def login():
+@simul_auth_router.post(
+    "/login",
+    summary="Iniciar sesión (devuelve access token JWT)"
+)
+def login(payload: SimulLoginIn):
 
     """
     POST /api/museo/auth/login
     """
 
-    payload = request.get_json(
-        silent=True
-    ) or {}
-
-    return controller.login(payload)
+    return controller.login(payload.model_dump())
 
 
 # ============================================================
 # SESIÓN ACTUAL
 # ============================================================
 
-@simul_auth_bp.get("/me")
-@jwt_required()
+@simul_auth_router.get(
+    "/me",
+    summary="Usuario del token vigente",
+    dependencies=[Depends(requiere_usuario)]
+)
 def me():
 
     """

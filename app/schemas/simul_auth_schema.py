@@ -1,113 +1,147 @@
-from marshmallow import (
-    Schema,
-    fields,
-    validate
-)
+"""
+Esquemas de autenticación y usuario del museo.
+
+- ENTRADA: modelos pydantic que FastAPI valida en la ruta
+  (documentados en Swagger/OpenAPI y generan 422 con el
+  sobre {success, message, details}).
+- SALIDA: modelos pydantic serializados por los services
+  con la interfaz .dump() (sin exponer password_hash).
+"""
+
+from datetime import datetime
+from typing import Literal
+
+from pydantic import EmailStr, Field, field_validator
+
+from app.schemas.base import Esquema, ModeloSalida
 
 
-class SimulRegisterSchema(Schema):
+# ============================================================
+# ENTRADA
+# ============================================================
 
-    nombre = fields.Str(
-        required=True,
-        validate=validate.Length(
-            min=3,
-            max=120
-        )
+class SimulRegisterIn(ModeloSalida):
+
+    """POST /api/museo/auth/register"""
+
+    nombre: str = Field(
+        min_length=3,
+        max_length=120,
+        description="Nombre completo (mínimo 3 caracteres)"
     )
 
-    correo = fields.Email(
-        required=True
+    correo: EmailStr = Field(
+        description="Correo institucional válido"
     )
 
-    password = fields.Str(
-        required=True,
-        load_only=True,
-        validate=validate.Length(
-            min=8
-        )
+    password: str = Field(
+        min_length=8,
+        description="Contraseña (mínimo 8 caracteres)"
     )
 
     # Opcionales: la rewiring del frontend puede enviarlos.
     # El rol solo admite cuentas de usuario (nunca admin
     # por autoregistro).
-    programa_cohorte = fields.Str(
-        allow_none=True
+    programa_cohorte: str | None = Field(
+        default=None,
+        max_length=80
     )
 
-    rol = fields.Str(
-        validate=validate.OneOf(
-            ["estudiante", "docente"]
-        )
+    rol: Literal["estudiante", "docente"] | None = None
+
+
+class SimulLoginIn(ModeloSalida):
+
+    """POST /api/museo/auth/login"""
+
+    correo: EmailStr
+    password: str
+
+
+class UsuarioUpdateIn(ModeloSalida):
+
+    """
+    PUT / PATCH /api/museo/admin/usuarios/<id>
+    Cambio de estado / rol / nombre (parcial).
+    """
+
+    estado: bool | None = None
+
+    id_rol: int | None = None
+
+    nombre: str | None = Field(
+        default=None,
+        min_length=3,
+        max_length=120
     )
 
 
-class SimulLoginSchema(Schema):
+# ============================================================
+# SALIDA
+# ============================================================
 
-    correo = fields.Email(
-        required=True
-    )
+class NivelInfo(ModeloSalida):
 
-    password = fields.Str(
-        required=True,
-        load_only=True
-    )
+    numero: int
+    nombre: str
+    puntos_min: int
+    puntos_max: int
 
 
-class UsuarioSchema(Schema):
+class UsuarioOut(ModeloSalida):
 
     """Serialización de usuario SIN password_hash."""
 
-    id_usuario = fields.Int()
+    id_usuario: int
 
-    nombre = fields.Str()
+    nombre: str
 
-    correo = fields.Email()
+    correo: str
 
-    foto = fields.Str(allow_none=True)
+    foto: str | None = None
 
-    biografia = fields.Str(allow_none=True)
+    biografia: str | None = None
 
-    programa_cohorte = fields.Str(allow_none=True)
+    programa_cohorte: str | None = None
 
-    estado = fields.Bool()
+    estado: bool
 
-    puntos_total = fields.Int()
+    puntos_total: int
 
-    fecha_registro = fields.DateTime()
+    fecha_registro: datetime
 
-    rol = fields.Method("get_rol")
+    rol: str | None = None
 
-    nivel = fields.Method("get_nivel")
+    nivel: NivelInfo | None = None
 
-    def get_rol(self, obj):
+    # ---- Transformaciones desde los modelos ORM ----
 
-        return obj.rol.nombre if obj.rol else None
+    @field_validator("rol", mode="before")
+    @classmethod
+    def _nombre_del_rol(cls, valor):
 
-    def get_nivel(self, obj):
+        # El ORM trae la relación Rol; la salida va como
+        # texto ("admin", "estudiante", ...).
+        return valor.nombre if valor is not None else None
 
-        if not obj.nivel:
+    @field_validator("nivel", mode="before")
+    @classmethod
+    def _datos_del_nivel(cls, valor):
+
+        if valor is None:
 
             return None
 
         return {
-            "numero": obj.nivel.numero,
-            "nombre": obj.nivel.nombre,
-            "puntos_min": obj.nivel.puntos_min,
-            "puntos_max": obj.nivel.puntos_max,
+            "numero": valor.numero,
+            "nombre": valor.nombre,
+            "puntos_min": valor.puntos_min,
+            "puntos_max": valor.puntos_max,
         }
 
 
-class UsuarioUpdateSchema(Schema):
+class UsuarioSchema(Esquema):
 
-    """Cambio de estado / rol desde la gestión de usuarios."""
+    """Interfaz .dump() que consumen los services."""
 
-    estado = fields.Bool()
-
-    id_rol = fields.Int()
-
-    nombre = fields.Str(
-        validate=validate.Length(
-            min=3,
-            max=120
-        )
-    )
+    modelo = UsuarioOut

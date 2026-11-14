@@ -1,7 +1,4 @@
-from flask_jwt_extended import create_access_token
-
-from marshmallow import ValidationError
-
+from app.extensions import db
 from app.models.usuario import Usuario
 from app.models.rol import Rol
 
@@ -14,8 +11,6 @@ from app.repositories.gamificacion_repository import (
 )
 
 from app.schemas.simul_auth_schema import (
-    SimulRegisterSchema,
-    SimulLoginSchema,
     UsuarioSchema
 )
 
@@ -24,10 +19,8 @@ from app.utils.response import (
     error
 )
 
+from app.utils.roles import crear_token
 
-register_schema = SimulRegisterSchema()
-
-login_schema = SimulLoginSchema()
 
 usuario_schema = UsuarioSchema()
 
@@ -50,17 +43,10 @@ class UsuarioService:
         Crea una cuenta de estudiante con nivel 1.
         """
 
-        try:
-
-            datos = register_schema.load(data)
-
-        except ValidationError as exc:
-
-            return error(
-                "Datos inválidos",
-                422,
-                exc.messages
-            )
+        # Los campos ya pasaron la validación del esquema
+        # pydantic declarado en la ruta (422 documentado en
+        # Swagger/OpenAPI).
+        datos = data
 
         if self.repository.get_by_correo(
             datos["correo"]
@@ -73,7 +59,7 @@ class UsuarioService:
 
         nombre_rol = datos.get("rol") or "estudiante"
 
-        rol_cuenta = Rol.query.filter_by(
+        rol_cuenta = db.session.query(Rol).filter_by(
             nombre=nombre_rol
         ).first()
 
@@ -115,17 +101,9 @@ class UsuarioService:
         usuario con roles del museo).
         """
 
-        try:
-
-            datos = login_schema.load(data)
-
-        except ValidationError as exc:
-
-            return error(
-                "Datos inválidos",
-                422,
-                exc.messages
-            )
+        # Credenciales ya validadas por el esquema de la
+        # ruta; aquí solo se autentica contra la BD.
+        datos = data
 
         usuario = self.repository.get_by_correo(
             datos["correo"]
@@ -154,9 +132,7 @@ class UsuarioService:
                 403
             )
 
-        token = create_access_token(
-            identity=str(usuario.id_usuario)
-        )
+        token = crear_token(usuario.id_usuario)
 
         return success(
             {
@@ -228,7 +204,8 @@ class UsuarioService:
 
         if "id_rol" in data:
 
-            nuevo_rol = Rol.query.get(
+            nuevo_rol = db.session.get(
+                Rol,
                 data["id_rol"]
             )
 

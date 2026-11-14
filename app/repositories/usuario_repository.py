@@ -16,7 +16,7 @@ class UsuarioRepository:
 
     def get_by_correo(self, correo):
 
-        return Usuario.query.filter_by(
+        return db.session.query(Usuario).filter_by(
             correo=correo
         ).first()
 
@@ -25,7 +25,7 @@ class UsuarioRepository:
         """Primera coincidencia por nombre exacto (para
         vincular participantes de un proyecto)."""
 
-        return Usuario.query.filter_by(
+        return db.session.query(Usuario).filter_by(
             nombre=nombre
         ).first()
 
@@ -36,7 +36,7 @@ class UsuarioRepository:
         estado=None
     ):
 
-        query = Usuario.query
+        query = db.session.query(Usuario)
 
         if q:
 
@@ -68,7 +68,7 @@ class UsuarioRepository:
         """Usuarios con un rol concreto ('admin', ...)."""
 
         return (
-            Usuario.query
+            db.session.query(Usuario)
             .join(Usuario.rol)
             .filter(Usuario.rol.has(nombre=nombre_rol))
             .all()
@@ -76,7 +76,7 @@ class UsuarioRepository:
 
     def count(self):
 
-        return Usuario.query.count()
+        return db.session.query(Usuario).count()
 
     def create(self, usuario):
 

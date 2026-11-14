@@ -25,8 +25,17 @@ sys.path.insert(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 )
 
-from app import create_app  # noqa: E402
-from app.extensions import db  # noqa: E402
+# Fuera de Docker no hay DATABASE_URL: el seed apunta al
+# MySQL del docker-compose (puerto 3307). Hay que fijarlo
+# ANTES de importar app, porque el motor se crea al
+# importar app.extensions.
+os.environ.setdefault(
+    "DATABASE_URL",
+    "mysql+pymysql://inventory_user:inventory_password"
+    "@127.0.0.1:3307/inventory_db"
+)
+
+from app.extensions import db, sesion_bd  # noqa: E402
 
 from app.data.simul_data import (  # noqa: E402
     ROLE_DATA,
@@ -656,7 +665,7 @@ def crear_contenido(
 
         for nombre_tec in tecnologias or []:
 
-            tecnologia = Tecnologia.query.filter_by(
+            tecnologia = db.session.query(Tecnologia).filter_by(
                 nombre=nombre_tec
             ).first()
 
@@ -1631,11 +1640,7 @@ def sembrar_premio_hall(creados):
 
 def main():
 
-    app = create_app(
-        {"SQLALCHEMY_DATABASE_URI": DATABASE_URL}
-    )
-
-    with app.app_context():
+    with sesion_bd():
 
         hay_datos = (
             db.session.query(Rol).count() > 0
@@ -1697,7 +1702,10 @@ def main():
         from app.models.contenido import Contenido
 
         print(f"  usuarios ....... {len(usuarios)}")
-        print(f"  contenido ...... {Contenido.query.count()}")
+        print(
+            f"  contenido ...... "
+            f"{db.session.query(Contenido).count()}"
+        )
         print(f"  niveles ........ {len(niveles)}")
         print(f"  insignias ...... {len(insignias)}")
         print(

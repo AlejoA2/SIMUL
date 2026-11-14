@@ -19,5 +19,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 #puerto
 EXPOSE 5000
-#Ejecucion
-CMD ["gunicorn","--bind","0.0.0.0:5000","--workers","3","run:app"]
+#Ejecucion (uvicorn: servidor ASGI de FastAPI; un worker
+#para que create_all no compita al arrancar desde cero)
+CMD ["uvicorn","run:app","--host","0.0.0.0","--port","5000"]

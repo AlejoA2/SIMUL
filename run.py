@@ -1,3 +1,15 @@
+"""
+Punto de entrada del backend FastAPI.
+
+El contenedor (y el profesor) ejecutan:
+
+    uvicorn run:app --host 0.0.0.0 --port 5000
+
+La documentación interactiva queda en http://localhost:5000/docs
+"""
+
+import uvicorn
+
 from app import create_app
 
 
@@ -5,8 +17,10 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(
+
+    uvicorn.run(
+        "run:app",
         host="0.0.0.0",
         port=5000,
-        debug=True
+        reload=True
     )

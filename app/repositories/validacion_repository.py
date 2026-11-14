@@ -14,7 +14,7 @@ class ValidacionRepository:
         vista v_bandeja_validacion muestra)."""
 
         return (
-            Contenido.query
+            db.session.query(Contenido)
             .filter(Contenido.estado == "pendiente")
             .order_by(Contenido.fec_crea.desc())
             .all()
@@ -30,7 +30,7 @@ class ValidacionRepository:
     def get_logs_de(self, contenido_id):
 
         return (
-            ValidacionLog.query
+            db.session.query(ValidacionLog)
             .filter(
                 ValidacionLog.id_contenido == contenido_id
             )

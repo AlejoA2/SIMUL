@@ -17,7 +17,7 @@ class SocialRepository:
     def get_comentarios(self, contenido_id):
 
         return (
-            Comentario.query
+            db.session.query(Comentario)
             .filter(
                 Comentario.id_contenido == contenido_id
             )
@@ -40,7 +40,7 @@ class SocialRepository:
     def get_reacciones(self, contenido_id):
 
         return (
-            Reaccion.query
+            db.session.query(Reaccion)
             .filter(
                 Reaccion.id_contenido == contenido_id
             )
@@ -70,7 +70,7 @@ class SocialRepository:
         tipo_reaccion
     ):
 
-        return Reaccion.query.filter_by(
+        return db.session.query(Reaccion).filter_by(
             id_usuario=usuario_id,
             id_contenido=contenido_id,
             tipo_reaccion=tipo_reaccion
@@ -96,7 +96,7 @@ class SocialRepository:
 
     def get_favorito(self, usuario_id, contenido_id):
 
-        return Favorito.query.filter_by(
+        return db.session.query(Favorito).filter_by(
             id_usuario=usuario_id,
             id_contenido=contenido_id
         ).first()
@@ -125,7 +125,7 @@ class SocialRepository:
         solo_no_leidas=False
     ):
 
-        query = Notificacion.query.filter(
+        query = db.session.query(Notificacion).filter(
             Notificacion.id_usuario == usuario_id
         )
 

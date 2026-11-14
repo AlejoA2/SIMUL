@@ -1,24 +1,17 @@
-from flask import (
-    Blueprint,
-    request
-)
-
-from flask_jwt_extended import (
-    jwt_required
-)
+from fastapi import APIRouter, Depends, Query
 
 from app.controllers.museo_controller import (
     MuseoController
 )
+from app.utils.roles import requiere_usuario
 
 
 # ============================================================
-# BLUEPRINT — vistas transversales del museo
+# APIRouter — vistas transversales del museo
 # ============================================================
 
-museo_bp = Blueprint(
-    "museo",
-    __name__
+museo_router = APIRouter(
+    tags=["Museo"]
 )
 
 
@@ -29,7 +22,10 @@ controller = MuseoController()
 # PORTADA / HISTORIA / HALL / CATÁLOGOS
 # ============================================================
 
-@museo_bp.get("/home")
+@museo_router.get(
+    "/home",
+    summary="Datos de la portada (KPIs)"
+)
 def home():
 
     """
@@ -39,7 +35,10 @@ def home():
     return controller.home()
 
 
-@museo_bp.get("/timeline")
+@museo_router.get(
+    "/timeline",
+    summary="Línea de tiempo agrupada por década"
+)
 def timeline():
 
     """
@@ -49,7 +48,10 @@ def timeline():
     return controller.timeline()
 
 
-@museo_bp.get("/hall")
+@museo_router.get(
+    "/hall",
+    summary="Premiación / Hall de la fama"
+)
 def hall():
 
     """
@@ -59,7 +61,10 @@ def hall():
     return controller.hall()
 
 
-@museo_bp.get("/categorias")
+@museo_router.get(
+    "/categorias",
+    summary="Categorías con conteo"
+)
 def categorias():
 
     """
@@ -69,7 +74,10 @@ def categorias():
     return controller.categorias()
 
 
-@museo_bp.get("/anios")
+@museo_router.get(
+    "/anios",
+    summary="Años con conteo"
+)
 def anios():
 
     """
@@ -83,20 +91,34 @@ def anios():
 # NOTIFICACIONES (RF-NOT-01)
 # ============================================================
 
-@museo_bp.get("/notificaciones")
-@jwt_required()
-def notificaciones():
+@museo_router.get(
+    "/notificaciones",
+    summary="Notificaciones del usuario",
+    description="Filtro: ?no_leidas=1",
+    dependencies=[Depends(requiere_usuario)]
+)
+def notificaciones(
+    no_leidas: str | None = Query(
+        None,
+        description="1 = solo no leídas"
+    )
+):
 
     """
-    GET /api/museo/notificaciones  (?no_leidas=1)
+    GET /api/museo/notificaciones
     """
 
-    return controller.notificaciones(request.args)
+    return controller.notificaciones({
+        "no_leidas": no_leidas,
+    })
 
 
-@museo_bp.post("/notificaciones/<int:notif_id>/leer")
-@jwt_required()
-def marcar_leida(notif_id):
+@museo_router.post(
+    "/notificaciones/{notif_id}/leer",
+    summary="Marcar notificación como leída",
+    dependencies=[Depends(requiere_usuario)]
+)
+def marcar_leida(notif_id: int):
 
     """
     POST /api/museo/notificaciones/<id>/leer

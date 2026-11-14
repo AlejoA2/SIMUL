@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from marshmallow import ValidationError
-
 from app.models.contenido import Contenido
 from app.models.contenido_tipos import (
     Acontecimiento,
@@ -31,11 +29,6 @@ from app.repositories.gamificacion_repository import (
 )
 
 from app.schemas.contenido_schema import (
-    ContenidoCreateSchema,
-    ContenidoUpdateSchema,
-    EvidenciaCreateSchema,
-    ComentarioCreateSchema,
-    ReaccionSchema,
     ContenidoSchema,
     ComentarioSchema,
     EvidenciaSchema,
@@ -52,16 +45,8 @@ from app.utils.response import (
 # Reglas de gamificación (RF-GAM-01).
 PUNTOS_COMENTARIO = 10
 
-create_schema = ContenidoCreateSchema()
-
-update_schema = ContenidoUpdateSchema()
-
-evidencia_schema = EvidenciaCreateSchema()
-
-comentario_schema = ComentarioCreateSchema()
-
-reaccion_schema = ReaccionSchema()
-
+# Esquemas de salida (los de entrada los valida FastAPI en
+# cada ruta y están documentados en Swagger/OpenAPI).
 contenido_schema = ContenidoSchema()
 
 comentario_out_schema = ComentarioSchema()
@@ -196,17 +181,9 @@ class ContenidoService:
 
     def crear(self, data, autor):
 
-        try:
-
-            datos = create_schema.load(data)
-
-        except ValidationError as exc:
-
-            return error(
-                "Datos inválidos",
-                422,
-                exc.messages
-            )
+        # Los campos ya pasaron la validación del esquema
+        # pydantic declarado en la ruta (422 en Swagger).
+        datos = data
 
         # Imagen principal: exige alt_text (RNF-ACC-01).
         if datos.get("imagen") and not datos.get("alt_text"):
@@ -297,17 +274,9 @@ class ContenidoService:
                 403
             )
 
-        try:
-
-            datos = update_schema.load(data)
-
-        except ValidationError as exc:
-
-            return error(
-                "Datos inválidos",
-                422,
-                exc.messages
-            )
+        # Solo los campos enviados llegan aquí (la ruta
+        # usa model_dump(exclude_unset=True) para PUT).
+        datos = data
 
         if "titulo" in datos:
 
@@ -394,17 +363,8 @@ class ContenidoService:
                 403
             )
 
-        try:
-
-            datos = evidencia_schema.load(data)
-
-        except ValidationError as exc:
-
-            return error(
-                "Datos inválidos",
-                422,
-                exc.messages
-            )
+        # Validación en la ruta (esquema pydantic).
+        datos = data
 
         # RNF-ACC-01: toda imagen lleva alt_text.
         if datos["tipo"] == "foto" and not datos.get(
@@ -462,17 +422,8 @@ class ContenidoService:
                 404
             )
 
-        try:
-
-            datos = comentario_schema.load(data)
-
-        except ValidationError as exc:
-
-            return error(
-                "Datos inválidos",
-                422,
-                exc.messages
-            )
+        # Validación en la ruta (esquema pydantic).
+        datos = data
 
         comentario = Comentario(
             id_contenido=contenido.id_contenido,
@@ -523,17 +474,8 @@ class ContenidoService:
                 404
             )
 
-        try:
-
-            datos = reaccion_schema.load(data)
-
-        except ValidationError as exc:
-
-            return error(
-                "Datos inválidos",
-                422,
-                exc.messages
-            )
+        # Validación en la ruta (esquema pydantic).
+        datos = data
 
         existente = self.social.get_reaccion(
             usuario.id_usuario,

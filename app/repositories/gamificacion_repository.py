@@ -17,7 +17,7 @@ class GamificacionRepository:
 
     def get_niveles(self):
 
-        return Nivel.query.order_by(
+        return db.session.query(Nivel).order_by(
             Nivel.numero
         ).all()
 
@@ -48,7 +48,7 @@ class GamificacionRepository:
 
     def get_insignias(self):
 
-        return Insignia.query.order_by(
+        return db.session.query(Insignia).order_by(
             Insignia.puntos_requeridos
         ).all()
 
@@ -94,7 +94,7 @@ class GamificacionRepository:
     def get_ranking(self, limite=100):
 
         return (
-            Usuario.query
+            db.session.query(Usuario)
             .filter(Usuario.estado.is_(True))
             .order_by(Usuario.puntos_total.desc())
             .limit(limite)
@@ -108,7 +108,7 @@ class GamificacionRepository:
     def get_historial(self, usuario_id, limite=50):
 
         return (
-            HistorialPuntos.query
+            db.session.query(HistorialPuntos)
             .filter(
                 HistorialPuntos.id_usuario == usuario_id
             )

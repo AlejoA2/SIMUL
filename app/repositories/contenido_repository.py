@@ -1,3 +1,5 @@
+from dataclasses import dataclass, field
+
 from sqlalchemy import (
     or_,
     select,
@@ -5,6 +7,26 @@ from sqlalchemy import (
 )
 
 from app.extensions import db
+
+
+@dataclass
+class Pagina:
+
+    """
+    Resultado paginado con la misma interfaz que la
+    paginación de flask-sqlalchemy (.items, .page, .pages,
+    .total), usada por el servicio de contenido.
+    """
+
+    items: list = field(default_factory=list)
+
+    page: int = 1
+
+    per_page: int = 12
+
+    total: int = 0
+
+    pages: int = 0
 
 from app.models.contenido import Contenido
 from app.models.contenido_tipos import (
@@ -51,7 +73,7 @@ class ContenidoRepository:
         per_page=12
     ):
 
-        query = Contenido.query.filter(
+        query = db.session.query(Contenido).filter(
             Contenido.estado == "publicado"
         )
 
@@ -63,18 +85,30 @@ class ContenidoRepository:
             anio
         )
 
-        return query.order_by(
-            Contenido.fec_crea.desc()
-        ).paginate(
+        # Conteo + página (la paginación clásica de
+        # flask-sqlalchemy, ahora explícita).
+        total = query.count()
+
+        items = (
+            query
+            .order_by(Contenido.fec_crea.desc())
+            .offset((page - 1) * per_page)
+            .limit(per_page)
+            .all()
+        )
+
+        return Pagina(
+            items=items,
             page=page,
             per_page=per_page,
-            error_out=False
+            total=total,
+            pages=-(-total // per_page)
         )
 
     def get_por_estado(self, estado):
 
         return (
-            Contenido.query
+            db.session.query(Contenido)
             .filter(Contenido.estado == estado)
             .order_by(Contenido.fec_crea.desc())
             .all()
@@ -85,7 +119,7 @@ class ContenidoRepository:
         """Contenido creado por un usuario (mis aportes)."""
 
         return (
-            Contenido.query
+            db.session.query(Contenido)
             .filter(Contenido.id_autor == usuario_id)
             .order_by(Contenido.fec_crea.desc())
             .all()
@@ -97,7 +131,7 @@ class ContenidoRepository:
         publicado, ordenado por año."""
 
         return (
-            Contenido.query
+            db.session.query(Contenido)
             .join(
                 Acontecimiento,
                 Acontecimiento.id_contenido
@@ -113,7 +147,7 @@ class ContenidoRepository:
         """Hall de la fama publicado."""
 
         return (
-            Contenido.query
+            db.session.query(Contenido)
             .join(
                 HallFama,
                 HallFama.id_contenido == Contenido.id_contenido
@@ -166,7 +200,7 @@ class ContenidoRepository:
 
     def count_publicados(self):
 
-        return Contenido.query.filter(
+        return db.session.query(Contenido).filter(
             Contenido.estado == "publicado"
         ).count()
 
@@ -199,7 +233,7 @@ class ContenidoRepository:
         from app.models.favorito import Favorito
 
         return (
-            Contenido.query
+            db.session.query(Contenido)
             .join(
                 Favorito,
                 Favorito.id_contenido
@@ -346,7 +380,7 @@ class ContenidoRepository:
 
     def get_tecnologia(self, nombre):
 
-        return Tec.query.filter_by(
+        return db.session.query(Tec).filter_by(
             nombre=nombre
         ).first()
 

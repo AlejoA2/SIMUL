@@ -1,24 +1,17 @@
-from flask import (
-    Blueprint,
-    request
-)
-
-from flask_jwt_extended import (
-    jwt_required
-)
+from fastapi import APIRouter, Depends, Query
 
 from app.controllers.gamificacion_controller import (
     GamificacionController
 )
+from app.utils.roles import requiere_usuario
 
 
 # ============================================================
-# BLUEPRINT — gamificación (RF-GAM)
+# APIRouter — gamificación (RF-GAM)
 # ============================================================
 
-gamificacion_bp = Blueprint(
-    "gamificacion",
-    __name__
+gamificacion_router = APIRouter(
+    tags=["Gamificación"]
 )
 
 
@@ -29,17 +22,30 @@ controller = GamificacionController()
 # RANKING / CATÁLOGOS
 # ============================================================
 
-@gamificacion_bp.get("/ranking")
-def ranking():
+@gamificacion_router.get(
+    "/ranking",
+    summary="Ranking de puntos por nivel"
+)
+def ranking(
+    limite: int | None = Query(
+        None,
+        ge=1,
+        le=500,
+        description="Máximo de usuarios (por defecto 100)"
+    )
+):
 
     """
     GET /api/museo/gamificacion/ranking
     """
 
-    return controller.ranking(request.args)
+    return controller.ranking({"limite": limite})
 
 
-@gamificacion_bp.get("/niveles")
+@gamificacion_router.get(
+    "/niveles",
+    summary="Catálogo de niveles"
+)
 def niveles():
 
     """
@@ -49,7 +55,11 @@ def niveles():
     return controller.niveles()
 
 
-@gamificacion_bp.get("/insignias")
+@gamificacion_router.get(
+    "/insignias",
+    summary="Catálogo de insignias",
+    description="Con sesión, marca las que ya posee el usuario."
+)
 def insignias():
 
     """
@@ -63,8 +73,11 @@ def insignias():
 # HISTORIAL DE PUNTOS
 # ============================================================
 
-@gamificacion_bp.get("/mi-historial")
-@jwt_required()
+@gamificacion_router.get(
+    "/mi-historial",
+    summary="Historial de puntos del usuario",
+    dependencies=[Depends(requiere_usuario)]
+)
 def mi_historial():
 
     """
@@ -74,8 +87,11 @@ def mi_historial():
     return controller.mi_historial()
 
 
-@gamificacion_bp.get("/historial/<int:usuario_id>")
-def historial(usuario_id):
+@gamificacion_router.get(
+    "/historial/{usuario_id}",
+    summary="Historial de puntos de un usuario"
+)
+def historial(usuario_id: int):
 
     """
     GET /api/museo/gamificacion/historial/<id>

@@ -1,255 +1,269 @@
-from marshmallow import (
-    Schema,
-    fields,
-    validate
-)
+"""
+Esquemas de contenido del museo (y sus subtipos).
+
+- ENTRADA: modelos pydantic que FastAPI valida en la ruta
+  (documentados en Swagger/OpenAPI y generan 422 con el
+  sobre {success, message, details}).
+- SALIDA: modelos pydantic serializados por los services
+  con la interfaz .dump().
+"""
+
+from datetime import date, datetime
+from typing import Literal
+
+from pydantic import Field
+
+from app.schemas.base import Esquema, ModeloSalida
 
 
-# ------------------------------------------------------------
+# ============================================================
 # ENTRADA
-# ------------------------------------------------------------
+# ============================================================
 
-class ContenidoCreateSchema(Schema):
+TipoContenido = Literal[
+    "acontecimiento",
+    "premio",
+    "proyecto",
+    "avance_investigacion",
+    "evento",
+    "noticia",
+    "hall",
+]
 
-    titulo = fields.Str(
-        required=True,
-        validate=validate.Length(
-            min=3,
-            max=200
-        )
+
+class ContenidoCreateIn(ModeloSalida):
+
+    """POST /api/museo/contenido — todo contenido nace
+    pendiente de validación."""
+
+    titulo: str = Field(
+        min_length=3,
+        max_length=200
     )
 
-    tipo = fields.Str(
-        required=True,
-        validate=validate.OneOf([
-            "acontecimiento",
-            "premio",
-            "proyecto",
-            "avance_investigacion",
-            "evento",
-            "noticia",
-            "hall",
-        ])
+    tipo: TipoContenido
+
+    categoria: str = Field(
+        min_length=2,
+        max_length=80
     )
 
-    categoria = fields.Str(
-        required=True,
-        validate=validate.Length(
-            min=2,
-            max=80
-        )
+    anio: int = Field(
+        ge=1900,
+        le=2100
     )
 
-    anio = fields.Int(
-        required=True,
-        validate=validate.Range(
-            min=1900,
-            max=2100
-        )
-    )
-
-    descripcion = fields.Str(
-        required=True,
-        validate=validate.Length(
-            min=10
-        )
+    descripcion: str = Field(
+        min_length=10
     )
 
     # Campos adicionales según el subtipo (opcionales).
-    lugar = fields.Str(allow_none=True)
+    lugar: str | None = None
 
-    linea_invest = fields.Str(allow_none=True)
+    linea_invest: str | None = None
 
-    resultados_impacto = fields.Str(allow_none=True)
+    resultados_impacto: str | None = None
 
-    id_asesor = fields.Int(allow_none=True)
+    id_asesor: int | None = None
 
-    tipo_avance = fields.Str(
-        validate=validate.OneOf([
-            "publicacion",
-            "patente",
-            "software",
-        ])
-    )
+    tipo_avance: (
+        Literal["publicacion", "patente", "software"] | None
+    ) = None
 
-    referencia = fields.Str(allow_none=True)
+    referencia: str | None = None
 
-    id_grupo = fields.Int(allow_none=True)
+    id_grupo: int | None = None
 
-    fecha_evento = fields.Date(allow_none=True)
+    fecha_evento: date | None = None
 
-    objetivo = fields.Str(allow_none=True)
+    objetivo: str | None = None
 
-    categoria_hall = fields.Str(
-        validate=validate.OneOf([
-            "Docente",
-            "Egresado",
-            "Investigador",
-            "Estudiante",
-        ])
-    )
+    categoria_hall: (
+        Literal["Docente", "Egresado", "Investigador",
+                "Estudiante"] | None
+    ) = None
 
     # Relaciones simples recibidas como texto.
-    tecnologias = fields.List(
-        fields.Str(),
-        load_default=list
-    )
+    tecnologias: list[str] = Field(default_factory=list)
 
-    participantes = fields.List(
-        fields.Str(),
-        load_default=list
-    )
+    participantes: list[str] = Field(default_factory=list)
 
     # Imagen principal (RNF-ACC-01: alt_text obligatorio
-    # cuando tipo == "foto").
-    imagen = fields.Str(allow_none=True)
+    # cuando imagen está presente).
+    imagen: str | None = None
 
-    alt_text = fields.Str(allow_none=True)
+    alt_text: str | None = None
 
 
-class ContenidoUpdateSchema(Schema):
+class ContenidoUpdateIn(ModeloSalida):
 
-    titulo = fields.Str(
-        validate=validate.Length(
-            min=3,
-            max=200
-        )
+    """PUT /api/museo/contenido/<id> — campos parciales
+    (solo los enviados se aplican)."""
+
+    titulo: str | None = Field(
+        default=None,
+        min_length=3,
+        max_length=200
     )
 
-    categoria = fields.Str(
-        validate=validate.Length(
-            min=2,
-            max=80
-        )
+    categoria: str | None = Field(
+        default=None,
+        min_length=2,
+        max_length=80
     )
 
-    descripcion = fields.Str()
+    descripcion: str | None = None
 
-    anio = fields.Int(
-        validate=validate.Range(
-            min=1900,
-            max=2100
-        )
+    anio: int | None = Field(
+        default=None,
+        ge=1900,
+        le=2100
     )
 
 
-class EvidenciaCreateSchema(Schema):
+class EvidenciaCreateIn(ModeloSalida):
 
-    tipo = fields.Str(
-        required=True,
-        validate=validate.OneOf([
-            "foto",
-            "video",
-            "doc",
-        ])
-    )
+    """POST /api/museo/contenido/<id>/evidencias"""
 
-    url_archivo = fields.Str(
-        required=True,
-        validate=validate.Length(
-            min=1,
-            max=500
-        )
+    tipo: Literal["foto", "video", "doc"]
+
+    url_archivo: str = Field(
+        min_length=1,
+        max_length=500
     )
 
     # RNF-ACC-01: obligatorio para imágenes.
-    alt_text = fields.Str(allow_none=True)
+    alt_text: str | None = None
 
 
-class ComentarioCreateSchema(Schema):
+class ComentarioCreateIn(ModeloSalida):
 
-    texto = fields.Str(
-        required=True,
-        validate=validate.Length(
-            min=1,
-            max=2000
-        )
+    """POST /api/museo/contenido/<id>/comentarios"""
+
+    texto: str = Field(
+        min_length=1,
+        max_length=2000
     )
 
-    respuesta_a = fields.Int(allow_none=True)
+    respuesta_a: int | None = None
 
 
-class ReaccionSchema(Schema):
+class ReaccionIn(ModeloSalida):
 
-    tipo_reaccion = fields.Str(
-        required=True,
-        validate=validate.Length(
-            min=1,
-            max=16
-        )
+    """POST /api/museo/contenido/<id>/reacciones"""
+
+    tipo_reaccion: str = Field(
+        min_length=1,
+        max_length=16
     )
 
 
-# ------------------------------------------------------------
+class DecisionIn(ModeloSalida):
+
+    """POST /api/museo/validacion/<id>/aprobar | /rechazar"""
+
+    observaciones: str | None = None
+
+
+# ============================================================
 # SALIDA
+# ============================================================
+
+class AutorOut(ModeloSalida):
+
+    id_usuario: int
+
+    nombre: str
+
+    foto: str | None = None
+
+
+class EvidenciaOut(ModeloSalida):
+
+    id_evid: int
+
+    tipo: str
+
+    url_archivo: str
+
+    alt_text: str | None = None
+
+    fecha_subida: datetime
+
+
+class ComentarioOut(ModeloSalida):
+
+    id_coment: int
+
+    id_contenido: int
+
+    id_usuario: int
+
+    respuesta_a: int | None = None
+
+    texto: str
+
+    fecha: datetime
+
+    autor: AutorOut | None = None
+
+
+class ReaccionConteoOut(ModeloSalida):
+
+    tipo_reaccion: str
+
+    total: int
+
+    reaccionado: bool
+
+
+class ContenidoOut(ModeloSalida):
+
+    id_contenido: int
+
+    tipo: str
+
+    titulo: str
+
+    categoria: str
+
+    estado: str
+
+    observaciones: str | None = None
+
+    fec_crea: datetime
+
+    fec_valid: datetime | None = None
+
+    autor: AutorOut | None = None
+
+    validador: AutorOut | None = None
+
+
+# ------------------------------------------------------------
+# Interfaz .dump() que consumen los services
 # ------------------------------------------------------------
 
-class AutorSchema(Schema):
+class AutorSchema(Esquema):
 
-    id_usuario = fields.Int()
-
-    nombre = fields.Str()
-
-    foto = fields.Str(allow_none=True)
+    modelo = AutorOut
 
 
-class EvidenciaSchema(Schema):
+class EvidenciaSchema(Esquema):
 
-    id_evid = fields.Int()
-
-    tipo = fields.Str()
-
-    url_archivo = fields.Str()
-
-    alt_text = fields.Str(allow_none=True)
-
-    fecha_subida = fields.DateTime()
+    modelo = EvidenciaOut
 
 
-class ComentarioSchema(Schema):
+class ComentarioSchema(Esquema):
 
-    id_coment = fields.Int()
-
-    id_contenido = fields.Int()
-
-    id_usuario = fields.Int()
-
-    respuesta_a = fields.Int(allow_none=True)
-
-    texto = fields.Str()
-
-    fecha = fields.DateTime()
-
-    autor = fields.Nested(AutorSchema)
+    modelo = ComentarioOut
 
 
-class ReaccionConteoSchema(Schema):
+class ReaccionConteoSchema(Esquema):
 
-    tipo_reaccion = fields.Str()
-
-    total = fields.Int()
-
-    reaccionado = fields.Bool()
+    modelo = ReaccionConteoOut
 
 
-class ContenidoSchema(Schema):
+class ContenidoSchema(Esquema):
 
-    id_contenido = fields.Int()
-
-    tipo = fields.Str()
-
-    titulo = fields.Str()
-
-    categoria = fields.Str()
-
-    estado = fields.Str()
-
-    observaciones = fields.Str(allow_none=True)
-
-    fec_crea = fields.DateTime()
-
-    fec_valid = fields.DateTime(allow_none=True)
-
-    autor = fields.Nested(AutorSchema)
-
-    validador = fields.Nested(AutorSchema, allow_none=True)
+    modelo = ContenidoOut

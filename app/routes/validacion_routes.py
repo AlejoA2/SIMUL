@@ -1,24 +1,19 @@
-from flask import (
-    Blueprint,
-    request
-)
-
-from flask_jwt_extended import (
-    jwt_required
-)
+from fastapi import APIRouter, Body, Depends
 
 from app.controllers.validacion_controller import (
     ValidacionController
 )
+from app.schemas.contenido_schema import DecisionIn
+from app.utils.roles import requiere_usuario
 
 
 # ============================================================
-# BLUEPRINT — bandeja de validación (RF-VAL)
+# APIRouter — bandeja de validación (RF-VAL)
 # ============================================================
 
-validacion_bp = Blueprint(
-    "validacion",
-    __name__
+validacion_router = APIRouter(
+    tags=["Validación"],
+    dependencies=[Depends(requiere_usuario)]
 )
 
 
@@ -29,12 +24,14 @@ controller = ValidacionController()
 # BANDEJA
 # ============================================================
 
-@validacion_bp.get("/bandeja")
-@jwt_required()
+@validacion_router.get(
+    "/bandeja",
+    summary="Bandeja de pendientes (admin/docente)"
+)
 def bandeja():
 
     """
-    GET /api/museo/validacion/bandeja  (solo admin)
+    GET /api/museo/validacion/bandeja
     """
 
     return controller.bandeja()
@@ -44,39 +41,47 @@ def bandeja():
 # DECISIONES
 # ============================================================
 
-@validacion_bp.post("/<int:contenido_id>/aprobar")
-@jwt_required()
-def aprobar(contenido_id):
+@validacion_router.post(
+    "/{contenido_id}/aprobar",
+    summary="Aprobar contenido (+100 puntos al autor)",
+    description=(
+        "Transacción única: estado publicado, bitácora, "
+        "notificación, puntos, nivel e insignias."
+    )
+)
+def aprobar(
+    contenido_id: int,
+    payload: DecisionIn | None = Body(default=None)
+):
 
     """
-    POST /api/museo/validacion/<id>/aprobar  (solo admin)
+    POST /api/museo/validacion/<id>/aprobar
     """
-
-    payload = request.get_json(
-        silent=True
-    ) or {}
 
     return controller.aprobar(
         contenido_id,
-        payload
+        payload.model_dump(exclude_unset=True)
+        if payload else {}
     )
 
 
-@validacion_bp.post("/<int:contenido_id>/rechazar")
-@jwt_required()
-def rechazar(contenido_id):
+@validacion_router.post(
+    "/{contenido_id}/rechazar",
+    summary="Rechazar contenido (con observaciones)"
+)
+def rechazar(
+    contenido_id: int,
+    payload: DecisionIn | None = Body(default=None)
+):
 
     """
-    POST /api/museo/validacion/<id>/rechazar  (solo admin)
+    POST /api/museo/validacion/<id>/rechazar
     """
-
-    payload = request.get_json(
-        silent=True
-    ) or {}
 
     return controller.rechazar(
         contenido_id,
-        payload
+        payload.model_dump(exclude_unset=True)
+        if payload else {}
     )
 
 
@@ -84,9 +89,11 @@ def rechazar(contenido_id):
 # HISTÓRICO DE DECISIONES (RF-SEG-04)
 # ============================================================
 
-@validacion_bp.get("/<int:contenido_id>/historial")
-@jwt_required()
-def historial(contenido_id):
+@validacion_router.get(
+    "/{contenido_id}/historial",
+    summary="Histórico de validación de un contenido"
+)
+def historial(contenido_id: int):
 
     """
     GET /api/museo/validacion/<id>/historial

@@ -194,7 +194,7 @@ class MuseoService:
         """Años disponibles (derivado de los subtipos)."""
 
         contenidos = (
-            Contenido.query
+            db.session.query(Contenido)
             .filter(Contenido.estado == "publicado")
             .all()
         )

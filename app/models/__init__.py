@@ -1,6 +1,3 @@
-from app.models.user import User
-from app.models.product import Product
-
 # Modelos del dominio SIMUL (25 tablas del modelo E-R)
 from app.models.rol import Rol
 from app.models.nivel import Nivel
@@ -33,8 +30,6 @@ from app.models.investigacion import (
 
 
 __all__ = [
-    "User",
-    "Product",
     "Rol",
     "Nivel",
     "Usuario",
