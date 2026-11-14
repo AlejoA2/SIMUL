@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "b7f5c1a2-6d4e-4c1a-9f0e-simul00000001",
+    "_postman_id": "b7f5c1a2-6d4e-4c1a-9f0e-1a2b3c4d5e6f",
     "name": "SIMUL · Museo Digital — API",
     "description": "Colección de pruebas manuales del backend FastAPI de SIMUL.\n\nPasos:\n1. Levanta el proyecto con `docker compose up --build` (o uvicorn local).\n2. Ejecuta **Auth → Login** (guarda el token automáticamente).\n3. Prueba el resto de carpetas.\n\nLa variable `baseUrl` apunta a http://localhost:5000 por defecto.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
