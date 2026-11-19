@@ -85,7 +85,7 @@
             "url": { "raw": "{{baseUrl}}/api/museo/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "museo", "auth", "login"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"correo\": \"admin@unilibre.edu.co\",\n  \"password\": \"1234\"\n}"
+              "raw": "{\n  \"correo\": \"l.jimenez@unilibre.edu.co\",\n  \"password\": \"1234\"\n}"
             }
           }
         },
@@ -118,7 +118,7 @@
             "url": { "raw": "{{baseUrl}}/api/museo/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "museo", "auth", "login"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"correo\": \"admin@unilibre.edu.co\",\n  \"password\": \"incorrecta\"\n}"
+              "raw": "{\n  \"correo\": \"l.jimenez@unilibre.edu.co\",\n  \"password\": \"incorrecta\"\n}"
             }
           }
         }
