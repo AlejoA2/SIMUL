@@ -250,8 +250,8 @@ validación con gamificación. Evidencia manual de la API: **Swagger**
 ## Documentación
 
 - [`docs/BACKEND.md`](docs/BACKEND.md) — arquitectura del backend, capas y API.
-- [`docs/guias/GUION_VIDEO_TERCER_CORTE.md`](docs/guias/GUION_VIDEO_TERCER_CORTE.md)
-  — guiones de los 3 integrantes para el video (recorrido botón → MySQL).
+- [`docs/guias/README.md`](docs/guias/README.md) — guiones separados por integrante,
+  con checklist de archivos/líneas y qué mostrar en cada bloque.
 - [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) — análisis general (nota: sus
   secciones sobre el backend describen el estado previo a FastAPI).
 - [`docs/FRONTEND.md`](docs/FRONTEND.md), [`docs/PAGINAS.md`](docs/PAGINAS.md),
