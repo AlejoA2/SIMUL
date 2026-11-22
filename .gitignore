@@ -23,3 +23,8 @@ instance/
 *.db
 *.sqlite
 *.sqlite3
+
+# Postman (workspace local del IDE, no es parte del entregable;
+# la coleccion versionada esta en docs/postman/)
+.postman/
+postman/

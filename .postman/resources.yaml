@@ -1,7 +1,0 @@
-# Use this workspace to collaborate
-workspace:
-  id: dde0d031-bff8-4224-8c55-d3d7cd7e4171
-
-localResources:
-  collections:
-    - ../docs/postman/SIMUL.postman_collection.json
