@@ -164,6 +164,7 @@
       boton.addEventListener('click', function (event) {
         event.preventDefault();
         Store.logout();
+        if (window.SIMULApi) window.SIMULApi.logout();
         window.location.href = '/';
       });
     });

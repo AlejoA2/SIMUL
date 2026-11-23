@@ -4,9 +4,9 @@
 
 {% block content %}
 
-{# Catálogo que se filtra en el navegador.
-   Se entrega tal cual llegó del "servidor" para que el JS
-   tenga una única fuente de verdad. #}
+{# Listas de apoyo (categorías, años y slugs) para los filtros.
+   Los resultados se consultan en /api/museo/contenido y los
+   pinta buscar.js; esta página solo prepara los controles. #}
 <script>
     window.SIMUL_CONTENT       = {{ simul_content | tojson }};
     window.SIMUL_CATEGORY_SLUG = {{ category_slug_map | tojson }};

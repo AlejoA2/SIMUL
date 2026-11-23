@@ -99,13 +99,15 @@ servidor y al cliente solo llega un `500` genérico.
 
 ---
 
-## 6. Frontend conservado del corte 2
+## 6. Frontend conectado a la API
 
 Las **21 vistas Jinja2** y su CSS/JS siguen en `app/templates` y `app/static`.
-Sus datos viven en `app/data/simul_data.py` y se entregan a la página como JSON
-para que JavaScript filtre y busque en `localStorage`: esas páginas **no llaman
-a la API**. Esto es intencional y se explica así en los videos, para no
-destruir el entregable anterior.
+Los catálogos iniciales de `app/data/simul_data.py` se entregan a la plantilla
+para dibujar controles y listas de apoyo, pero **las acciones demostradas pasan
+por `app/static/js/api.js`**: inicio de sesión, bandeja, decisiones y búsqueda
+consultan `/api/museo` y leen o escriben en MySQL. El token se conserva en el
+navegador solo para identificarse en las siguientes peticiones; ninguno de los
+tres flujos depende solo del navegador.
 
 La migración de Flask a FastAPI fue una decisión deliberada del tercer corte:
 el enunciado menciona Flask en algunos criterios, pero el código runtime no

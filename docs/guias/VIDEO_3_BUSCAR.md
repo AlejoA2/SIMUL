@@ -13,9 +13,11 @@ Tener abiertos estos archivos en el editor, exactamente en estas líneas:
 
 | Archivo | Líneas | Qué vas a señalar |
 |---|---|---|
-| `app/templates/pages/buscar.html` | `11`, `50-63`, `146-152`, `190-193`, `216-218` | datos, campo, contador, resultados y botón de limpiar |
-| `app/static/js/pages/buscar.js` | `18`, `29`, `36` | datos cargados, campo y botón |
-| `app/static/js/pages/buscar.js` | `43-47`, `49-77` | solo publicados y comparación de filtros |
+| `app/templates/pages/buscar.html` | `11`, `50-63`, `146-152`, `190-193`, `216-218` | datos de apoyo, campo, contador, resultados y botón de limpiar |
+| `app/static/js/pages/buscar.js` | `41-54` | respuesta de la API convertida en tarjeta |
+| `app/static/js/pages/buscar.js` | `56-69`, `92-120` | filtros enviados y consulta a la API |
+| `app/static/js/pages/buscar.js` | `71-86` | pintado de la lista y del contador |
+| `app/static/js/api.js` | `50-92`, `133-145` | petición HTTP y armado de la consulta |
 | `app/routes/web_routes.py` | `90-108` | vista HTML del buscador |
 | `app/routes/contenido_routes.py` | `35-86` | entrada de la consulta y filtros |
 | `app/routes/contenido_routes.py` | `150-156` | detalle público con sesión opcional |
@@ -33,7 +35,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [0:00] Acuerdo previo — 1:00
 
-> "Me voy a la pantalla de inicio antes de empezar: es la entrega del corte 2 y guarda datos en el navegador. El corte 3 ofrece la misma acción como servicio, probado en Swagger contra MySQL. El buscador de la pantalla no llama al servicio; lo dejamos así para conservar lo anterior, pero la acción existe completa y consulta la base. Arrancamos en Flask y pasamos a FastAPI, que genera la documentación solo. Los tres diremos lo mismo."
+> "Me voy a la pantalla de inicio antes de empezar: es la entrega del corte 2. La sesión se guarda en el navegador, pero las acciones ya están conectadas: el botón llama a la API, la API guarda en MySQL y la misma operación se prueba en Swagger. Arrancamos en Flask y pasamos a FastAPI, que genera la documentación solo. Los tres diremos lo mismo."
 
 ### [1:00] Presentación — 0:15
 
@@ -41,23 +43,23 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [1:15] Capa visual — 1:00
 
-> "Me voy al editor, a `app/templates/pages/buscar.html`, línea 11, donde se entregan los datos; líneas 50 a 63 para el campo, 146 a 152 para el contador, 190 a 193 para los resultados y 216 a 218 para el botón de limpiar. Abro `app/static/js/pages/buscar.js`, línea 18, y las líneas 29 y 36; entre 43 y 47 se toma solo lo publicado y entre 49 y 77 se compara texto, categoría y año, incluso «Antes de 2019». Escribo en el campo y ves cómo cambia la lista. No hay llamada al servidor: es almacenamiento local del navegador, parte visual del corte 2."
+> "Me voy al editor, a `app/templates/pages/buscar.html`, línea 11 y líneas 50 a 63: ahí están las listas de apoyo y el campo. Sigo en 146 a 152, 190 a 193 y 216 a 218 para el contador, la cuadrícula y el botón de limpiar. Abro `app/static/js/pages/buscar.js`, líneas 41 a 54: cada fila se convierte en tarjeta con título, año, imagen y autor; entre 56 y 69 se arman los filtros y entre 92 y 120 se consulta la API. Escribo una palabra y la lista cambia con lo que devolvió MySQL. Me voy a `app/static/js/api.js`, 133 a 145, para ver la dirección armada."
 
 ### [2:15] De la pantalla al servidor — 0:45
 
-> "Me voy a `app/routes/contenido_routes.py`, líneas 35 a 86: entra `GET /api/museo/contenido/`, que es público. Swagger muestra los filtros: texto, categoría, tipo, año entre **1900 y 2100**, página desde 1 y tamaño entre 1 y 100. Si mando `anio=1800`, aparece **422**. En `app/controllers/contenido_controller.py`, 20 a 36, los valores vacíos pasan a página 1 y 12 elementos. No hace falta iniciar sesión."
+> "Me voy a `app/routes/contenido_routes.py`, líneas 35 a 86: entra `GET /api/museo/contenido/`, que es público. Swagger muestra los filtros: texto, categoría, tipo, año entre **1900 y 2100**, página desde 1 y tamaño entre 1 y 100. Si mando `anio=1800`, aparece **422** con el nombre del campo. En `app/controllers/contenido_controller.py`, 20 a 36, los valores vacíos pasan a página 1 y 12 elementos. La vista HTML está en `app/routes/web_routes.py`, 90 a 108: solo prepara la página."
 
 ### [3:00] Servicio, consulta y base — 1:30
 
-> "Me voy a `app/services/contenido_service.py`, líneas 74 a 103, y después a `app/repositories/contenido_repository.py`, líneas 12 a 28, 65 a 104 y 369 a 448. El servicio pide la página; la parte que consulta toma solo lo publicado, aplica filtros, cuenta el total, ordena por fecha y devuelve el bloque correspondiente. Las páginas se calculan con el total entre el tamaño, redondeado hacia arriba. El texto compara sin importar mayúsculas; el año vive en tablas aparte, por eso se usa una lista de identificadores y no se juntan tablas, para no duplicar filas. En `app/models/types.py`, 6 a 28, el año se guarda como YEAR en MySQL."
+> "Me voy a `app/services/contenido_service.py`, líneas 74 a 103, y a `app/repositories/contenido_repository.py`, 12 a 28, 65 a 104 y 369 a 448. El servicio pide la página; la consulta toma solo lo publicado, aplica filtros, cuenta el total, ordena por fecha y devuelve ese bloque. El texto compara sin importar mayúsculas. El año vive en tablas aparte, por eso se usa una lista de identificadores y no se juntan tablas, para no duplicar filas; en `app/models/types.py`, 6 a 28, se guarda como YEAR. «Antes de 2019» se filtra después, porque no es un año exacto."
 
 ### [4:30] Respuesta — 0:45
 
-> "Me voy a Swagger y ejecuto con `q=museo&anio=2024`: aparece **200** con `items`, `page`, `pages` y `total`. Cada elemento trae los campos del prototipo —tipo, título, categoría, año, imagen y autor—: ahí está la coherencia con el corte 2. La app confirma o deshace al terminar la petición."
+> "Me voy a Swagger y ejecuto con `q=museo&anio=2024`: aparece **200** con `items`, `page`, `pages` y `total`. Cada elemento trae tipo, título, categoría, año, imagen y autor: ahí está la coherencia con el corte 2. Vuelvo a `buscar.js`, líneas 71 a 86: con esos campos se pinta la cuadrícula y el contador. Si falla la consulta, aparece un aviso y la lista queda vacía."
 
 ### [5:15] Persistencia — 1:00
 
-> "Me voy a DBeaver y compruebo que las filas tengan `estado='publicado'` y que los índices del DDL estén sobre esas columnas. En `db/DDL.sql`, líneas 451 a 464, muestro la vista del ranking, una consulta guardada con puntos y nivel. Las dos vistas de la base están al final del archivo."
+> "Me voy a DBeaver y compruebo que las filas tengan `estado='publicado'` y que los índices del DDL estén sobre esas columnas, en `db/DDL.sql`, líneas 108 a 109. La búsqueda no escribe nada: solo lee lo que quedó guardado cuando el contenido se publicó. En líneas 451 a 464 muestro la vista del ranking, una consulta guardada con puntos y nivel. Las dos vistas de la base están al final del archivo."
 
 ### [6:15] Arquitectura y base de datos — 1:00
 
@@ -69,7 +71,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [8:15] Seguridad — 0:30
 
-> "Me voy a `app/utils/roles.py`, línea 191: ahí está la comprobación de sesión para rutas privadas. En `app/routes/contenido_routes.py`, 150 a 156, el detalle permite entrar sin sesión; si viene una, solo añade el dato de favorito. La huella con valor aleatorio está en `app/utils/security.py`, 23 a 46 y 49 a 85, y los datos devueltos no incluyen la contraseña."
+> "Me voy a `app/utils/roles.py`, línea 191: ahí se comprueba la sesión en rutas privadas. En `app/routes/contenido_routes.py`, 150 a 156, el detalle entra sin sesión; si viene una, solo añade el favorito. La huella con valor aleatorio está en `app/utils/security.py`, 23 a 46 y 49 a 85, y los datos devueltos no incluyen la contraseña. El buscador es público; el ingreso guarda el token para lo privado."
 
 ### [8:45] Pruebas, Docker y coherencia — 0:45
 
@@ -99,5 +101,5 @@ ORDER BY contenido.fec_crea DESC LIMIT 12, 12;
 
 **Preguntas propias de este botón:** ¿por qué una lista y no juntar tablas? →
 evita duplicados. ¿Cómo se calculan las páginas? → total entre tamaño, hacia arriba.
-¿`anio=1800`? → 422 por el rango permitido. ¿Por qué no hay llamada al servidor en
-la web? → es el prototipo del corte 2; cambiar eso sería lo único a tocar.
+¿`anio=1800`? → 422 por el rango permitido. ¿La lista sale del navegador? → no:
+sale de MySQL por `/api/museo/contenido`; el navegador solo pinta la respuesta.

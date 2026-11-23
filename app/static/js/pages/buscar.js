@@ -1,12 +1,9 @@
 /* ==========================================================
    BUSCAR - Filtros y resultados
 
-   Reproduce el buscador del prototipo: texto libre, categoría
-   y año. El filtrado ocurre aquí en el navegador sobre el
-   catálogo que entrega la vista (RF-EXP-02).
-
-   La API REST ya expone GET /api/museo/contenido con query
-   params; aquí el filtrado se hace en el navegador.
+   El catálogo se consulta en GET /api/museo/contenido. Los
+   filtros de texto, categoría y año se envían a la API; el
+   resultado que llega se convierte a tarjeta y se pinta.
    ========================================================== */
 
 (function () {
@@ -15,10 +12,8 @@
   const $  = SIMUL.$;
   const $$ = SIMUL.$$;
 
-  const CATALOGO    = window.SIMUL_CONTENT || [];
   const SLUG_MAP    = window.SIMUL_CATEGORY_SLUG || {};
   const CATEGORIAS  = window.SIMUL_CATEGORIES || [];
-  const ANIOS       = window.SIMUL_YEARS || [];
 
   const estado = {
     texto: window.SIMUL_INITIAL_QUERY || '',
@@ -35,77 +30,95 @@
   const selectAnio = $('#search-year-mobile');
   const botonLimpiar = $('#search-clear');
 
+  let filasAPI = [];
+  let totalAPI = 0;
+  let ultimaConsulta = 0;
+
   /* ----------------------------------------------------------
-     FILTRADO
+     DATOS DE LA API → TARJETA
      ---------------------------------------------------------- */
 
-  /** Solo se muestra lo publicado en el museo. */
-  function publicados() {
-    return Store.getContent().filter(function (item) {
-      return item.status === 'publicado';
-    });
+  function aTarjeta(item) {
+    return {
+      id: item.id_contenido,
+      title: item.titulo,
+      year: item.anio,
+      category: item.categoria,
+      categoryTag: 'tag-blue',
+      description: item.descripcion,
+      image: item.imagen,
+      author: (item.autor && item.autor.nombre) || 'Autor del museo',
+      tags: item.tipo ? [item.tipo] : [],
+      status: 'publicado'
+    };
   }
 
-  function coincide(item) {
-    /* Texto libre: título o etiquetas. */
-    if (estado.texto) {
-      const texto = estado.texto.toLowerCase();
+  function parametros() {
+    const params = { per_page: 100 };
 
-      const enTitulo = item.title.toLowerCase().indexOf(texto) !== -1;
-      const enEtiquetas = (item.tags || []).some(function (tag) {
-        return tag.toLowerCase().indexOf(texto) !== -1;
-      });
+    if (estado.texto) params.q = estado.texto;
+    if (estado.categoria !== 'Todos') params.categoria = estado.categoria;
 
-      if (!enTitulo && !enEtiquetas) return false;
+    /* «Antes de 2019» no es un año exacto: se pide todo y se
+       filtra abajo. Para los demás años la API filtra. */
+    if (estado.anio !== 'Todos' && estado.anio !== 'Antes de 2019') {
+      params.anio = estado.anio;
     }
 
-    /* Categoría */
-    if (estado.categoria !== 'Todos' && item.category !== estado.categoria) {
-      return false;
-    }
-
-    /* Año: "Antes de 2019" agrupa todo lo anterior. */
-    if (estado.anio !== 'Todos') {
-      if (estado.anio === 'Antes de 2019') {
-        if (item.year >= 2019) return false;
-      } else if (String(item.year) !== estado.anio) {
-        return false;
-      }
-    }
-
-    return true;
+    return params;
   }
 
-  function pintar() {
-    const resultados = publicados().filter(coincide);
+  function pintar(filas) {
+    filasAPI = filas || [];
+    totalAPI = filasAPI.length;
 
-    grid.innerHTML = resultados
-      .map(SIMUL.contentCardHtml)
-      .join('');
+    grid.innerHTML = filasAPI.map(SIMUL.contentCardHtml).join('');
 
-    grid.classList.toggle('hidden', resultados.length === 0);
-    vacio.classList.toggle('hidden', resultados.length !== 0);
-    vacio.classList.toggle('flex', resultados.length === 0);
+    grid.classList.toggle('hidden', filasAPI.length === 0);
+    vacio.classList.toggle('hidden', filasAPI.length !== 0);
+    vacio.classList.toggle('flex', filasAPI.length === 0);
 
-    contador.textContent = resultados.length === 0
+    contador.textContent = totalAPI === 0
       ? 'Sin resultados'
-      : resultados.length + (resultados.length === 1
+      : totalAPI + (totalAPI === 1
           ? ' resultado encontrado'
           : ' resultados encontrados');
   }
 
-  /** El prototipo muestra un esqueleto ~250 ms antes de pintar. */
+  /* ----------------------------------------------------------
+     BÚSQUEDA CONTRA LA API
+     ---------------------------------------------------------- */
+
   function buscar() {
+    const numero = ++ultimaConsulta;
+
     skeleton.classList.remove('hidden');
     grid.classList.add('hidden');
     vacio.classList.add('hidden');
 
-    window.clearTimeout(buscar.timer);
+    SIMULApi.contenido(parametros())
+      .then(function (respuesta) {
+        if (numero !== ultimaConsulta) return;
 
-    buscar.timer = window.setTimeout(function () {
-      skeleton.classList.add('hidden');
-      pintar();
-    }, 250);
+        const items = (respuesta && respuesta.items) || [];
+        let filas = items.map(aTarjeta);
+
+        if (estado.anio === 'Antes de 2019') {
+          filas = filas.filter(function (item) {
+            return Number(item.year) < 2019;
+          });
+        }
+
+        pintar(filas);
+      })
+      .catch(function (error) {
+        if (numero !== ultimaConsulta) return;
+        pintar([]);
+        SIMUL.toast(error.message || 'No se pudo consultar el catálogo', 'error');
+      })
+      .then(function () {
+        if (numero === ultimaConsulta) skeleton.classList.add('hidden');
+      });
   }
 
   /* ----------------------------------------------------------
@@ -162,8 +175,7 @@
       if (input) input.value = q;
     }
 
-    /* El prototipo no distingue mayúsculas de los nombres de
-       categoría; aquí se comparan sin tildes ni mayúsculas. */
+    /* El prototipo no distinguía mayúsculas ni tildes. */
     const normalizado = estado.categoria.toLowerCase().replace('í', 'i');
     const categoria = CATEGORIAS.find(function (c) {
       return c.toLowerCase().replace('í', 'i') === normalizado;

@@ -23,13 +23,7 @@ Si Docker no está arriba, Swagger da *Connection refused*.
 
 ## 2. Acuerdo previo — lo dicen los TRES, idéntico (0:00 – 1:00)
 
-> "Aclaración antes de empezar: la interfaz HTML es la entrega del **corte 2** y
-> persiste en `localStorage`; el backend del **corte 3** expone esa misma operación
-> como API REST y la demostramos en **Swagger contra MySQL**. El botón
-> visual no llama a la API —lo dejamos así para conservar el entregable anterior—,
-> pero la operación sí está implementada capa por capa y persiste. Arrancamos en
-> Flask en el corte 2 y migramos a **FastAPI**, que da Swagger automático y
-> validación con Pydantic. Los tres diremos lo mismo."
+> "Me voy a la pantalla de inicio antes de empezar: es la entrega del corte 2. La sesión se guarda en el navegador, pero las acciones ya están conectadas: el botón llama a la API, la API guarda en MySQL y la misma operación se prueba en Swagger. Arrancamos en Flask y pasamos a FastAPI, que genera la documentación solo. Los tres diremos lo mismo."
 
 ## 3. Archivos y líneas que TODOS deben tener listos
 
@@ -47,7 +41,8 @@ Tenerlos abiertos en el editor (o al menos poder ir a ellos rápido). Son el
 | `app/utils/response.py` | `14-33` | `success()` → sobre `{success, message, data}` |
 | `app/utils/response.py` | `34-...` | `error()` → sobre de error |
 | `app/utils/roles.py` | `191`, `195` | `requiere_usuario` y `usuario_opcional` |
-| `app/utils/security.py` | `23-46`, `49-85` | PBKDF2 + `verify_password`, sin `werkzeug` |
+| `app/utils/security.py` | `23-46`, `49-85` | huella de contraseña con valor aleatorio y comparación segura |
+| `app/static/js/api.js` | `19-33`, `50-92`, `94-145` | token, petición HTTP y llamadas desde la interfaz |
 | `db/DDL.sql` | `94-118` | tabla `contenido` (ENUM, índices `idx_contenido_estado/tipo`) |
 | `db/DDL.sql` | `355-370` | tabla `notificacion`, índice compuesto `idx_notif_usuario_leida` |
 | `db/DDL.sql` | `375-389` | tabla `validacion_log` |
@@ -74,5 +69,7 @@ movete al editor, a Swagger, a DBeaver o a la terminal y mostrás eso mismo.
 
 - [ ] Docker `up` y `/docs` responde.
 - [ ] DBeaver conectado a `127.0.0.1:3307`.
+- [ ] Ingreso desde `/login` con el admin de demo y token guardado en el navegador.
+- [ ] La pantalla correspondiente carga datos desde `/api/museo` (sin errores en consola).
 - [ ] Editor con los archivos de la tabla 3 **y los de tu video**.
 - [ ] Acuerdo previo memorizado (lo dicen los tres igual).

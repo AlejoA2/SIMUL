@@ -1,14 +1,9 @@
 /* ==========================================================
-   BANNERJA DE VALIDACIÓN (ADMIN)  (RF-VAL-01 / RF-VAL-03)
+   BANDEJA DE VALIDACIÓN (ADMIN)  (RF-VAL-01 / RF-VAL-03)
 
-   Cola única para los siete tipos de contenido: un proyecto, un
-   premio, una persona para el Hall de la Fama o un aviso
-   institucional llegan todos al mismo sitio, que es el punto
-   fuerte del modelo de `CONTENIDO` como supertipo.
-
-   Aprobar marca la pieza como publicada y la añade al catálogo.
-   Rechazar exige escribir observaciones: son las que el autor
-   lee después en "Mis aportes" (RNF-SEG-04).
+   La cola se carga desde GET /api/museo/validacion/bandeja.
+   Aprobar y rechazar llaman a la API: el cambio se guarda en
+   MySQL y la pantalla se vuelve a consultar para refrescarse.
    ========================================================== */
 
 (function () {
@@ -32,50 +27,48 @@
   };
 
   let filtro = 'Todos';
+  let colaRemota = [];
+  let ocupado = false;
 
   /* ----------------------------------------------------------
      1. PINTADO DE LA COLA
 
-     La bandeja es la unión de dos fuentes:
-       1. la cola sembrada (`simul.queue`): propuestas que
-          nunca han pasado por validación.
-       2. el catálogo (`simul.content`) con estado "pendiente":
-          por ejemplo un contenido que el admin despublicó
-          desde "Gestionar contenido" y que vuelve a revisión.
-
-     Si ambas fuentes hablan de la misma pieza solo se pinta
-     una vez.
+     La fuente es la API. Cada fila que devuelve la consulta se
+     convierte al formato que espera la tarjeta de la bandeja.
      ---------------------------------------------------------- */
 
-  /** Ficha del catálogo → formato de tarjeta de la bandeja. */
-  function aCola(item) {
+  /** Fila de la API → tarjeta de la bandeja. */
+  function aBandeja(item) {
     return {
-      id: item.id,
-      type: item.category,
-      date: String(item.year || ''),
-      title: item.title,
-      author: item.author,
-      description: item.description,
-      image: item.image,
-      tags: item.tags || [],
-      documents: item.documents || []
+      id: item.id_contenido,
+      type: item.categoria || item.tipo || 'Contenido',
+      date: String(item.fec_crea || '').slice(0, 10),
+      title: item.titulo,
+      author: item.autor || 'Autor del museo',
+      description: item.descripcion || '',
+      image: item.imagen || '',
+      tags: item.tipo ? [item.tipo] : [],
+      documents: []
     };
   }
 
-  function todos() {
-    const enCola = Store.getQueue();
-
-    const pendientesDelCatalogo = Store.getContent()
-      .filter(function (item) {
-        if (item.status !== 'pendiente') return false;
-
-        return !enCola.some(function (q) {
-          return String(q.id) === String(item.id);
-        });
+  function cargarBandeja() {
+    return SIMULApi.bandeja()
+      .then(function (filas) {
+        colaRemota = (filas || []).map(aBandeja);
+        pintar();
+        return colaRemota;
       })
-      .map(aCola);
+      .catch(function (error) {
+        colaRemota = [];
+        pintar();
+        SIMUL.toast(error.message || 'No se pudo cargar la bandeja', 'error');
+        return colaRemota;
+      });
+  }
 
-    return enCola.concat(pendientesDelCatalogo);
+  function todos() {
+    return colaRemota;
   }
 
   function cola() {
@@ -201,47 +194,32 @@
      2. APROBAR  (RF-VAL-04)
      ---------------------------------------------------------- */
 
-  function aprobar(id) {
-    const item = todos().find(function (i) {
-      return String(i.id) === String(id);
-    });
-    if (!item) return;
+  function aprobar(id, boton) {
+    if (ocupado) return;
+    ocupado = true;
+    if (boton) boton.disabled = true;
 
-    /* Si la pieza ya vive en el catálogo (fue despublicada y
-       volvió a la bandeja) se actualiza in situ; si llega
-       directa de la cola sin ficha se crea con prefijo "pub-"
-       para no chocar con los id del catálogo. */
-    const existente = Store.findContent(item.id);
+    function terminar() {
+      ocupado = false;
+      if (boton) boton.disabled = false;
+    }
 
-    /* La pieza entra al catálogo ya como publicada. */
-    Store.upsertContent({
-      id: existente ? String(item.id) : 'pub-' + item.id,
-      title: item.title,
-      year: Number(String(item.date).slice(0, 4)) || new Date().getFullYear(),
-      category: item.type,
-      categoryTag: 'tag-blue',
-      description: item.description,
-      image: item.image,
-      author: item.author,
-      tags: item.tags || [],
-      status: 'publicado',
-      participants: [item.author],
-      technologies: [],
-      documents: item.documents || [],
-      observations: ''
-    });
-
-    Store.dropFromQueue(id);
-    pintar();
-
-    SIMUL.toast('Contenido aprobado y publicado', 'success');
-
-    /* La pantalla de publicación resume las acciones que se
-       dispararon al aprobar (línea del tiempo, notificaciones,
-       índice de búsqueda, puntos al autor). */
-    window.setTimeout(function () {
-      window.location.href = '/admin/publicacion';
-    }, 900);
+    /* La API hace todo en una sola operación: publica, guarda
+       la decisión, avisa al autor y suma puntos. */
+    SIMULApi.aprobar(id)
+      .then(function () {
+        SIMUL.toast('Contenido aprobado y guardado en la base', 'success');
+        return cargarBandeja();
+      })
+      .then(function () {
+        window.setTimeout(function () {
+          window.location.href = '/admin/publicacion';
+        }, 900);
+      })
+      .catch(function (error) {
+        SIMUL.toast(error.message || 'No se pudo aprobar', 'error');
+      })
+      .then(terminar, terminar);
   }
 
   /* ----------------------------------------------------------
@@ -270,7 +248,7 @@
       'style="font-family:\'Inter\',sans-serif"></textarea>' +
 
       '<p id="reject-error" class="hidden text-xs text-red-600 mt-1.5">' +
-        'Escribe el motivo del rechazo: es obligatorio (RNF-SEG-04).' +
+        'Escribe al menos 5 caracteres: el motivo es obligatorio.' +
       '</p>' +
 
       '<div class="flex justify-end gap-3 mt-6">' +
@@ -298,38 +276,35 @@
       const motivo = modal.querySelector('#reject-reason').value.trim();
       const error  = modal.querySelector('#reject-error');
 
-      if (!motivo) {
+      if (motivo.length < 5) {
         error.classList.remove('hidden');
         return;
       }
 
-      /* El motivo queda en la pieza para que el autor lo lea.
-         Si la ficha ya existía en el catálogo se actualiza en
-         lugar de duplicarla. */
-      Store.upsertContent({
-        id: Store.findContent(item.id)
-          ? String(item.id)
-          : 'rech-' + item.id,
-        title: item.title,
-        year: Number(String(item.date).slice(0, 4)) || new Date().getFullYear(),
-        category: item.type,
-        categoryTag: 'tag-blue',
-        description: item.description,
-        image: item.image,
-        author: item.author,
-        tags: item.tags || [],
-        status: 'rechazado',
-        participants: [item.author],
-        technologies: [],
-        documents: item.documents || [],
-        observations: motivo
-      });
+      if (ocupado) return;
+      ocupado = true;
+      confirmar.disabled = true;
 
-      Store.dropFromQueue(id);
-      SIMUL.closeModal();
-      pintar();
-
-      SIMUL.toast('Contenido rechazado con observaciones', 'info');
+      /* El motivo viaja a la API: allí se valida y se guarda en
+         la decisión y en el aviso al autor. */
+      SIMULApi.rechazar(id, motivo)
+        .then(function () {
+          SIMUL.closeModal();
+          SIMUL.toast('Rechazo guardado en la base', 'info');
+          return cargarBandeja();
+        })
+        .catch(function (fallo) {
+          error.textContent = fallo.message || 'No se pudo rechazar';
+          error.classList.remove('hidden');
+          SIMUL.toast(fallo.message || 'No se pudo rechazar', 'error');
+        })
+        .then(function () {
+          ocupado = false;
+          confirmar.disabled = false;
+        }, function () {
+          ocupado = false;
+          confirmar.disabled = false;
+        });
     });
   }
 
@@ -358,8 +333,7 @@
   document.addEventListener('simul:ready', function () {
     if (!SIMUL.guardPage('admin')) return;
 
-    Store.initQueue(window.SIMUL_QUEUE || []);
-    pintar();
+    cargarBandeja();
 
     if (FILTROS) {
       FILTROS.addEventListener('click', function (event) {
@@ -377,7 +351,7 @@
       const detalleBoton = event.target.closest('[data-preview]');
 
       if (aprobarBoton) {
-        aprobar(aprobarBoton.getAttribute('data-approve'));
+        aprobar(aprobarBoton.getAttribute('data-approve'), aprobarBoton);
       } else if (rechazarBoton) {
         rechazar(rechazarBoton.getAttribute('data-reject'));
       } else if (detalleBoton) {

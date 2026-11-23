@@ -1,14 +1,10 @@
 /* ==========================================================
    INICIAR SESIÓN  (RF-USR-01)
 
-   El prototipo dejaba elegir rol y contraseña fija. Aquí se
-   mantiene ese comportamiento, pero con las validaciones
-   reales del formulario (correo válido, contraseña no vacía).
-
-   La API REST ya expone el inicio de sesión en
-   POST /api/museo/auth/login (ver Swagger en /docs). Para
-   el alcance de este corte la vista sigue resolviendo los
-   perfiles de demostración con Store/localStorage.
+   El formulario valida correo y contraseña y después llama a
+   POST /api/museo/auth/login. El token que devuelve se guarda
+   para que las pantallas puedan ejecutar acciones contra la
+   API con la sesión del usuario.
    ========================================================== */
 
 (function () {
@@ -20,7 +16,15 @@
   });
 
   const EMAILS = window.SIMUL_ROLE_EMAILS || {};
-  const PASSWORD_DEMO = window.SIMUL_DEMO_PASSWORD;
+
+  /* La API devuelve estudiante/docente/admin; la interfaz usa
+     student/teacher/admin desde el corte 2. */
+  const ROLES_API = {
+    estudiante: 'student',
+    docente: 'teacher',
+    admin: 'admin',
+    egresado: 'student'
+  };
 
   const formulario = $('#login-form');
   const inputEmail = $('#login-email');
@@ -115,38 +119,37 @@
 
     if (!validar()) return;
 
-    /* Verificación de credenciales contra los perfiles de
-       demostración. Sin base de datos, la contraseña correcta
-       es la misma para los tres roles. */
     const correo = inputEmail.value.trim();
     const clave  = inputPassword.value;
-
-    const correoEsperado = EMAILS[rolSeleccionado];
-
-    if (correo.toLowerCase() !== String(correoEsperado).toLowerCase()) {
-      mostrarErrorGeneral(
-        'Ese correo no corresponde al rol seleccionado. Revisa el rol o usa el correo de demostración.'
-      );
-      return;
-    }
-
-    if (clave !== PASSWORD_DEMO) {
-      mostrarErrorGeneral(
-        'Contraseña incorrecta. En modo demostración la contraseña es ' +
-        PASSWORD_DEMO + '.'
-      );
-      return;
-    }
 
     mostrarCarga(true);
     ocultarErrorGeneral();
 
-    /* El retardo imita la latencia de una petición real para
-       que la transición de estados sea visible. */
-    window.setTimeout(function () {
-      Store.login(rolSeleccionado);
-      window.location.href = Store.dashboardPath(rolSeleccionado);
-    }, 600);
+    SIMULApi.login(correo, clave)
+      .then(function (datos) {
+        const usuario = datos.user || {};
+        const rol = ROLES_API[usuario.rol] || rolSeleccionado;
+
+        /* Guardamos el token y reflejamos los datos reales del
+           usuario (nombre, puntos y nivel vienen de MySQL). */
+        Store.login(rol);
+        Store.updateUser({
+          name: usuario.nombre,
+          email: usuario.correo,
+          avatar: usuario.foto || (EMAILS[rol] && Store.roleUsers()[rol]
+            ? Store.roleUsers()[rol].avatar : ''),
+          points: usuario.puntos_total || 0,
+          level: (usuario.nivel && usuario.nivel.numero) || 1,
+          description: usuario.biografia || '',
+          badges: (Store.roleUsers()[rol] || {}).badges || []
+        });
+
+        window.location.href = Store.dashboardPath(rol);
+      })
+      .catch(function (error) {
+        mostrarErrorGeneral(error.message || 'No se pudo iniciar sesión');
+        mostrarCarga(false);
+      });
   }
 
   /* ----------------------------------------------------------

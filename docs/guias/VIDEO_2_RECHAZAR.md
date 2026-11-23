@@ -14,10 +14,12 @@ Tener abiertos estos archivos en el editor, exactamente en estas líneas:
 | Archivo | Líneas | Qué vas a señalar |
 |---|---|---|
 | `app/templates/pages/admin_validacion.html` | `8`, `50-60`, `94` | datos de la cola, contador y lista |
-| `app/static/js/pages/admin_validacion.js` | `167-170` | botón creado con `data-reject` |
-| `app/static/js/pages/admin_validacion.js` | `251-282` | ventana para escribir el motivo |
-| `app/static/js/pages/admin_validacion.js` | `284-334` | acción al confirmar |
-| `app/static/js/pages/admin_validacion.js` | `374-377`, `381-382` | captura del clic |
+| `app/static/js/pages/login.js` | `117-150` | inicio de sesión contra la API y guardado del token |
+| `app/static/js/api.js` | `50-92`, `123-131` | petición HTTP y llamada de rechazo con el motivo |
+| `app/static/js/pages/admin_validacion.js` | `160-163` | botón creado con `data-reject` |
+| `app/static/js/pages/admin_validacion.js` | `229-260` | ventana para escribir el motivo |
+| `app/static/js/pages/admin_validacion.js` | `262-309` | acción al confirmar |
+| `app/static/js/pages/admin_validacion.js` | `347-356` | captura del clic |
 | `app/schemas/contenido_schema.py` | `170-182` | motivo obligatorio de 5 a 1000 caracteres |
 | `app/routes/validacion_routes.py` | `71-91` | entrada de la operación |
 | `app/routes/validacion_routes.py` | `98-108` | consulta del historial |
@@ -37,7 +39,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [0:00] Acuerdo previo — 1:00
 
-> "Me voy a la pantalla de inicio antes de empezar: es la entrega del corte 2 y guarda datos en el navegador. El corte 3 ofrece la misma acción como servicio, probado en Swagger contra MySQL. El botón visual no llama al servicio; lo dejamos así para conservar lo anterior, pero la acción existe completa y guarda en la base. Arrancamos en Flask y pasamos a FastAPI, que genera la documentación solo. Los tres diremos lo mismo."
+> "Me voy a la pantalla de inicio antes de empezar: es la entrega del corte 2. La sesión se guarda en el navegador, pero las acciones ya están conectadas: el botón llama a la API, la API guarda en MySQL y la misma operación se prueba en Swagger. Arrancamos en Flask y pasamos a FastAPI, que genera la documentación solo. Los tres diremos lo mismo."
 
 ### [1:00] Presentación — 0:15
 
@@ -45,7 +47,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [1:15] Capa visual — 1:00
 
-> "Me voy al editor, a `app/templates/pages/admin_validacion.html`, líneas 50 a 60 y 94, para ver el contador y la lista. Abro `app/static/js/pages/admin_validacion.js`, líneas 167 a 170: el botón se crea con un marcador llamado `data-reject`. Entre 251 y 282 está la ventana para escribir el motivo y entre 284 y 334 la acción al confirmar. Hago clic y dejo el motivo vacío para que aparezca el aviso rojo. La pantalla solo revisa que no esté vacío; el tamaño mínimo lo pide el servidor. Es almacenamiento local del navegador, parte visual del corte 2."
+> "Me voy al editor, a `app/templates/pages/admin_validacion.html`, líneas 50 a 60 y 94, para ver el contador y la lista. Abro `app/static/js/pages/admin_validacion.js`, líneas 160 a 163: el botón se crea con `data-reject`. Entre 229 y 260 está la ventana para escribir el motivo y entre 262 y 309 la acción al confirmar. Hago clic y dejo el motivo vacío para que aparezca el aviso rojo. La pantalla pide al menos cinco caracteres y la API vuelve a exigirlos. Me voy a `app/static/js/api.js`, líneas 123 a 131: el motivo viaja en la petición y la bandeja se refresca con lo que hay en MySQL."
 
 ### [2:15] De la pantalla al servidor — 0:30
 
@@ -73,7 +75,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [8:15] Seguridad — 0:30
 
-> "Me voy a `app/utils/roles.py`, línea 191: ahí está la comprobación de sesión. En `app/models/usuario.py`, 136 a 139, se lee el rol; en `app/schemas/simul_auth_schema.py`, 91 a 112, los datos devueltos no incluyen la contraseña. La huella con valor aleatorio está en `app/utils/security.py`, 23 a 46 y 49 a 85."
+> "Me voy a `app/static/js/pages/login.js`, líneas 117 a 150: la página pide el token y lo guarda para las siguientes peticiones. En `app/utils/roles.py`, línea 191, está la comprobación de sesión. En `app/models/usuario.py`, 136 a 139, se lee el rol; en `app/schemas/simul_auth_schema.py`, 91 a 112, los datos devueltos no incluyen la contraseña. La huella con valor aleatorio está en `app/utils/security.py`, 23 a 46 y 49 a 85."
 
 ### [8:45] Pruebas, Docker y coherencia — 0:45
 

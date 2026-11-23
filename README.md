@@ -108,9 +108,9 @@ app/
 ├── controllers/       # reciben la petición y llaman a los services
 ├── routes/            # APIRouters: rutas REST + vistas HTML
 ├── utils/             # JWT/roles, respuesta estándar, hashing, url_for
-├── data/              # datos mock del frontend (segundo corte)
+├── data/              # catálogos iniciales para las plantillas (corte 2)
 ├── templates/         # 21 vistas Jinja2 del museo
-└── static/            # CSS, JS e imágenes
+└── static/            # CSS, JS e imágenes; js/api.js habla con /api/museo
 
 db/
 ├── DDL.sql            # script MySQL: 25 tablas + 2 vistas (diseño E-R)

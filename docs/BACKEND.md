@@ -179,9 +179,9 @@ app/
 │   ├── roles.py           # JWT + dependencias de auth
 │   ├── response.py        # sobre {success, message, data}
 │   └── templados.py       # url_for y render de plantillas
-├── data/                  # datos mock del frontend (corte 2)
+├── data/                  # catálogos iniciales para las plantillas (corte 2)
 ├── templates/             # 21 vistas Jinja2
-└── static/                # CSS/JS/imágenes
+└── static/                # CSS/JS/imágenes; js/api.js es el cliente de /api/museo
 db/
 ├── DDL.sql                # 25 tablas + 2 vistas (MySQL)
 └── seed.py                # datos de demostración

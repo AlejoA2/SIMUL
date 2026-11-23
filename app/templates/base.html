@@ -118,7 +118,8 @@
     {# =====================================================
          JAVASCRIPT
 
-         store.js  → estado en localStorage
+         store.js  → estado local de la interfaz
+         api.js    → cliente HTTP hacia /api/museo
          app.js    → navbar, toasts, modales, guardas
 
          Cada bloque `page_script` recibe sus datos como JSON
@@ -126,6 +127,7 @@
     ====================================================== #}
 
     <script src="{{ url_for('static', filename='js/store.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 
     {% block page_scripts %}{% endblock %}
