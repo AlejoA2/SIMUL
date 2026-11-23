@@ -103,11 +103,13 @@ servidor y al cliente solo llega un `500` genérico.
 
 Las **21 vistas Jinja2** y su CSS/JS siguen en `app/templates` y `app/static`.
 Los catálogos iniciales de `app/data/simul_data.py` se entregan a la plantilla
-para dibujar controles y listas de apoyo, pero **las acciones demostradas pasan
-por `app/static/js/api.js`**: inicio de sesión, bandeja, decisiones y búsqueda
+para dibujar controles y listas de apoyo, pero **todas las acciones de la
+interfaz pasan por `app/static/js/api.js`**: inicio de sesión, registro,
+bandeja, decisiones, búsqueda, contenido, favoritos, reacciones, comentarios,
+aportes, evidencias, usuarios, publicación, indicadores y gamificación
 consultan `/api/museo` y leen o escriben en MySQL. El token se conserva en el
-navegador solo para identificarse en las siguientes peticiones; ninguno de los
-tres flujos depende solo del navegador.
+navegador solo para identificarse en las siguientes peticiones; ninguna acción
+depende únicamente del almacenamiento local.
 
 La migración de Flask a FastAPI fue una decisión deliberada del tercer corte:
 el enunciado menciona Flask en algunos criterios, pero el código runtime no

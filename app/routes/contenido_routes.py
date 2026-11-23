@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import APIRouter, Depends, Query
 
 from app.controllers.contenido_controller import (
@@ -34,7 +36,12 @@ controller = ContenidoController()
 
 @contenido_router.get(
     "/",
-    summary="Listar contenido publicado (con filtros)"
+    summary="Listar contenido (con filtros)",
+    description=(
+        "Por defecto solo publicado. El filtro estado=pendiente|"
+        "rechazado requiere sesión de administrador."
+    ),
+    dependencies=[Depends(usuario_opcional)]
 )
 def listar(
     q: str | None = Query(
@@ -58,6 +65,12 @@ def listar(
         le=2100,
         description="Año del contenido"
     ),
+    estado: Literal[
+        "publicado", "pendiente", "rechazado"
+    ] | None = Query(
+        None,
+        description="Estado del contenido (solo admin si no es publicado)"
+    ),
     page: int | None = Query(
         None,
         ge=1,
@@ -73,7 +86,7 @@ def listar(
 
     """
     GET /api/museo/contenido
-    Filtros: ?q= &categoria= &tipo= &anio= &page= &per_page=
+    Filtros: ?q= &categoria= &tipo= &anio= &estado= &page= &per_page=
     """
 
     return controller.listar({
@@ -81,6 +94,7 @@ def listar(
         "categoria": categoria,
         "tipo": tipo,
         "anio": anio,
+        "estado": estado,
         "page": page,
         "per_page": per_page,
     })
@@ -222,6 +236,19 @@ def eliminar(contenido_id: int):
 # ============================================================
 # EVIDENCIAS (RF-EVD-01)
 # ============================================================
+
+@contenido_router.get(
+    "/{contenido_id}/evidencias",
+    summary="Listar evidencias de un contenido"
+)
+def listar_evidencias(contenido_id: int):
+
+    """
+    GET /api/museo/contenido/<id>/evidencias
+    """
+
+    return controller.listar_evidencias(contenido_id)
+
 
 @contenido_router.post(
     "/{contenido_id}/evidencias",

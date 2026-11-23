@@ -42,7 +42,7 @@ Tenerlos abiertos en el editor (o al menos poder ir a ellos rápido). Son el
 | `app/utils/response.py` | `34-...` | `error()` → sobre de error |
 | `app/utils/roles.py` | `191`, `195` | `requiere_usuario` y `usuario_opcional` |
 | `app/utils/security.py` | `23-46`, `49-85` | huella de contraseña con valor aleatorio y comparación segura |
-| `app/static/js/api.js` | `19-33`, `50-92`, `94-145` | token, petición HTTP y llamadas desde la interfaz |
+| `app/static/js/api.js` | `19-33`, `50-92`, `129-226` | token, petición HTTP y llamadas desde la interfaz |
 | `db/DDL.sql` | `94-118` | tabla `contenido` (ENUM, índices `idx_contenido_estado/tipo`) |
 | `db/DDL.sql` | `355-370` | tabla `notificacion`, índice compuesto `idx_notif_usuario_leida` |
 | `db/DDL.sql` | `375-389` | tabla `validacion_log` |

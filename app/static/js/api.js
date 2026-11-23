@@ -91,6 +91,41 @@
     return json && json.data !== undefined ? json.data : json;
   }
 
+  /* ----------------------------------------------------------
+     UTILIDADES
+     ---------------------------------------------------------- */
+
+  /** Los id del prototipo eran texto; la base usa enteros. */
+  function idNumerico(valor) {
+    const texto = String(valor === null || valor === undefined ? '' : valor);
+    if (!/^\d+$/.test(texto)) return null;
+    return Number(texto);
+  }
+
+  /** Resumen de la API → ficha que entiende Store. */
+  function aTarjeta(item) {
+    return {
+      id: item.id_contenido,
+      title: item.titulo,
+      year: item.anio,
+      category: item.categoria,
+      categoryTag: 'tag-blue',
+      description: item.descripcion || '',
+      image: item.imagen || '',
+      author: (item.autor && item.autor.nombre) || 'Autor del museo',
+      tags: item.tipo ? [item.tipo] : [],
+      status: item.estado || 'publicado',
+      participants: [],
+      technologies: [],
+      documents: [],
+      observations: item.observaciones || ''
+    };
+  }
+
+  /* ----------------------------------------------------------
+     AUTENTICACIÓN Y USUARIOS
+     ---------------------------------------------------------- */
+
   function login(correo, password) {
     return request('/auth/login', {
       method: 'POST',
@@ -101,6 +136,52 @@
       return datos;
     });
   }
+
+  function register(datos) {
+    return request('/auth/register', {
+      method: 'POST',
+      auth: false,
+      body: datos
+    });
+  }
+
+  function me() {
+    return request('/auth/me');
+  }
+
+  function updateProfile(id, datos) {
+    return request('/admin/usuarios/' + encodeURIComponent(id), {
+      method: 'PATCH',
+      body: datos
+    });
+  }
+
+  function usuarios(filtros) {
+    const query = new URLSearchParams();
+    Object.keys(filtros || {}).forEach(function (clave) {
+      if (filtros[clave] !== null && filtros[clave] !== undefined &&
+          filtros[clave] !== '') {
+        query.append(clave, filtros[clave]);
+      }
+    });
+    const sufijo = query.toString() ? '?' + query.toString() : '';
+    return request('/admin/usuarios' + sufijo);
+  }
+
+  function updateUsuario(id, datos) {
+    return request('/admin/usuarios/' + encodeURIComponent(id), {
+      method: 'PATCH',
+      body: datos
+    });
+  }
+
+  function kpis() {
+    return request('/admin/kpis');
+  }
+
+  /* ----------------------------------------------------------
+     CONTENIDO
+     ---------------------------------------------------------- */
 
   function bandeja() {
     return request('/validacion/bandeja');
@@ -141,7 +222,108 @@
     });
 
     const sufijo = query.toString() ? '?' + query.toString() : '';
-    return request('/contenido/' + sufijo, { auth: false });
+    return request('/contenido/' + sufijo);
+  }
+
+  function contenidoDetalle(contenidoId) {
+    return request('/contenido/' + encodeURIComponent(contenidoId));
+  }
+
+  function crearContenido(datos) {
+    return request('/contenido/', {
+      method: 'POST',
+      body: datos
+    });
+  }
+
+  function actualizarContenido(contenidoId, datos) {
+    return request('/contenido/' + encodeURIComponent(contenidoId), {
+      method: 'PATCH',
+      body: datos
+    });
+  }
+
+  function eliminarContenido(contenidoId) {
+    return request('/contenido/' + encodeURIComponent(contenidoId), {
+      method: 'DELETE'
+    });
+  }
+
+  function misAportes() {
+    return request('/contenido/mis-aportes');
+  }
+
+  function favoritos() {
+    return request('/contenido/favoritos');
+  }
+
+  function toggleFavorito(contenidoId) {
+    return request('/contenido/' + encodeURIComponent(contenidoId) + '/favorito', {
+      method: 'POST',
+      body: {}
+    });
+  }
+
+  function comentarios(contenidoId) {
+    return request(
+      '/contenido/' + encodeURIComponent(contenidoId) + '/comentarios',
+      { auth: false }
+    );
+  }
+
+  function comentar(contenidoId, texto, respuestaA) {
+    const cuerpo = { texto: texto };
+    if (respuestaA) cuerpo.respuesta_a = Number(respuestaA);
+    return request(
+      '/contenido/' + encodeURIComponent(contenidoId) + '/comentarios',
+      { method: 'POST', body: cuerpo }
+    );
+  }
+
+  function reaccion(contenidoId, tipo) {
+    return request('/contenido/' + encodeURIComponent(contenidoId) + '/reaccion', {
+      method: 'POST',
+      body: { tipo_reaccion: tipo || 'like' }
+    });
+  }
+
+  function evidencias(contenidoId) {
+    return request(
+      '/contenido/' + encodeURIComponent(contenidoId) + '/evidencias',
+      { auth: false }
+    );
+  }
+
+  function agregarEvidencia(contenidoId, datos) {
+    return request(
+      '/contenido/' + encodeURIComponent(contenidoId) + '/evidencias',
+      { method: 'POST', body: datos }
+    );
+  }
+
+  /* ----------------------------------------------------------
+     GAMIFICACIÓN Y MUSEO
+     ---------------------------------------------------------- */
+
+  function ranking(limite) {
+    return request('/gamificacion/ranking' + (limite ? '?limite=' + limite : ''),
+      { auth: false });
+  }
+
+  function niveles() {
+    return request('/gamificacion/niveles', { auth: false });
+  }
+
+  function insignias() {
+    return request('/gamificacion/insignias', { auth: false });
+  }
+
+  function miHistorial() {
+    return request('/gamificacion/mi-historial');
+  }
+
+  function home() {
+    return request('/home', { auth: false });
   }
 
   window.SIMULApi = {
@@ -149,12 +331,37 @@
     setToken: setToken,
     clearToken: clearToken,
     request: request,
-    login: login,
     logout: clearToken,
+    idNumerico: idNumerico,
+    aTarjeta: aTarjeta,
+    login: login,
+    register: register,
+    me: me,
+    updateProfile: updateProfile,
+    usuarios: usuarios,
+    updateUsuario: updateUsuario,
+    kpis: kpis,
     bandeja: bandeja,
     historial: historial,
     aprobar: aprobar,
     rechazar: rechazar,
-    contenido: contenido
+    contenido: contenido,
+    contenidoDetalle: contenidoDetalle,
+    crearContenido: crearContenido,
+    actualizarContenido: actualizarContenido,
+    eliminarContenido: eliminarContenido,
+    misAportes: misAportes,
+    favoritos: favoritos,
+    toggleFavorito: toggleFavorito,
+    comentarios: comentarios,
+    comentar: comentar,
+    reaccion: reaccion,
+    evidencias: evidencias,
+    agregarEvidencia: agregarEvidencia,
+    ranking: ranking,
+    niveles: niveles,
+    insignias: insignias,
+    miHistorial: miHistorial,
+    home: home
   };
 })();

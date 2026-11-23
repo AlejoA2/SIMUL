@@ -17,12 +17,12 @@ Tener abiertos estos archivos en el editor, exactamente en estas líneas:
 | `app/static/js/pages/buscar.js` | `41-54` | respuesta de la API convertida en tarjeta |
 | `app/static/js/pages/buscar.js` | `56-69`, `92-120` | filtros enviados y consulta a la API |
 | `app/static/js/pages/buscar.js` | `71-86` | pintado de la lista y del contador |
-| `app/static/js/api.js` | `50-92`, `133-145` | petición HTTP y armado de la consulta |
+| `app/static/js/api.js` | `50-92`, `214-226` | petición HTTP y armado de la consulta |
 | `app/routes/web_routes.py` | `90-108` | vista HTML del buscador |
-| `app/routes/contenido_routes.py` | `35-86` | entrada de la consulta y filtros |
-| `app/routes/contenido_routes.py` | `150-156` | detalle público con sesión opcional |
-| `app/controllers/contenido_controller.py` | `20-36` | valores por defecto |
-| `app/services/contenido_service.py` | `74-103` | armado de la respuesta |
+| `app/routes/contenido_routes.py` | `37-100` | entrada de la consulta y filtros |
+| `app/routes/contenido_routes.py` | `162-171` | detalle público con sesión opcional |
+| `app/controllers/contenido_controller.py` | `20-49` | valores por defecto |
+| `app/services/contenido_service.py` | `74-105` | armado de la respuesta |
 | `app/repositories/contenido_repository.py` | `12-28` | resultado con total y páginas |
 | `app/repositories/contenido_repository.py` | `65-104`, `369-448` | consulta y filtros |
 | `app/models/types.py` | `6-28` | año en MySQL |
@@ -43,15 +43,15 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [1:15] Capa visual — 1:00
 
-> "Me voy al editor, a `app/templates/pages/buscar.html`, línea 11 y líneas 50 a 63: ahí están las listas de apoyo y el campo. Sigo en 146 a 152, 190 a 193 y 216 a 218 para el contador, la cuadrícula y el botón de limpiar. Abro `app/static/js/pages/buscar.js`, líneas 41 a 54: cada fila se convierte en tarjeta con título, año, imagen y autor; entre 56 y 69 se arman los filtros y entre 92 y 120 se consulta la API. Escribo una palabra y la lista cambia con lo que devolvió MySQL. Me voy a `app/static/js/api.js`, 133 a 145, para ver la dirección armada."
+> "Me voy al editor, a `app/templates/pages/buscar.html`, línea 11 y líneas 50 a 63: ahí están las listas de apoyo y el campo. Sigo en 146 a 152, 190 a 193 y 216 a 218 para el contador, la cuadrícula y el botón de limpiar. Abro `app/static/js/pages/buscar.js`, líneas 41 a 54: cada fila se convierte en tarjeta con título, año, imagen y autor; entre 56 y 69 se arman los filtros y entre 92 y 120 se consulta la API. Escribo una palabra y la lista cambia con lo que devolvió MySQL. Me voy a `app/static/js/api.js`, 214 a 226, para ver la dirección armada."
 
 ### [2:15] De la pantalla al servidor — 0:45
 
-> "Me voy a `app/routes/contenido_routes.py`, líneas 35 a 86: entra `GET /api/museo/contenido/`, que es público. Swagger muestra los filtros: texto, categoría, tipo, año entre **1900 y 2100**, página desde 1 y tamaño entre 1 y 100. Si mando `anio=1800`, aparece **422** con el nombre del campo. En `app/controllers/contenido_controller.py`, 20 a 36, los valores vacíos pasan a página 1 y 12 elementos. La vista HTML está en `app/routes/web_routes.py`, 90 a 108: solo prepara la página."
+> "Me voy a `app/routes/contenido_routes.py`, líneas 37 a 100: entra `GET /api/museo/contenido/`, que es público. Swagger muestra los filtros: texto, categoría, tipo, año entre **1900 y 2100**, página desde 1 y tamaño entre 1 y 100. Si mando `anio=1800`, aparece **422** con el nombre del campo. En `app/controllers/contenido_controller.py`, 20 a 49, los valores vacíos pasan a página 1 y 12 elementos. La vista HTML está en `app/routes/web_routes.py`, 90 a 108: solo prepara la página."
 
 ### [3:00] Servicio, consulta y base — 1:30
 
-> "Me voy a `app/services/contenido_service.py`, líneas 74 a 103, y a `app/repositories/contenido_repository.py`, 12 a 28, 65 a 104 y 369 a 448. El servicio pide la página; la consulta toma solo lo publicado, aplica filtros, cuenta el total, ordena por fecha y devuelve ese bloque. El texto compara sin importar mayúsculas. El año vive en tablas aparte, por eso se usa una lista de identificadores y no se juntan tablas, para no duplicar filas; en `app/models/types.py`, 6 a 28, se guarda como YEAR. «Antes de 2019» se filtra después, porque no es un año exacto."
+> "Me voy a `app/services/contenido_service.py`, líneas 74 a 105, y a `app/repositories/contenido_repository.py`, 12 a 28, 75 a 115 y 380 a 459. El servicio pide la página; la consulta toma solo lo publicado, aplica filtros, cuenta el total, ordena por fecha y devuelve ese bloque. El texto compara sin importar mayúsculas. El año vive en tablas aparte, por eso se usa una lista de identificadores y no se juntan tablas, para no duplicar filas; en `app/models/types.py`, 6 a 28, se guarda como YEAR. «Antes de 2019» se filtra después, porque no es un año exacto."
 
 ### [4:30] Respuesta — 0:45
 
@@ -71,7 +71,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [8:15] Seguridad — 0:30
 
-> "Me voy a `app/utils/roles.py`, línea 191: ahí se comprueba la sesión en rutas privadas. En `app/routes/contenido_routes.py`, 150 a 156, el detalle entra sin sesión; si viene una, solo añade el favorito. La huella con valor aleatorio está en `app/utils/security.py`, 23 a 46 y 49 a 85, y los datos devueltos no incluyen la contraseña. El buscador es público; el ingreso guarda el token para lo privado."
+> "Me voy a `app/utils/roles.py`, línea 191: ahí se comprueba la sesión en rutas privadas. En `app/routes/contenido_routes.py`, 162 a 171, el detalle entra sin sesión; si viene una, solo añade el favorito. La huella con valor aleatorio está en `app/utils/security.py`, 23 a 46 y 49 a 85, y los datos devueltos no incluyen la contraseña. El buscador es público; el ingreso guarda el token para lo privado."
 
 ### [8:45] Pruebas, Docker y coherencia — 0:45
 

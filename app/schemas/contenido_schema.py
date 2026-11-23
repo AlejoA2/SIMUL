@@ -120,6 +120,10 @@ class ContenidoUpdateIn(ModeloSalida):
         le=2100
     )
 
+    estado: Literal[
+        "pendiente", "publicado", "rechazado"
+    ] | None = None
+
 
 class EvidenciaCreateIn(ModeloSalida):
 

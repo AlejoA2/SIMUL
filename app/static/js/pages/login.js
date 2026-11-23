@@ -134,6 +134,7 @@
            usuario (nombre, puntos y nivel vienen de MySQL). */
         Store.login(rol);
         Store.updateUser({
+          id: usuario.id_usuario,
           name: usuario.nombre,
           email: usuario.correo,
           avatar: usuario.foto || (EMAILS[rol] && Store.roleUsers()[rol]

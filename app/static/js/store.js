@@ -1,10 +1,10 @@
 /* ==========================================================
    SIMUL - STORE
-   Capa de estado del frontend sobre localStorage.
+   Estado de la interfaz en el navegador.
 
-   En este corte NO hay base de datos: toda la "persistencia"
-   vive en el navegador. El objetivo es que al conectar la API
-   REST solo se cambie este archivo y no las páginas.
+   La fuente de verdad es la API (/api/museo) y MySQL. Aquí
+   solo se guardan la sesión, el token y copias locales para
+   pintar rápido; las acciones escriben siempre en la API.
 
    Claves usadas
      simul.user        → sesión activa (rol, nombre, puntos…)
@@ -66,9 +66,9 @@ const Store = (() => {
   }
 
   /**
-   * Inicia sesión con uno de los perfiles de demostración.
-   * Guarda una copia del usuario para que la interfaz pueda
-   * trabajar sin volver a preguntar al servidor.
+   * Guarda la copia local de una sesión ya autenticada.
+   * El nombre, los puntos y el nivel reales los rellena
+   * login.js con la respuesta de /api/museo/auth/login.
    */
   function login(role) {
     const user = roleUsers()[role];
@@ -87,8 +87,9 @@ const Store = (() => {
   }
 
   /**
-   * Registra una cuenta nueva. Solo la guarda como pendiente:
-   * abrir sesión tiene que pasar antes por el login.
+   * Helper heredado: guarda una copia local del alta mientras
+   * SIMULApi.register() crea el usuario en MySQL. registro.js
+   * usa la API; esta copia no decide el resultado.
    */
   function register(user) {
     const pendientes = read('simul.pendingUsers', []);
@@ -161,11 +162,17 @@ const Store = (() => {
           (getFavorites() || []).filter(x => x !== String(id)));
   }
 
+  /** Reemplaza la copia local con lo que devolvió la API. */
+  function setFavorites(lista) {
+    return write('simul.favorites', lista || []);
+  }
+
   /* ======================================================
      CONTENIDO  (tabla CONTENIDO)
-     Copia editable del catálogo que llega desde el servidor.
-     Permite que altas, bajas y estados sobrevivan a la
-     recarga sin tocar la base de datos.
+     Copia local del catálogo: se inicializa con los catálogos
+     de la plantilla y se reemplaza con /api/museo/contenido.
+     Altas, bajas y cambios de estado se escriben en MySQL
+     desde api.js; aquí solo se reflejan para pintar rápido.
      ====================================================== */
 
   function initContent(seed) {
@@ -177,6 +184,11 @@ const Store = (() => {
 
   function getContent() {
     return read('simul.content', []);
+  }
+
+  /** Reemplaza la copia local con lo que devolvió la API. */
+  function replaceContent(lista) {
+    return write('simul.content', lista || []);
   }
 
   function findContent(id) {
@@ -363,7 +375,7 @@ const Store = (() => {
      UTILIDADES
      ====================================================== */
 
-  /** Reinicia todo el estado simulado (botón de demo). */
+  /** Borra las copias locales; no modifica MySQL. */
   function reset() {
     [
       'simul.user', 'simul.favorites', 'simul.content', 'simul.queue',
@@ -377,7 +389,8 @@ const Store = (() => {
     getUser, setUser, logout, updateUser, dashboardPath,
     login, register, getPendingUsers, roleUsers,
     getFavorites, initFavorites, isFavorite, toggleFavorite, removeFavorite,
-    initContent, getContent, findContent, upsertContent,
+    setFavorites,
+    initContent, getContent, findContent, upsertContent, replaceContent,
     setContentStatus, deleteContent,
     initQueue, getQueue, dropFromQueue,
     initComments, getComments, addComment,

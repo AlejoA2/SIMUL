@@ -15,7 +15,7 @@ Tener abiertos estos archivos en el editor, exactamente en estas líneas:
 |---|---|---|
 | `app/templates/pages/admin_validacion.html` | `8`, `50-60`, `94` | datos de la cola, contador y lista |
 | `app/static/js/pages/login.js` | `117-150` | inicio de sesión contra la API y guardado del token |
-| `app/static/js/api.js` | `50-92`, `105-121` | petición HTTP, consulta de la bandeja y llamada de aprobación |
+| `app/static/js/api.js` | `50-92`, `186-202` | petición HTTP, consulta de la bandeja y llamada de aprobación |
 | `app/static/js/pages/admin_validacion.js` | `156-159` | botón creado con `data-approve` |
 | `app/static/js/pages/admin_validacion.js` | `197-223` | acción al hacer clic |
 | `app/static/js/pages/admin_validacion.js` | `347-356` | captura del clic |
@@ -24,12 +24,12 @@ Tener abiertos estos archivos en el editor, exactamente en estas líneas:
 | `app/services/validacion_service.py` | `32`, `80-160` | valor de puntos y regla principal |
 | `app/services/validacion_service.py` | `249-277` | comprobaciones de permiso y estado |
 | `app/services/validacion_service.py` | `306-326` | nivel e insignias |
-| `app/repositories/contenido_repository.py` | `58-63` | lectura del contenido |
+| `app/repositories/contenido_repository.py` | `68-73` | lectura del contenido |
 | `app/repositories/validacion_repository.py` | `36-44` | escritura del registro |
 | `app/models/contenido.py` | `6-45` | campos de estado y validador |
 | `app/models/historial_puntos.py` | `6-40` | movimiento de puntos |
 | `app/models/usuario.py` | `136-139` | nombre del rol |
-| `app/schemas/simul_auth_schema.py` | `91-112` | datos de usuario que se devuelven |
+| `app/schemas/simul_auth_schema.py` | `96-120` | datos de usuario que se devuelven |
 | `tests/test_app.py` | `433-463` | prueba de esta operación |
 
 Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
@@ -46,7 +46,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [1:15] Capa visual — 1:00
 
-> "Me voy al editor, a `app/templates/pages/admin_validacion.html`, líneas 50 a 60, para ver el contador, y a la línea 94, donde se dibuja la lista. Abro `app/static/js/pages/admin_validacion.js`, líneas 156 a 159: el botón se crea con `data-approve`. Entre 197 y 223 está la acción: llama a la API, vuelve a consultar la bandeja y muestra el aviso. Me voy a `app/static/js/api.js`, líneas 113 a 121, para ver la llamada `POST /validacion/{id}/aprobar`. Hago clic y el contador baja porque la API ya guardó el cambio."
+> "Me voy al editor, a `app/templates/pages/admin_validacion.html`, líneas 50 a 60, para ver el contador, y a la línea 94, donde se dibuja la lista. Abro `app/static/js/pages/admin_validacion.js`, líneas 156 a 159: el botón se crea con `data-approve`. Entre 197 y 223 está la acción: llama a la API, vuelve a consultar la bandeja y muestra el aviso. Me voy a `app/static/js/api.js`, líneas 194 a 202, para ver la llamada `POST /validacion/{id}/aprobar`. Hago clic y el contador baja porque la API ya guardó el cambio."
 
 ### [2:15] De la pantalla al servidor — 0:45
 
@@ -58,7 +58,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [4:15] Datos y respuesta — 1:00
 
-> "Me voy a `app/repositories/contenido_repository.py`, líneas 58 a 63, y a `app/repositories/validacion_repository.py`, líneas 36 a 44: uno lee el contenido y el otro escribe el registro, sin confirmar por su cuenta. En `app/models/contenido.py`, 6 a 45, y en `app/models/historial_puntos.py`, 6 a 40, están los campos que se tocan. En `app/static/js/api.js`, líneas 50 a 92, se ve cómo se envía el token y se lee la respuesta. En Swagger aparece **200** con el contenido publicado y el validador, nunca la contraseña. La app confirma al terminar; si falla, deshace."
+> "Me voy a `app/repositories/contenido_repository.py`, líneas 68 a 73, y a `app/repositories/validacion_repository.py`, líneas 36 a 44: uno lee el contenido y el otro escribe el registro, sin confirmar por su cuenta. En `app/models/contenido.py`, 6 a 45, y en `app/models/historial_puntos.py`, 6 a 40, están los campos que se tocan. En `app/static/js/api.js`, líneas 50 a 92, se ve cómo se envía el token y se lee la respuesta. En Swagger aparece **200** con el contenido publicado y el validador, nunca la contraseña. La app confirma al terminar; si falla, deshace."
 
 ### [5:15] Persistencia — 1:00
 

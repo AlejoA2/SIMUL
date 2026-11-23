@@ -69,6 +69,34 @@ class AdminController:
 
         usuario = usuario_actual()
 
+        if not usuario:
+
+            return error(
+                "No autenticado",
+                401
+            )
+
+        # Una persona puede editar solo su nombre y biografía.
+        # El resto de cambios sigue siendo exclusivo de admin.
+        if str(usuario.id_usuario) == str(usuario_id):
+
+            propios = {
+                clave: valor for clave, valor in payload.items()
+                if clave in ("nombre", "biografia")
+            }
+
+            if not propios or len(propios) != len(payload):
+
+                return error(
+                    "No autorizado",
+                    403
+                )
+
+            return service.actualizar(
+                usuario_id,
+                propios
+            )
+
         respuesta = self._como_admin(usuario)
 
         if respuesta:

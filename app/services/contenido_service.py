@@ -77,6 +77,7 @@ class ContenidoService:
         categoria=None,
         tipo=None,
         anio=None,
+        estado=None,
         page=1,
         per_page=12
     ):
@@ -86,6 +87,7 @@ class ContenidoService:
             categoria=categoria,
             tipo=tipo,
             anio=anio,
+            estado=estado,
             page=page,
             per_page=per_page
         )
@@ -283,6 +285,10 @@ class ContenidoService:
 
             contenido.categoria = datos["categoria"]
 
+        if "estado" in datos and datos["estado"]:
+
+            contenido.estado = datos["estado"]
+
         subtipo = self._subtipo_de(contenido)
 
         if subtipo is not None:
@@ -334,6 +340,31 @@ class ContenidoService:
     # ========================================================
     # EVIDENCIAS (RF-EVD-01)
     # ========================================================
+
+    def listar_evidencias(self, contenido_id):
+
+        contenido = self.repository.get_by_id(
+            contenido_id
+        )
+
+        if not contenido:
+
+            return error(
+                "Contenido no encontrado",
+                404
+            )
+
+        evidencias = self.repository.get_evidencias(
+            contenido_id
+        )
+
+        return success(
+            [
+                evidencia_out_schema.dump(evidencia)
+                for evidencia in evidencias
+            ],
+            "OK"
+        )
 
     def agregar_evidencia(
         self,

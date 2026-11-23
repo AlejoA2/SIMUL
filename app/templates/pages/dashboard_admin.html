@@ -76,7 +76,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
 
             {% for kpi in kpis %}
-                <div class="simul-card p-6">
+                <div class="simul-card p-6" data-kpi="{{ kpi.label }}">
                     <div class="flex items-start justify-between mb-4">
                         <div
                             class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
@@ -305,4 +305,8 @@
 
 </div>
 
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/pages/dashboard_admin.js') }}"></script>
 {% endblock %}

@@ -21,14 +21,27 @@ class ContenidoController:
 
         """
         GET /api/museo/contenido
-        Filtros: q, categoria, tipo, anio, page, per_page
+        Filtros: q, categoria, tipo, anio, estado, page, per_page
         """
+
+        estado = args.get("estado") or None
+
+        # El catálogo público sigue mostrando solo publicados.
+        # Ver pendientes o rechazados es una acción de admin.
+        if estado and estado != "publicado":
+
+            usuario = usuario_actual()
+
+            if not usuario or usuario.rol_nombre != "admin":
+
+                return error("No autorizado", 403)
 
         return service.listar(
             q=args.get("q") or None,
             categoria=args.get("categoria") or None,
             tipo=args.get("tipo") or None,
             anio=self._entero(args.get("anio")),
+            estado=estado,
             page=self._entero(args.get("page")) or 1,
             per_page=(
                 self._entero(args.get("per_page")) or 12
@@ -143,6 +156,14 @@ class ContenidoController:
             )
 
         return service.eliminar(contenido_id, usuario)
+
+    def listar_evidencias(self, contenido_id):
+
+        """
+        GET /api/museo/contenido/<id>/evidencias
+        """
+
+        return service.listar_evidencias(contenido_id)
 
     def agregar_evidencia(self, contenido_id, payload):
 

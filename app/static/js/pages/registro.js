@@ -6,8 +6,8 @@
    con requisitos de seguridad, confirmación y aceptación de
    las políticas.
 
-   La API REST ya expone POST /api/museo/auth/register;
-   esta vista mantiene el registro local de demostración.
+   El alta se envía a POST /api/museo/auth/register mediante
+   SIMULApi.register; al confirmarse, se vuelve al login.
    ========================================================== */
 
 (function () {
@@ -16,7 +16,6 @@
   const $ = SIMUL.$;
 
   const formulario = $('#register-form');
-  const panelExito = $('#register-success');
 
   const campos = {
     nombre:  $('#reg-name'),
@@ -237,24 +236,20 @@
       return;
     }
 
-    /* Guarda la cuenta recién creada para que el usuario pueda
-       entrar sin esperar al backend. */
-    Store.register({
-      name: campos.nombre.value.trim(),
-      email: campos.correo.value.trim(),
-      role: tipoCuenta,
-      avatar: 'https://ui-avatars.com/api/?name=' +
-              encodeURIComponent(campos.nombre.value.trim()) +
-              '&background=C8102E&color=fff&size=160',
-      points: 0,
-      level: 1,
-      badges: ['Nuevo miembro'],
-      description: 'Cuenta creada en el Museo Digital Interactivo.'
-    });
-
-    formulario.classList.add('hidden');
-    panelExito.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    SIMULApi.register({
+      nombre: campos.nombre.value.trim(),
+      correo: campos.correo.value.trim(),
+      password: campos.clave.value,
+      /* El código del formulario viaja como programa/cohorte. */
+      programa_cohorte: campos.codigo.value.trim(),
+      rol: tipoCuenta === 'teacher' ? 'docente' : 'estudiante'
+    })
+      .then(function () {
+        window.location.href = '/login';
+      })
+      .catch(function (error) {
+        SIMUL.toast(error.message);
+      });
   }
 
   /* ----------------------------------------------------------

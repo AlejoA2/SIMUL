@@ -15,12 +15,12 @@ Tener abiertos estos archivos en el editor, exactamente en estas líneas:
 |---|---|---|
 | `app/templates/pages/admin_validacion.html` | `8`, `50-60`, `94` | datos de la cola, contador y lista |
 | `app/static/js/pages/login.js` | `117-150` | inicio de sesión contra la API y guardado del token |
-| `app/static/js/api.js` | `50-92`, `123-131` | petición HTTP y llamada de rechazo con el motivo |
+| `app/static/js/api.js` | `50-92`, `204-212` | petición HTTP y llamada de rechazo con el motivo |
 | `app/static/js/pages/admin_validacion.js` | `160-163` | botón creado con `data-reject` |
 | `app/static/js/pages/admin_validacion.js` | `229-260` | ventana para escribir el motivo |
 | `app/static/js/pages/admin_validacion.js` | `262-309` | acción al confirmar |
 | `app/static/js/pages/admin_validacion.js` | `347-356` | captura del clic |
-| `app/schemas/contenido_schema.py` | `170-182` | motivo obligatorio de 5 a 1000 caracteres |
+| `app/schemas/contenido_schema.py` | `174-186` | motivo obligatorio de 5 a 1000 caracteres |
 | `app/routes/validacion_routes.py` | `71-91` | entrada de la operación |
 | `app/routes/validacion_routes.py` | `98-108` | consulta del historial |
 | `app/controllers/validacion_controller.py` | `54-65` | acción del controlador |
@@ -47,7 +47,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [1:15] Capa visual — 1:00
 
-> "Me voy al editor, a `app/templates/pages/admin_validacion.html`, líneas 50 a 60 y 94, para ver el contador y la lista. Abro `app/static/js/pages/admin_validacion.js`, líneas 160 a 163: el botón se crea con `data-reject`. Entre 229 y 260 está la ventana para escribir el motivo y entre 262 y 309 la acción al confirmar. Hago clic y dejo el motivo vacío para que aparezca el aviso rojo. La pantalla pide al menos cinco caracteres y la API vuelve a exigirlos. Me voy a `app/static/js/api.js`, líneas 123 a 131: el motivo viaja en la petición y la bandeja se refresca con lo que hay en MySQL."
+> "Me voy al editor, a `app/templates/pages/admin_validacion.html`, líneas 50 a 60 y 94, para ver el contador y la lista. Abro `app/static/js/pages/admin_validacion.js`, líneas 160 a 163: el botón se crea con `data-reject`. Entre 229 y 260 está la ventana para escribir el motivo y entre 262 y 309 la acción al confirmar. Hago clic y dejo el motivo vacío para que aparezca el aviso rojo. La pantalla pide al menos cinco caracteres y la API vuelve a exigirlos. Me voy a `app/static/js/api.js`, líneas 204 a 212: el motivo viaja en la petición y la bandeja se refresca con lo que hay en MySQL."
 
 ### [2:15] De la pantalla al servidor — 0:30
 

@@ -2,8 +2,8 @@
    MI PERFIL  (RF-USR-03)
 
    La descripción pública es el único campo editable de este
-   corte. Se guarda en la sesión del navegador y se refleja en
-   el resto de pantallas, porque todas leen del mismo sitio.
+   corte. Se envía a la API con SIMULApi.updateProfile y se
+   refleja en el resto de pantallas al actualizar la sesión.
    ========================================================== */
 
 (function () {
@@ -51,13 +51,47 @@
        tarjetas donde se muestra el texto del usuario. */
     const recortada = texto.slice(0, LIMITE);
 
-    Store.updateUser({ description: recortada });
+    function enviar(idUsuario) {
+      return SIMULApi.updateProfile(idUsuario, { biografia: recortada });
+    }
 
-    /* Se repinta con el texto ya guardado. */
-    SIMUL.paintUser(Store.getUser());
+    const actual = Store.getUser() || user;
+    const id = SIMULApi.idNumerico(actual && actual.id);
+    let peticion;
 
-    cerrarEditor();
-    SIMUL.toast('Descripción actualizada', 'success');
+    if (id !== null) {
+      peticion = enviar(id);
+    } else {
+      /* El login guarda el id, pero si no está lo pedimos. */
+      peticion = SIMULApi.me().then(function (datos) {
+        const idApi = SIMULApi.idNumerico(datos && datos.id_usuario);
+
+        if (idApi === null) {
+          throw new Error('No se pudo identificar tu usuario.');
+        }
+
+        Store.updateUser({ id: idApi });
+        return enviar(idApi);
+      });
+    }
+
+    if (BOTON_GUARDAR) BOTON_GUARDAR.disabled = true;
+
+    peticion
+      .then(function () {
+        /* Se repinta con el texto ya guardado. */
+        Store.updateUser({ description: recortada });
+        SIMUL.paintUser(Store.getUser());
+
+        cerrarEditor();
+        SIMUL.toast('Descripción actualizada', 'success');
+      })
+      .catch(function (error) {
+        SIMUL.toast(error.message);
+      })
+      .then(function () {
+        if (BOTON_GUARDAR) BOTON_GUARDAR.disabled = false;
+      });
   }
 
   /* ----------------------------------------------------------

@@ -1,9 +1,6 @@
 /* ==========================================================
-   GESTIONAR USUARIOS (ADMIN)  (RF-USR-05)
-
-   Cambio de rol y activación de cuentas. Desactivar no borra
-   nada: el usuario conserva sus aportes, comentarios y puntos,
-   pero deja poder entrar al museo.
+   GESTIONAR USUARIOS (ADMIN)
+   Lista, cambio de rol y activación contra la API REST.
    ========================================================== */
 
 (function () {
@@ -12,25 +9,38 @@
   const $  = SIMUL.$;
   const $$ = SIMUL.$$;
 
-  const FILAS   = $('#users-rows');
-  const VACIO   = $('#users-empty');
+  const FILAS    = $('#users-rows');
+  const VACIO    = $('#users-empty');
   const BUSCADOR = $('#users-search');
   const CONTADOR = $('#users-active');
 
+  /* seed.py siembra la tabla rol en este orden. */
+  const ID_ROL = {
+    estudiante: 1,
+    docente: 2,
+    admin: 3,
+    egresado: 4
+  };
+
   let rol = 'Todos';
   let texto = '';
+  let usuarios = [];
 
   /* ----------------------------------------------------------
      1. FILTRADO
      ---------------------------------------------------------- */
 
   function filtrar() {
-    return Store.getUsers().filter(function (user) {
-      const coincideRol = rol === 'Todos' || user.role === rol;
+    return usuarios.filter(function (user) {
+      const coincideRol = rol === 'Todos' || user.rol === rol;
 
       const coincideTexto = !texto ||
-        user.name.toLowerCase().indexOf(texto.toLowerCase()) !== -1 ||
-        user.email.toLowerCase().indexOf(texto.toLowerCase()) !== -1;
+        String(user.nombre || '').toLowerCase().indexOf(
+          texto.toLowerCase()
+        ) !== -1 ||
+        String(user.correo || '').toLowerCase().indexOf(
+          texto.toLowerCase()
+        ) !== -1;
 
       return coincideRol && coincideTexto;
     });
@@ -40,16 +50,43 @@
      2. PINTADO
      ---------------------------------------------------------- */
 
-  function fila(user) {
-    const color = window.SIMUL_ROLE_COLORS[user.role] || 'tag-blue';
-    const roles = window.SIMUL_USER_ROLES || [];
+  function avatarDe(user) {
+    if (user.foto) return user.foto;
 
-    const opciones = roles.map(function (nombre) {
+    const inicial = String(user.nombre || '?').trim().charAt(0)
+      .toUpperCase() || '?';
+
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">' +
+        '<rect width="64" height="64" fill="#E5E7EB"/>' +
+        '<text x="32" y="43" text-anchor="middle" ' +
+        'font-family="Arial" font-size="28" fill="#6B7280">' +
+        inicial +
+        '</text>' +
+      '</svg>'
+    );
+  }
+
+  function opcionesDeRol(actual) {
+    const nombres = Object.keys(ID_ROL);
+
+    if (actual && nombres.indexOf(actual) === -1) {
+      nombres.unshift(actual);
+    }
+
+    return nombres.map(function (nombre) {
       return '<option value="' + SIMUL.escapeHtml(nombre) + '"' +
-        (nombre === user.role ? ' selected' : '') + '>' +
-        SIMUL.escapeHtml(nombre) +
+        (nombre === actual ? ' selected' : '') + '>' +
+        SIMUL.escapeHtml(SIMUL.capitalize(nombre)) +
         '</option>';
     }).join('');
+  }
+
+  function fila(user) {
+    const id = user.id_usuario;
+    const activo = user.estado === true;
+    const fecha = String(user.fecha_registro || '').slice(0, 10) || '—';
+    const puntos = SIMUL.formatNumber(user.puntos_total || 0);
 
     return '' +
       '<div class="grid grid-cols-[1fr_240px_130px_120px_180px] gap-4 ' +
@@ -57,48 +94,48 @@
         'transition-colors">' +
 
         '<div class="flex items-center gap-3 min-w-0">' +
-          '<img src="' + SIMUL.escapeHtml(user.avatar) + '" ' +
-          'alt="' + SIMUL.escapeHtml(user.name) + '" ' +
+          '<img src="' + SIMUL.escapeHtml(avatarDe(user)) + '" ' +
+          'alt="' + SIMUL.escapeHtml(user.nombre) + '" ' +
           'loading="lazy" class="w-9 h-9 rounded-full object-cover shrink-0">' +
           '<span class="min-w-0">' +
             '<span class="block text-sm font-semibold text-gray-800 ' +
             'truncate" style="font-family:\'Montserrat\',sans-serif">' +
-              SIMUL.escapeHtml(user.name) +
+              SIMUL.escapeHtml(user.nombre) +
             '</span>' +
             '<span class="block text-xs text-gray-400" ' +
             'style="font-family:\'Inter\',sans-serif">' +
-              'Desde ' + SIMUL.escapeHtml(user.joined) +
+              'Desde ' + SIMUL.escapeHtml(fecha) + ' · ' + puntos + ' pts' +
             '</span>' +
           '</span>' +
         '</div>' +
 
         '<span class="text-sm text-gray-600 truncate" ' +
         'style="font-family:\'Inter\',sans-serif">' +
-          SIMUL.escapeHtml(user.email) +
+          SIMUL.escapeHtml(user.correo) +
         '</span>' +
 
         '<span>' +
-          '<select data-role-of="' + SIMUL.escapeHtml(user.id) + '" ' +
+          '<select data-role-of="' + SIMUL.escapeHtml(id) + '" ' +
           'class="text-xs px-2.5 py-1.5 rounded-lg border border-gray-200 ' +
           'bg-white focus:outline-none focus:ring-2 focus:ring-[#C8102E]/20">' +
-            opciones +
+            opcionesDeRol(user.rol) +
           '</select>' +
         '</span>' +
 
-        '<span class="tag ' + (user.active ? 'tag-publicado' : 'tag-rechazado') + '">' +
-          (user.active ? 'Activo' : 'Inactivo') +
+        '<span class="tag ' + (activo ? 'tag-publicado' : 'tag-rechazado') + '">' +
+          (activo ? 'Activo' : 'Inactivo') +
         '</span>' +
 
         '<div class="flex justify-end">' +
           '<button type="button" data-toggle-active="' +
-            SIMUL.escapeHtml(user.id) + '" ' +
+            SIMUL.escapeHtml(id) + '" ' +
           'class="px-3 py-1.5 rounded-lg text-xs font-semibold ' +
-          (user.active
+          (activo
             ? 'bg-red-50 text-red-700 hover:bg-red-100'
             : 'bg-green-50 text-green-700 hover:bg-green-100') +
           ' transition-colors" ' +
           'style="font-family:\'Montserrat\',sans-serif">' +
-            (user.active ? 'Desactivar' : 'Activar') +
+            (activo ? 'Desactivar' : 'Activar') +
           '</button>' +
         '</div>' +
 
@@ -113,48 +150,78 @@
 
     VACIO.classList.toggle('hidden', items.length !== 0);
 
-    const activos = Store.getUsers().filter(function (u) {
-      return u.active;
+    const activos = usuarios.filter(function (u) {
+      return u.estado === true;
     }).length;
 
-    const total = Store.getUsers().length;
-
-    CONTADOR.textContent = activos + ' de ' + total + ' activos';
+    if (CONTADOR) {
+      CONTADOR.textContent = activos + ' de ' + usuarios.length + ' activos';
+    }
   }
 
   /* ----------------------------------------------------------
-     3. ACCIONES
+     3. CARGA Y ACCIONES
      ---------------------------------------------------------- */
 
-  function cambiarRol(id, nuevoRol) {
-    Store.setUserRole(id, nuevoRol);
+  function cargar() {
+    return SIMULApi.usuarios()
+      .then(function (filas) {
+        usuarios = Array.isArray(filas) ? filas : [];
+        pintar();
+      })
+      .catch(function (error) {
+        usuarios = [];
+        pintar();
+        SIMUL.toast(error.message || 'No se pudo cargar los usuarios', 'error');
+      });
+  }
 
-    /* Aviso al titular: cambiar de rol cambia lo que ve. */
-    const user = Store.getUser();
-    if (user && String(user.id) === String(id)) {
-      Store.updateUser({ role: nuevoRol.toLowerCase() });
-      SIMUL.paintUser(Store.getUser());
+  function cambiarRol(id, nombreRol) {
+    const numero = SIMULApi.idNumerico(id);
+    const idRol = ID_ROL[nombreRol];
+
+    if (!numero || !idRol) {
+      SIMUL.toast('Rol no reconocido por el catálogo', 'error');
+      return;
     }
 
-    pintar();
-    SIMUL.toast('Rol actualizado a ' + nuevoRol, 'success');
+    SIMULApi.updateUsuario(numero, { id_rol: idRol })
+      .then(function () {
+        SIMUL.toast('Rol actualizado a ' + nombreRol, 'success');
+        return cargar();
+      })
+      .catch(function (error) {
+        SIMUL.toast(error.message || 'No se pudo cambiar el rol', 'error');
+      });
   }
 
   function alternarActivo(id) {
-    const user = Store.getUsers().find(function (u) {
-      return String(u.id) === String(id);
+    const user = usuarios.find(function (u) {
+      return String(u.id_usuario) === String(id);
     });
     if (!user) return;
 
-    Store.toggleUserActive(id);
-    pintar();
+    const numero = SIMULApi.idNumerico(id);
+    if (!numero) {
+      SIMUL.toast('Usuario no válido', 'error');
+      return;
+    }
 
-    SIMUL.toast(
-      user.active
-        ? 'Cuenta desactivada. Conserva su historial.'
-        : 'Cuenta activada',
-      user.active ? 'info' : 'success'
-    );
+    const nuevoEstado = user.estado !== true;
+
+    SIMULApi.updateUsuario(numero, { estado: nuevoEstado })
+      .then(function () {
+        SIMUL.toast(
+          nuevoEstado
+            ? 'Cuenta activada'
+            : 'Cuenta desactivada. Conserva su historial.',
+          nuevoEstado ? 'success' : 'info'
+        );
+        return cargar();
+      })
+      .catch(function (error) {
+        SIMUL.toast(error.message || 'No se pudo cambiar el estado', 'error');
+      });
   }
 
   /* ----------------------------------------------------------
@@ -182,8 +249,7 @@
   document.addEventListener('simul:ready', function () {
     if (!SIMUL.guardPage('admin')) return;
 
-    Store.initUsers(window.SIMUL_USERS || []);
-    pintar();
+    cargar();
 
     if (BUSCADOR) {
       BUSCADOR.addEventListener('input', function (event) {
@@ -192,12 +258,15 @@
       });
     }
 
-    $('#users-role-filters').addEventListener('click', function (event) {
-      const boton = event.target.closest('[data-role-filter]');
-      if (!boton) return;
+    const filtros = $('#users-role-filters');
+    if (filtros) {
+      filtros.addEventListener('click', function (event) {
+        const boton = event.target.closest('[data-role-filter]');
+        if (!boton) return;
 
-      marcarFiltro(boton.getAttribute('data-role-filter'));
-    });
+        marcarFiltro(boton.getAttribute('data-role-filter'));
+      });
+    }
 
     FILAS.addEventListener('change', function (event) {
       const select = event.target.closest('[data-role-of]');

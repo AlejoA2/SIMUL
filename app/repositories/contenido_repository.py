@@ -55,6 +55,16 @@ class ContenidoRepository:
     # LECTURA
     # --------------------------------------------------------
 
+    def get_evidencias(self, contenido_id):
+
+        """Evidencias adjuntas a un contenido, en orden de subida."""
+
+        return db.session.execute(
+            select(Evidencia)
+            .where(Evidencia.id_contenido == contenido_id)
+            .order_by(Evidencia.id_evid)
+        ).scalars().all()
+
     def get_by_id(self, contenido_id):
 
         return db.session.get(
@@ -68,12 +78,13 @@ class ContenidoRepository:
         categoria=None,
         tipo=None,
         anio=None,
+        estado=None,
         page=1,
         per_page=12
     ):
 
         query = db.session.query(Contenido).filter(
-            Contenido.estado == "publicado"
+            Contenido.estado == (estado or "publicado")
         )
 
         query = self._aplicar_filtros(

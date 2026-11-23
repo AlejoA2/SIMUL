@@ -1,56 +1,80 @@
 /* ==========================================================
    FAVORITOS  (RF-EXP-04)
 
-   Lista el contenido guardado por el usuario. Los ids viven en
-   localStorage; el texto sale del catálogo que entrega la ruta.
+   La lista viene de SIMULApi.favoritos(). Cada resumen se
+   convierte con aTarjeta y se pinta con contentCardHtml. El
+   botón ★ sigue siendo responsabilidad de app.js.
    ========================================================== */
 
 (function () {
   'use strict';
 
-  const $ = SIMUL.$;
+  const $  = SIMUL.$;
+  const $$ = SIMUL.$$;
 
   const GRID  = $('#favorites-grid');
   const VACIO = $('#favorites-empty');
 
-  /* ----------------------------------------------------------
-     PINTADO
-     ---------------------------------------------------------- */
+  function alternarVista(hayFavoritos) {
+    if (GRID) {
+      GRID.classList.toggle('hidden', !hayFavoritos);
+      GRID.classList.toggle('grid', hayFavoritos);
+    }
+
+    if (VACIO) {
+      VACIO.classList.toggle('hidden', hayFavoritos);
+      VACIO.classList.toggle('flex', !hayFavoritos);
+    }
+  }
+
+  function mensaje(markup) {
+    if (VACIO) VACIO.innerHTML = markup;
+    alternarVista(false);
+  }
+
+  function sinSesion() {
+    mensaje('' +
+      '<div class="text-6xl mb-5">🔒</div>' +
+      '<h3 style="font-family:\'Montserrat\',sans-serif;font-weight:700;' +
+      'font-size:22px;color:#1A1A1A">' +
+        'Inicia sesión para ver tus favoritos' +
+      '</h3>' +
+      '<p class="text-gray-500 mt-2 max-w-sm" ' +
+      'style="font-family:\'Inter\',sans-serif">' +
+        'Tu lista de favoritos está asociada a tu cuenta.' +
+      '</p>' +
+      '<a href="/login" class="btn-primary mt-6">Iniciar sesión</a>'
+    );
+  }
 
   function pintar() {
-    if (!GRID) return;
+    if (!GRID) return Promise.resolve();
 
-    /* La primera vez se siembra la lista con cuatro piezas para
-       que la pantalla no arranque vacía en la demostración. */
-    Store.initFavorites(window.SIMUL_SEED_FAVORITES || []);
+    if (!Store.getUser()) {
+      sinSesion();
+      return Promise.resolve();
+    }
 
-    const catalogo = Store.getContent();
-    const ids = Store.getFavorites() || [];
+    return SIMULApi.favoritos()
+      .then(function (datos) {
+        const tarjetas = (datos || []).map(SIMULApi.aTarjeta);
 
-    /* Se conserva el orden en que el usuario guardó. */
-    const items = ids
-      .map(function (id) {
-        return catalogo.find(function (c) {
-          return String(c.id) === String(id);
+        GRID.innerHTML = tarjetas.map(SIMUL.contentCardHtml).join('');
+        alternarVista(tarjetas.length > 0);
+
+        /* Todo lo que aparece aquí es favorito: refleja la ★
+           sin volver a lanzar la acción de guardar. */
+        $$('[data-favorite]', GRID).forEach(function (boton) {
+          boton.textContent = '★';
+          boton.style.color = '#C9A84C';
+          boton.setAttribute('aria-pressed', 'true');
         });
       })
-      .filter(Boolean);
-
-    GRID.classList.toggle('hidden', items.length === 0);
-    GRID.classList.toggle('grid', items.length > 0);
-
-    VACIO.classList.toggle('hidden', items.length !== 0);
-    VACIO.classList.toggle('flex', items.length === 0);
-
-    GRID.innerHTML = items.map(SIMUL.contentCardHtml).join('');
-
-    /* Refleja el estado de cada botón ★ / ☆. */
-    ids.forEach(function (id) {
-      SIMUL.$$('[data-favorite="' + id + '"]').forEach(function (btn) {
-        btn.textContent = '★';
-        btn.style.color = '#C9A84C';
+      .catch(function (error) {
+        SIMUL.toast(error.message);
+        GRID.innerHTML = '';
+        alternarVista(false);
       });
-    });
   }
 
   /* ----------------------------------------------------------
@@ -58,15 +82,12 @@
      ---------------------------------------------------------- */
 
   document.addEventListener('simul:ready', function () {
-    const user = SIMUL.guardPage();
-    if (!user) return;
-
     pintar();
 
-    /* Quitar un favorito desde esta misma pantalla vacía la
-       cuadrícula al instante. */
-    document.addEventListener('simul:favorites-changed', function (event) {
-      if (!event.detail.active) pintar();
+    /* app.js ya actualizó Store y avisó del cambio: solo
+       necesitamos pedir la lista otra vez a la API. */
+    document.addEventListener('simul:favorites-changed', function () {
+      pintar();
     });
   });
 

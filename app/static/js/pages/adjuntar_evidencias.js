@@ -1,10 +1,6 @@
 /* ==========================================================
-   ADJUNTAR EVIDENCIAS  (RNF-ACC-01)
-
-   Lista de archivos con barra de progreso simulada. Al enviar
-   confirma que todo terminó de cargar; la API REST ya expone
-   POST /api/museo/contenido/<id>/evidencias con
-   multipart/form-data.
+   ADJUNTAR EVIDENCIAS
+   Cada archivo se registra con POST /contenido/<id>/evidencias.
    ========================================================== */
 
 (function () {
@@ -22,33 +18,94 @@
   const ENVIAR  = $('#evidence-submit');
   const PANTALLA = $('#evidence-done');
 
-  /* Los dos archivos que ya traía el prototipo al abrir la
-     pantalla: uno completo y otro a medio cargar. */
+  /* Los dos ejemplos del prototipo pasan a ser registros reales. */
   let archivos = [
-    { id: '1', nombre: 'Informe_Final_SISTEC.pdf', tamano: '3.2 MB',
-      tipo: 'pdf', progreso: 100 },
-    { id: '2', nombre: 'Presentacion_Premio.pptx', tamano: '8.7 MB',
-      tipo: 'pptx', progreso: 68 }
+    {
+      id: 'ejemplo-1',
+      nombre: 'Informe_Final_SISTEC.pdf',
+      extension: 'pdf',
+      tamano: '3.2 MB',
+      tipo: 'doc',
+      url_archivo: 'Informe_Final_SISTEC.pdf',
+      alt_text: 'Informe_Final_SISTEC.pdf'
+    },
+    {
+      id: 'ejemplo-2',
+      nombre: 'Presentacion_Premio.pptx',
+      extension: 'pptx',
+      tamano: '8.7 MB',
+      tipo: 'doc',
+      url_archivo: 'Presentacion_Premio.pptx',
+      alt_text: 'Presentacion_Premio.pptx'
+    }
   ];
 
+  let contenidoId = null;
+  let aviso = null;
+  let guardando = false;
+
   /* ----------------------------------------------------------
-     1. PINTADO
+     1. ID DEL CONTENIDO
      ---------------------------------------------------------- */
 
-  function iconoDe(tipo) {
-    return ICONOS[String(tipo).toLowerCase()] || '📄';
+  function idDesdePagina() {
+    const candidatos = [];
+
+    if (window.SIMUL_CONTENT_ID !== undefined &&
+        window.SIMUL_CONTENT_ID !== null &&
+        window.SIMUL_CONTENT_ID !== '') {
+      candidatos.push(window.SIMUL_CONTENT_ID);
+    }
+
+    const parametros = new URLSearchParams(window.location.search);
+
+    candidatos.push(parametros.get('id'));
+    candidatos.push(parametros.get('contenido_id'));
+
+    const partes = window.location.pathname.split('/').filter(Boolean);
+    candidatos.push(partes[partes.length - 1]);
+
+    for (let i = 0; i < candidatos.length; i++) {
+      const numero = SIMULApi.idNumerico(candidatos[i]);
+      if (numero) return numero;
+    }
+
+    return null;
+  }
+
+  function crearAviso() {
+    aviso = document.createElement('p');
+
+    aviso.id = 'evidence-content-id';
+    aviso.className = 'text-xs text-gray-500 mb-6';
+    aviso.style.fontFamily = 'Inter, sans-serif';
+
+    aviso.textContent = contenidoId
+      ? 'Evidencias para el contenido #' + contenidoId + '.'
+      : 'No se indicó el contenido. Abre esta página con ?id=<número> ' +
+        'o define window.SIMUL_CONTENT_ID.';
+
+    if (ZONA && ZONA.parentNode) {
+      ZONA.parentNode.insertBefore(aviso, ZONA);
+    }
+  }
+
+  /* ----------------------------------------------------------
+     2. PINTADO
+     ---------------------------------------------------------- */
+
+  function iconoDe(archivo) {
+    return ICONOS[archivo.extension] || ICONOS[archivo.tipo] || '📄';
   }
 
   function pintar() {
     LISTA.innerHTML = archivos.map(function (archivo) {
-      const completo = archivo.progreso >= 100;
-
       return '' +
         '<li class="simul-card p-4">' +
           '<div class="flex items-center gap-4">' +
 
             '<span class="text-2xl shrink-0">' +
-              iconoDe(archivo.tipo) +
+              iconoDe(archivo) +
             '</span>' +
 
             '<span class="flex-1 min-w-0">' +
@@ -57,18 +114,16 @@
                 'truncate" style="font-family:\'Montserrat\',sans-serif">' +
                   SIMUL.escapeHtml(archivo.nombre) +
                 '</span>' +
-                (completo
-                  ? '<span class="text-green-600 text-xs shrink-0">✓</span>'
-                  : '') +
+                '<span class="tag tag-blue shrink-0">' +
+                  SIMUL.capitalize(archivo.tipo) +
+                '</span>' +
               '</span>' +
 
               '<span class="flex items-center gap-3 mt-2">' +
-                '<span class="flex-1 h-1.5 rounded-full bg-gray-200 ' +
-                'overflow-hidden">' +
-                  '<span class="block h-full rounded-full ' +
-                  'transition-all duration-300" style="width:' +
-                    archivo.progreso + '%;background:' +
-                    (completo ? '#059669' : '#C8102E') + '"></span>' +
+                '<span class="text-xs text-gray-400 truncate">' +
+                  (archivo.tipo === 'foto'
+                    ? 'Texto alternativo: ' + archivo.alt_text
+                    : 'URL: ' + archivo.url_archivo) +
                 '</span>' +
                 '<span class="text-xs text-gray-400 shrink-0">' +
                   SIMUL.escapeHtml(archivo.tamano) +
@@ -83,56 +138,50 @@
         '</li>';
     }).join('');
 
-    /* Estado vacío y contador. */
     const hay = archivos.length > 0;
 
     VACIO.classList.toggle('hidden', hay);
 
-    RESUMEN.textContent = hay
-      ? archivos.length + (archivos.length === 1
-          ? ' archivo'
-          : ' archivos')
-      : '0 archivos';
+    RESUMEN.textContent = !contenidoId
+      ? 'Sin contenido asociado'
+      : hay
+        ? archivos.length + (archivos.length === 1
+            ? ' archivo'
+            : ' archivos')
+        : '0 archivos';
 
-    /* Solo se habilita el envío si no hay cargas en curso. */
-    ENVIAR.disabled = !hay || archivos.some(function (a) {
-      return a.progreso < 100;
-    });
-
-    ENVIAR.textContent = ENVIAR.disabled && hay
-      ? 'Espera a que termine la carga…'
-      : 'Guardar evidencias';
+    ENVIAR.disabled = guardando || !hay || !contenidoId;
+    ENVIAR.textContent = guardando ? 'Guardando…' : 'Guardar evidencias';
   }
 
   /* ----------------------------------------------------------
-     2. CARGA
+     3. SELECCIÓN DE ARCHIVOS
      ---------------------------------------------------------- */
+
+  function tipoDe(extension) {
+    if (['png', 'jpg', 'jpeg', 'gif', 'webp'].indexOf(extension) !== -1) {
+      return 'foto';
+    }
+    if (['mp4', 'webm', 'mov'].indexOf(extension) !== -1) {
+      return 'video';
+    }
+    return 'doc';
+  }
 
   function agregar(listaRecibida) {
     Array.prototype.forEach.call(listaRecibida, function (file) {
       const extension = (file.name.split('.').pop() || '').toLowerCase();
+      const tipo = tipoDe(extension);
 
-      const archivo = {
+      archivos.push({
         id: 'f' + Date.now() + Math.random().toString(36).slice(2, 7),
         nombre: file.name,
+        extension: extension,
         tamano: (file.size / 1024 / 1024).toFixed(1) + ' MB',
-        tipo: extension,
-        progreso: 0
-      };
-
-      archivos.push(archivo);
-
-      /* Progreso simulado: sube en saltos hasta llegar a 100. */
-      const intervalo = window.setInterval(function () {
-        archivo.progreso += Math.random() * 22 + 6;
-
-        if (archivo.progreso >= 100) {
-          archivo.progreso = 100;
-          window.clearInterval(intervalo);
-        }
-
-        pintar();
-      }, 320);
+        tipo: tipo,
+        url_archivo: file.name,
+        alt_text: tipo === 'foto' ? file.name : ''
+      });
     });
 
     pintar();
@@ -144,7 +193,6 @@
     });
   }
 
-  /* Arrastrar y soltar sobre toda la zona. */
   if (ZONA) {
     ['dragenter', 'dragover'].forEach(function (evento) {
       ZONA.addEventListener(evento, function (e) {
@@ -167,10 +215,6 @@
     });
   }
 
-  /* ----------------------------------------------------------
-     3. QUITAR ARCHIVOS
-     ---------------------------------------------------------- */
-
   if (LISTA) {
     LISTA.addEventListener('click', function (event) {
       const boton = event.target.closest('[data-remove]');
@@ -183,37 +227,99 @@
   }
 
   /* ----------------------------------------------------------
-     4. ENVÍO
+     4. ENVÍO A LA API
      ---------------------------------------------------------- */
 
+  function mostrarResultado(guardadas, fallidas) {
+    if (!PANTALLA) return;
+
+    const texto = PANTALLA.querySelector('p');
+
+    if (texto) {
+      texto.textContent =
+        'Se guardaron ' + guardadas +
+        (guardadas === 1 ? ' evidencia' : ' evidencias') +
+        ' en el contenido #' + contenidoId + '.' +
+        (fallidas
+          ? ' No se pudieron guardar ' + fallidas + '.'
+          : '');
+    }
+
+    SIMUL.$$('#evidence-dropzone, #evidence-list, #evidence-empty, ' +
+             '#evidence-submit').forEach(function (el) {
+      el.classList.add('hidden');
+    });
+
+    if (aviso) aviso.classList.add('hidden');
+
+    PANTALLA.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   function enviar() {
+    if (!contenidoId) {
+      SIMUL.toast(
+        'No se indicó el contenido de las evidencias',
+        'error'
+      );
+      return;
+    }
+
     if (archivos.length === 0) {
       SIMUL.toast('Adjunta al menos un archivo antes de guardar', 'error');
       return;
     }
 
-    const pendientes = archivos.filter(function (a) {
-      return a.progreso < 100;
-    });
+    const pendientes = archivos.slice();
+    let guardadas = 0;
+    let fallidas = 0;
+    let cadena = Promise.resolve();
 
-    if (pendientes.length) {
-      SIMUL.toast('Espera a que terminen de cargar los archivos', 'info');
-      return;
-    }
-
+    guardando = true;
     ENVIAR.disabled = true;
     ENVIAR.textContent = 'Guardando…';
 
-    window.setTimeout(function () {
-      /* Se oculta el formulario y se muestra la confirmación. */
-      SIMUL.$$('#evidence-dropzone, #evidence-list, #evidence-empty, ' +
-               '#evidence-submit').forEach(function (el) {
-        el.classList.add('hidden');
-      });
+    pendientes.forEach(function (archivo) {
+      cadena = cadena
+        .then(function () {
+          return SIMULApi.agregarEvidencia(contenidoId, {
+            tipo: archivo.tipo,
+            url_archivo: archivo.url_archivo,
+            alt_text: archivo.alt_text
+          });
+        })
+        .then(function () {
+          guardadas++;
+          archivos = archivos.filter(function (a) {
+            return a.id !== archivo.id;
+          });
+          pintar();
+        })
+        .catch(function (error) {
+          fallidas++;
+          SIMUL.toast(
+            error.message || 'No se pudo guardar ' + archivo.nombre,
+            'error'
+          );
+        });
+    });
 
-      PANTALLA.classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 700);
+    cadena.then(function () {
+      guardando = false;
+      pintar();
+
+      if (guardadas === 0) return;
+
+      mostrarResultado(guardadas, fallidas);
+
+      if (!fallidas) {
+        SIMUL.toast('Evidencias guardadas en la base', 'success');
+      }
+    }).catch(function (error) {
+      guardando = false;
+      pintar();
+      SIMUL.toast(error.message || 'No se pudo completar el envío', 'error');
+    });
   }
 
   /* ----------------------------------------------------------
@@ -221,7 +327,12 @@
      ---------------------------------------------------------- */
 
   document.addEventListener('simul:ready', function () {
-    if (SIMUL.guardPage('teacher')) pintar();
+    if (!SIMUL.guardPage('teacher')) return;
+
+    contenidoId = idDesdePagina();
+    crearAviso();
+    pintar();
+
     if (ENVIAR) ENVIAR.addEventListener('click', enviar);
   });
 

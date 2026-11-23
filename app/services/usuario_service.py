@@ -205,6 +205,10 @@ class UsuarioService:
 
             usuario.nombre = data["nombre"]
 
+        if "biografia" in data and data["biografia"] is not None:
+
+            usuario.biografia = data["biografia"]
+
         self.repository.update(usuario)
 
         return success(

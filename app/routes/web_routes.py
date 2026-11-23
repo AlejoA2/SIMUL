@@ -10,17 +10,17 @@ los templates sigan funcionando tal cual.
 
 Nota sobre los datos
 --------------------
-Las vistas HTML son el entregable del corte 2: cada una lee
-de `app/data/simul_data.py` y entrega además el mismo JSON a
-la página mediante `tojson`, de modo que el JavaScript
-filtra y busca sin volver a pedirlo al servidor. La API REST
-del corte 3 (/api/museo/*, respaldada por MySQL) es
-independiente y se consume desde Swagger.
+Las vistas conservan el maquetado del corte 2 y todavía
+reciben catálogos de `app/data/simul_data.py` para pintar
+rápido. Todas las acciones y las lecturas dinámicas pasan
+por `/api/museo/*` (MySQL) mediante `SIMULApi`:
+búsqueda, login, bandeja, decisiones, favoritos, comentarios,
+reacciones, aportes, usuarios, contenido, evidencias,
+indicadores y gamificación. Swagger consume la misma API.
 
-Las páginas privadas (dashboards, administración) no se
-protegen en el servidor porque la sesión vive en
-localStorage; la guarda real la aplica `guardPage()` en
-app/static/js/app.js.
+Las páginas privadas mantienen `guardPage()` en el navegador
+como filtro visible; la autoridad real está en la API, que
+exige token y revisa roles en cada operación protegida.
 =============================================================
 """
 
@@ -91,7 +91,7 @@ def explorar(request: Request):
 def buscar(request: Request):
     """
     Buscador con filtros por texto, categoría y año
-    (RF-EXP-02). El filtrado ocurre en el navegador.
+    (RF-EXP-02). La consulta se envía a /api/museo/contenido.
     """
     return renderizar(
         request,
@@ -412,6 +412,10 @@ def adjuntar_evidencias(request: Request):
         "pages/adjuntar_evidencias.html",
         icons=data.FILE_ICONS,
         demo=data.ROLE_DATA["teacher"],
+        contenido_id=(
+            request.query_params.get("id")
+            or request.query_params.get("contenido_id")
+        ),
         **_common_context()
     )
 

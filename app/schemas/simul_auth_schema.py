@@ -75,6 +75,11 @@ class UsuarioUpdateIn(ModeloSalida):
         max_length=120
     )
 
+    biografia: str | None = Field(
+        default=None,
+        max_length=1000
+    )
+
 
 # ============================================================
 # SALIDA

@@ -7,7 +7,8 @@
    así sucesivamente.
 
    Las definiciones de campo llegan desde Python en
-   `simul_data.TEACHER_FORMS`; aquí solo se pintan.
+   `simul_data.TEACHER_FORMS`; aquí solo se pintan. El alta se
+   envía a la API con SIMULApi.crearContenido.
    ========================================================== */
 
 (function () {
@@ -33,6 +34,22 @@
     investigacion: 'Avance de investigación',
     hall: 'Persona para el Hall de la Fama'
   };
+
+  /* Los tipos del formulario no coinciden con los de la API. */
+  const TIPOS_API = {
+    historia: 'acontecimiento',
+    premio: 'premio',
+    proyecto: 'proyecto',
+    evento: 'evento',
+    investigacion: 'avance_investigacion',
+    hall: 'hall'
+  };
+
+  const IMAGEN_POR_DEFECTO =
+    'https://images.unsplash.com/photo-1518770660439-4636190af475' +
+    '?w=800&h=500&fit=crop&auto=format';
+
+  const TEXTO_ENVIAR = ENVIAR ? ENVIAR.textContent : 'Registrar contenido';
 
   let tipoSeleccionado = null;
 
@@ -151,6 +168,11 @@
       if (obligatorio && !input.value.trim()) {
         SIMUL.setFieldError(input, 'Este campo es obligatorio');
         valido = false;
+      } else if (definicion.type === 'textarea' &&
+                 input.value.trim().length < 10) {
+        /* La API exige descripcion de al menos 10 caracteres. */
+        SIMUL.setFieldError(input, 'Escribe al menos 10 caracteres');
+        valido = false;
       } else {
         SIMUL.setFieldError(input, '');
       }
@@ -169,6 +191,20 @@
      4. ENVÍO
      ---------------------------------------------------------- */
 
+  function lista(texto) {
+    return String(texto || '')
+      .split(',')
+      .map(function (parte) { return parte.trim(); })
+      .filter(function (parte) { return parte.length > 0; });
+  }
+
+  function anioDe(datos) {
+    const anio = Number(datos['ano'] || datos['ano-de-ingreso-al-hall']);
+    return anio >= 1900 && anio <= 2100
+      ? anio
+      : new Date().getFullYear();
+  }
+
   function enviar(evento) {
     evento.preventDefault();
 
@@ -185,7 +221,7 @@
     ENVIAR.disabled = true;
     ENVIAR.textContent = 'Registrando…';
 
-    /* Recolecta lo escrito para guardarlo en el catálogo local. */
+    /* Recolecta lo escrito para enviarlo a la API. */
     const plantilla = plantillaDe(tipoSeleccionado);
     const datos = {};
 
@@ -195,42 +231,69 @@
     });
 
     const user = Store.getUser();
+    const titulo = datos['nombre-del-premio'] ||
+                   datos['nombre-completo'] ||
+                   datos['nombre-del-proyecto'] ||
+                   datos['titulo'] ||
+                   'Contenido sin título';
 
-    /* El contenido nace pendiente: nadie publica sin pasar
-       por la bandeja de validación del administrador. */
-    Store.upsertContent({
-      id: 'n' + Date.now(),
-      title: datos['nombre-del-premio'] ||
-             datos['nombre-completo'] ||
-             datos['nombre-del-proyecto'] ||
-             datos['titulo'] ||
-             'Contenido sin título',
-      year: Number(datos['ano'] || datos['ano-de-ingreso-al-hall']) || new Date().getFullYear(),
-      category: ETIQUETAS[tipoSeleccionado] || 'Proyecto',
-      categoryTag: 'tag-blue',
-      description: datos['descripcion'] ||
-                   datos['principales-logros'] || '',
-      image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=500&fit=crop&auto=format',
-      author: user ? user.name : 'Docente',
-      tags: [],
-      status: 'pendiente',
-      participants: datos['integrantes'] ? [datos['integrantes']] : [],
-      technologies: datos['tecnologias-utilizadas']
-        ? datos['tecnologias-utilizadas'].split(',').map(function (t) {
-            return t.trim();
-          })
-        : [],
-      documents: [],
-      observations: ''
-    });
+    const payload = {
+      titulo: titulo,
+      tipo: TIPOS_API[tipoSeleccionado] || 'proyecto',
+      categoria: datos['categoria'] ||
+                 ETIQUETAS[tipoSeleccionado] ||
+                 'Proyecto',
+      anio: anioDe(datos),
+      descripcion: datos['descripcion'] || datos['principales-logros'] || '',
+      imagen: IMAGEN_POR_DEFECTO,
+      alt_text: 'Imagen representativa de ' + titulo,
+      tecnologias: lista(datos['tecnologias-utilizadas']),
+      participantes: lista(
+        datos['integrantes'] ||
+        datos['equipo-persona-galardonada'] ||
+        datos['responsable'] ||
+        datos['cargo-rol-en-el-programa']
+      )
+    };
 
-    window.setTimeout(function () {
-      SIMUL.toast(
-        'Contenido registrado. Queda pendiente de validación.',
-        'success'
-      );
-      window.location.href = '/dashboard/docente';
-    }, 700);
+    /* Campos propios de cada subtipo, cuando el formulario los da. */
+    if (tipoSeleccionado === 'premio' && datos['entidad-otorgante']) {
+      payload.lugar = datos['entidad-otorgante'];
+    }
+
+    if (tipoSeleccionado === 'hall') {
+      const opciones = ['Docente', 'Egresado', 'Investigador', 'Estudiante'];
+      const cargo = (datos['cargo-rol-en-el-programa'] || '').toLowerCase();
+      const categoriaHall = opciones.filter(function (nombre) {
+        return cargo.indexOf(nombre.toLowerCase()) !== -1;
+      })[0];
+
+      if (categoriaHall) payload.categoria_hall = categoriaHall;
+
+      if (datos['vinculo-con-la-universidad-libre']) {
+        payload.descripcion += '\n' + datos['vinculo-con-la-universidad-libre'];
+      }
+    }
+
+    SIMULApi.crearContenido(payload)
+      .then(function (creado) {
+        const id = creado && creado.id_contenido;
+
+        SIMUL.toast(
+          'Contenido registrado' + (id ? ' con el ID ' + id : '') +
+          '. Queda pendiente de validación.',
+          'success'
+        );
+
+        window.location.href = user && user.role === 'admin'
+          ? '/admin/validacion'
+          : '/mis-aportes';
+      })
+      .catch(function (error) {
+        ENVIAR.disabled = false;
+        ENVIAR.textContent = TEXTO_ENVIAR;
+        SIMUL.toast(error.message);
+      });
   }
 
   /* ----------------------------------------------------------

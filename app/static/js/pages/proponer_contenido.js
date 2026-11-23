@@ -2,11 +2,11 @@
    PROPUESTA DE PROYECTO  (RF-PRY-01)
 
    Formulario largo con validación en el navegador, selección
-   múltiple de tecnologías, vista previa del docente asesor y
-   carga simulada de evidencias.
+   múltiple de tecnologías y vista previa del docente asesor.
 
-   Al enviar, la propuesta queda en `simul.proposals` para que
-   el panel del docente pueda verla asignada.
+   Al enviar, SIMULApi.crearContenido guarda un proyecto en la
+   API. Los archivos elegidos se listan, pero no se suben: el
+   modulo de evidencias no recibe archivos desde esta vista.
    ========================================================== */
 
 (function () {
@@ -23,6 +23,10 @@
   const contador     = $('#description-counter');
 
   const LIMITE_DESCRIPCION = 600;
+  const TEXTO_ENVIAR = botonEnviar ? botonEnviar.textContent : 'Enviar propuesta';
+  const IMAGEN_POR_DEFECTO =
+    'https://images.unsplash.com/photo-1518770660439-4636190af475' +
+    '?w=800&h=500&fit=crop&auto=format';
 
   const campos = {
     nombre:      $('#prop-name'),
@@ -34,7 +38,7 @@
     resultados:  $('#prop-results')
   };
 
-  /* Archivos cargados con su barra de progreso. */
+  /* Archivos seleccionados en el navegador (no se transmiten). */
   let archivos = [];
 
   /* ----------------------------------------------------------
@@ -115,11 +119,19 @@
   function pintarArchivos() {
     if (!lista) return;
 
-    lista.innerHTML = archivos.map(function (archivo) {
-      const colores = archivo.progreso === 100
-        ? { fondo: '#059669', texto: 'Listo' }
-        : { fondo: '#C8102E', texto: Math.round(archivo.progreso) + '%' };
+    if (!archivos.length) {
+      lista.innerHTML = '';
+      return;
+    }
 
+    const aviso =
+      '<li class="text-xs text-gray-400" ' +
+      'style="font-family:\'Inter\',sans-serif">' +
+        'Los archivos seleccionados no se suben: la API guarda solo ' +
+        'los datos de la propuesta.' +
+      '</li>';
+
+    lista.innerHTML = aviso + archivos.map(function (archivo) {
       return '' +
         '<li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 ' +
         'border border-gray-100">' +
@@ -129,19 +141,14 @@
             'style="font-family:\'Inter\',sans-serif">' +
               SIMUL.escapeHtml(archivo.nombre) +
             '</span>' +
-            '<span class="block h-1.5 rounded-full bg-gray-200 mt-2 ' +
-            'overflow-hidden">' +
-              '<span class="block h-full rounded-full" ' +
-              'style="width:' + archivo.progreso + '%;' +
-              'background:' + colores.fondo + '"></span>' +
-            '</span>' +
           '</span>' +
           '<span class="text-xs text-gray-400 shrink-0">' +
             SIMUL.escapeHtml(archivo.tamano) +
           '</span>' +
-          '<span class="text-xs font-semibold shrink-0 w-10 text-right" ' +
-          'style="font-family:\'Montserrat\',sans-serif;color:' +
-            colores.fondo + '">' + colores.texto + '</span>' +
+          '<span class="text-xs font-semibold shrink-0 w-20 text-right" ' +
+          'style="font-family:\'Montserrat\',sans-serif;color:#6B7280">' +
+            'Sin subir' +
+          '</span>' +
           '<button type="button" data-remove-file="' + archivo.id + '" ' +
           'class="text-gray-400 hover:text-red-600 transition-colors ' +
           'shrink-0" aria-label="Quitar archivo">✕</button>' +
@@ -149,29 +156,13 @@
     }).join('');
   }
 
-  /* Progreso simulado con temporizadores, igual que en el
-     prototipo: el archivo "sube" sin tocar el servidor. */
   function agregarArchivos(listaRecibida) {
     Array.prototype.forEach.call(listaRecibida, function (file) {
-      const archivo = {
+      archivos.push({
         id: 'f' + Date.now() + Math.random().toString(36).slice(2, 7),
         nombre: file.name,
-        tamano: formato(file.size),
-        progreso: 0
-      };
-
-      archivos.push(archivo);
-
-      const intervalo = window.setInterval(function () {
-        archivo.progreso += Math.random() * 25 + 5;
-
-        if (archivo.progreso >= 100) {
-          archivo.progreso = 100;
-          window.clearInterval(intervalo);
-        }
-
-        pintarArchivos();
-      }, 350);
+        tamano: formato(file.size)
+      });
     });
 
     pintarArchivos();
@@ -298,6 +289,19 @@
     errorGeneral.classList.remove('hidden');
   }
 
+  function ajustarMensajeExito() {
+    if (!panelExito) return;
+
+    const parrafo = panelExito.querySelector('p.text-gray-500');
+    if (!parrafo) return;
+
+    const enlace = parrafo.querySelector('a');
+    parrafo.textContent =
+      'Tu propuesta quedó registrada y pendiente de validación. ' +
+      'Podrás seguir su estado desde ';
+    if (enlace) parrafo.appendChild(enlace);
+  }
+
   function enviar(evento) {
     evento.preventDefault();
 
@@ -309,53 +313,74 @@
       return;
     }
 
-    /* Espera a que terminen de "subir" los archivos. */
-    if (archivos.some(function (a) { return a.progreso < 100; })) {
-      mostrarErrorGeneral(
-        'Espera a que terminen de cargar los archivos antes de enviar.'
-      );
-      return;
-    }
-
-    const user = Store.getUser();
+    const titulo = campos.nombre.value.trim();
     const opcionAsesor = campos.asesor.selectedOptions[0];
+    const nombreAsesor = opcionAsesor
+      ? opcionAsesor.getAttribute('data-name') || ''
+      : '';
+    const idAsesor = SIMULApi.idNumerico(campos.asesor.value);
 
-    Store.addProposal({
-      name: campos.nombre.value.trim(),
-      year: campos.anio.value,
-      category: campos.categoria.value,
-      members: campos.integrantes.value.trim(),
-      teacherId: campos.asesor.value,
-      teacherName: opcionAsesor ? opcionAsesor.getAttribute('data-name') : '',
-      description: campos.descripcion.value.trim(),
-      technologies: tecnologíasElegidas(),
-      results: campos.resultados.value.trim(),
-      documents: archivos.map(function (a) {
-        return { name: a.nombre, size: a.tamano };
-      }),
-      studentName: user ? user.name : '',
-      studentEmail: user ? user.email : ''
-    });
+    let descripcion = campos.descripcion.value.trim();
 
-    /* Resumen de la propuesta enviada. */
-    const resumen = $('#proposal-summary');
-    if (resumen) {
-      resumen.textContent =
-        campos.nombre.value.trim() + ' · ' +
-        campos.anio.value + ' · ' +
-        archivos.length + (archivos.length === 1
-          ? ' evidencia adjunta'
-          : ' evidencias adjuntas');
+    /* Si el asesor es texto, se conserva su nombre, sin inventar id. */
+    if (idAsesor === null && nombreAsesor) {
+      descripcion += '\n\nDocente asesor: ' + nombreAsesor;
     }
+
+    const payload = {
+      titulo: titulo,
+      tipo: 'proyecto',
+      categoria: campos.categoria.value,
+      anio: Number(campos.anio.value),
+      descripcion: descripcion,
+      imagen: IMAGEN_POR_DEFECTO,
+      alt_text: 'Imagen representativa del proyecto ' + titulo,
+      tecnologias: tecnologíasElegidas(),
+      participantes: campos.integrantes.value.trim()
+        .split(',').map(function (nombre) { return nombre.trim(); })
+        .filter(function (nombre) { return nombre.length > 0; }),
+      resultados_impacto: campos.resultados.value.trim()
+    };
+
+    if (idAsesor !== null) payload.id_asesor = idAsesor;
 
     botonEnviar.disabled = true;
     botonEnviar.textContent = 'Enviando…';
 
-    window.setTimeout(function () {
-      formulario.classList.add('hidden');
-      panelExito.classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 700);
+    SIMULApi.crearContenido(payload)
+      .then(function (creado) {
+        /* Resumen de la propuesta enviada. */
+        const resumen = $('#proposal-summary');
+        if (resumen) {
+          resumen.textContent =
+            titulo + ' · ' + campos.anio.value + ' · ' +
+            (creado && creado.id_contenido
+              ? 'ID ' + creado.id_contenido
+              : 'pendiente de validación');
+        }
+
+        ajustarMensajeExito();
+
+        formulario.classList.add('hidden');
+        panelExito.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        if (archivos.length) {
+          SIMUL.toast(
+            'Propuesta guardada. Los archivos seleccionados no se subieron; ' +
+            'solo se registraron los datos.',
+            'info'
+          );
+        } else {
+          SIMUL.toast('Propuesta guardada correctamente.', 'success');
+        }
+      })
+      .catch(function (error) {
+        mostrarErrorGeneral(error.message);
+        botonEnviar.disabled = false;
+        botonEnviar.textContent = TEXTO_ENVIAR;
+        SIMUL.toast(error.message);
+      });
   }
 
   /* ----------------------------------------------------------

@@ -187,7 +187,7 @@
     });
 
     $$('[data-user-avatar]').forEach(function (el) {
-      el.src = user.avatar;
+      if (user.avatar) el.src = user.avatar;
       el.alt = user.name;
     });
 
@@ -302,18 +302,48 @@
       }
 
       const id = btn.getAttribute('data-favorite');
-      const ahoraEsFavorito = Store.toggleFavorite(id);
+      const numero = window.SIMULApi
+        ? SIMULApi.idNumerico(id)
+        : Number(id);
 
-      paintFavoriteButton(id);
-      toast(
-        ahoraEsFavorito ? 'Guardado en favoritos' : 'Eliminado de favoritos',
-        ahoraEsFavorito ? 'success' : 'info'
-      );
+      if (!numero) {
+        toast('Este contenido no está en la base de datos', 'error');
+        return;
+      }
 
-      /* Avisa a la página por si necesita repintarse. */
-      document.dispatchEvent(new CustomEvent('simul:favorites-changed', {
-        detail: { id: id, active: ahoraEsFavorito }
-      }));
+      btn.disabled = true;
+
+      SIMULApi.toggleFavorito(numero)
+        .then(function (datos) {
+          const activo = datos.es_favorito;
+          const actuales = (Store.getFavorites() || []).slice();
+
+          if (activo && actuales.indexOf(String(numero)) === -1) {
+            actuales.push(String(numero));
+          } else if (!activo) {
+            const en = actuales.indexOf(String(numero));
+            if (en !== -1) actuales.splice(en, 1);
+          }
+
+          Store.setFavorites(actuales);
+          paintFavoriteButton(numero);
+          toast(
+            activo ? 'Guardado en favoritos' : 'Eliminado de favoritos',
+            activo ? 'success' : 'info'
+          );
+
+          document.dispatchEvent(new CustomEvent('simul:favorites-changed', {
+            detail: { id: numero, active: activo }
+          }));
+        })
+        .catch(function (error) {
+          toast(error.message || 'No se pudo guardar el favorito', 'error');
+        })
+        .then(function () {
+          btn.disabled = false;
+        }, function () {
+          btn.disabled = false;
+        });
     });
 
     /* Refleja el estado inicial en los botones ya pintados. */
@@ -324,8 +354,36 @@
      6. ARRANQUE
      ---------------------------------------------------------- */
 
-  function boot() {
-    /* Los catálogos simulados se siembran una sola vez. */
+  /** La copia local se refresca con lo que hay en MySQL. */
+  async function cargarDatosDeLaAPI(user) {
+    if (!window.SIMULApi) return;
+
+    try {
+      const respuesta = await SIMULApi.contenido({ per_page: 100 });
+      const filas = (respuesta && respuesta.items) || [];
+
+      if (filas.length) {
+        Store.replaceContent(filas.map(SIMULApi.aTarjeta));
+      }
+    } catch (e) {
+      /* Sin conexión se conserva la copia anterior. */
+    }
+
+    if (!user) return;
+
+    try {
+      const favoritos = await SIMULApi.favoritos();
+      Store.setFavorites((favoritos || []).map(function (item) {
+        return String(item.id_contenido || item.id);
+      }));
+    } catch (e) {
+      /* Sin sesión válida se conserva la copia anterior. */
+    }
+  }
+
+  async function boot() {
+    /* Semilla inicial del prototipo; enseguida se reemplaza
+       por la respuesta de la API. */
     if (window.SIMUL_CONTENT) Store.initContent(window.SIMUL_CONTENT);
     if (window.SIMUL_QUEUE)   Store.initQueue(window.SIMUL_QUEUE);
     if (window.SIMUL_COMMENTS) Store.initComments(window.SIMUL_COMMENTS);
@@ -334,6 +392,7 @@
     Store.initProposals();
 
     const user = Store.getUser();
+    await cargarDatosDeLaAPI(user);
 
     paintAuthBlocks(user);
     if (user) paintUser(user);
