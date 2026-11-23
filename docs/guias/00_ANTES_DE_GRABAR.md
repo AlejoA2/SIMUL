@@ -62,12 +62,13 @@ Cada bloque del video tiene este formato:
 
 ```
 ### [mm:ss] Título del bloque
-👉 MOSTRAR: qué pantalla, qué archivo y qué líneas hay que enseñar.
-> "Texto literal que se dice en voz alta."
+> "Me voy al archivo tal, líneas tantas a tantas… y después hago tal cosa."
 ```
 
-La hora es **acumulada**: `[1:00]` significa "a partir del minuto 1". El bloque
-`👉 MOSTRAR:` no se lee: es una instrucción para vos.
+La hora es **acumulada**: `[1:00]` significa "a partir del minuto 1". Todo lo que
+está entre comillas **se dice en voz alta**, incluidos el nombre del archivo y el
+rango de líneas. No hay instrucciones aparte: cuando el texto dice «me voy a…»,
+movete al editor, a Swagger, a DBeaver o a la terminal y mostrás eso mismo.
 
 ## 5. Checklist rápido
 

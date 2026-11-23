@@ -1,7 +1,7 @@
 # Video 3 — «Buscar / filtrar» (10 min)
 
 **Integrante 3.** Ancla única: búsqueda y filtrado del catálogo.
-**No mencionar** los otros dos botones en ningún momento. Mostrar todo el proyecto a
+**No mencionar** los otros dos botones en ningún momento. Recorre todo el proyecto a
 través de este botón.
 
 Leé antes [00_ANTES_DE_GRABAR.md](00_ANTES_DE_GRABAR.md) (Docker, credenciales y
@@ -11,27 +11,21 @@ acuerdo previo).
 
 Tener abiertos estos archivos en el editor, exactamente en estas líneas:
 
-| Archivo | Líneas | Qué hay que verificar |
+| Archivo | Líneas | Qué vas a señalar |
 |---|---|---|
-| `app/templates/pages/buscar.html` | `11` | `window.SIMUL_CONTENT = {{ simul_content | tojson }}` |
-| `app/templates/pages/buscar.html` | `50-63` | campo `id="search-input"` |
-| `app/templates/pages/buscar.html` | `146-152` | `id="search-count"` |
-| `app/templates/pages/buscar.html` | `190-193` | `id="search-results"` |
-| `app/templates/pages/buscar.html` | `216-218` | botón `id="search-clear"` |
-| `app/static/js/pages/buscar.js` | `18` | `CATALOGO = window.SIMUL_CONTENT` |
-| `app/static/js/pages/buscar.js` | `29`, `36` | `#search-input` y `#search-clear` |
-| `app/static/js/pages/buscar.js` | `43-48`, `49-...` | `publicados()` y `coincide()` |
-| `app/routes/web_routes.py` | `91-...` | vista `buscar` |
-| `app/routes/contenido_routes.py` | `39-...` | `GET /api/museo/contenido/` y sus `Query(...)` |
-| `app/controllers/contenido_controller.py` | `20-...` | `listar` (normaliza `None`) |
-| `app/services/contenido_service.py` | `74-...` | `listar` |
-| `app/repositories/contenido_repository.py` | `13-...` | `@dataclass Pagina` |
-| `app/repositories/contenido_repository.py` | `65-...` | `get_publicados` (count, order, offset, limit) |
-| `app/repositories/contenido_repository.py` | `369-...` | `_aplicar_filtros` (`ilike`, `IN`, `extract`) |
-| `app/models/types.py` | `6-...` | `YearType` (YEAR en MySQL / SMALLINT en SQLite) |
-| `db/DDL.sql` | `108-109` | `idx_contenido_estado`, `idx_contenido_tipo` |
-| `db/DDL.sql` | `451-...` | vista `v_ranking` |
-| `tests/test_app.py` | `511-525` | `test_ranking_y_catalogos` |
+| `app/templates/pages/buscar.html` | `11`, `50-63`, `146-152`, `190-193`, `216-218` | datos, campo, contador, resultados y botón de limpiar |
+| `app/static/js/pages/buscar.js` | `18`, `29`, `36` | datos cargados, campo y botón |
+| `app/static/js/pages/buscar.js` | `43-47`, `49-77` | solo publicados y comparación de filtros |
+| `app/routes/web_routes.py` | `90-108` | vista HTML del buscador |
+| `app/routes/contenido_routes.py` | `35-86` | entrada de la consulta y filtros |
+| `app/routes/contenido_routes.py` | `150-156` | detalle público con sesión opcional |
+| `app/controllers/contenido_controller.py` | `20-36` | valores por defecto |
+| `app/services/contenido_service.py` | `74-103` | armado de la respuesta |
+| `app/repositories/contenido_repository.py` | `12-28` | resultado con total y páginas |
+| `app/repositories/contenido_repository.py` | `65-104`, `369-448` | consulta y filtros |
+| `app/models/types.py` | `6-28` | año en MySQL |
+| `db/DDL.sql` | `108-109`, `451-464` | índices y vista del ranking |
+| `tests/test_app.py` | `511-525` | prueba de catálogos y ranking |
 
 Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
@@ -39,81 +33,51 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [0:00] Acuerdo previo — 1:00
 
-👉 **MOSTRAR:** pantalla de inicio del museo o `/docs`; no hace falta abrir código todavía.
-
-> "Aclaración antes de empezar: la interfaz HTML es la entrega del **corte 2** y
-> persiste en `localStorage`; el backend del **corte 3** expone esa misma operación
-> como API REST y la demostramos en **Swagger contra MySQL**. El botón
-> visual no llama a la API —lo dejamos así para conservar el entregable anterior—,
-> pero la operación sí está implementada capa por capa y persiste. Arrancamos en
-> Flask en el corte 2 y migramos a **FastAPI**, que da Swagger automático y
-> validación con Pydantic. Los tres diremos lo mismo."
+> "Me voy a la pantalla de inicio antes de empezar: es la entrega del corte 2 y guarda datos en el navegador. El corte 3 ofrece la misma acción como servicio, probado en Swagger contra MySQL. El buscador de la pantalla no llama al servicio; lo dejamos así para conservar lo anterior, pero la acción existe completa y consulta la base. Arrancamos en Flask y pasamos a FastAPI, que genera la documentación solo. Los tres diremos lo mismo."
 
 ### [1:00] Presentación — 0:15
 
-👉 **MOSTRAR:** `/buscar` ya cargado con el campo de búsqueda visible.
-
-> "Soy **[NOMBRE]**. Voy a usar el buscador del museo para explicarles **todo el proyecto**: cómo está armado, cómo persiste, cómo se prueba y cómo se conecta con los cortes anteriores."
+> "Me voy a `/buscar`, con el campo de texto visible. Soy **[NOMBRE]** y voy a usar el buscador del museo para explicarles **todo el proyecto**: cómo está armado, cómo guarda, cómo se prueba y cómo se conecta con los cortes anteriores."
 
 ### [1:15] Capa visual — 1:00
 
-👉 **MOSTRAR:** editor en `buscar.html:50-63` y `buscar.js:18`, `:29`, `:43-49`; después escribir en el campo y ver cómo cambian los resultados.
+> "Me voy al editor, a `app/templates/pages/buscar.html`, línea 11, donde se entregan los datos; líneas 50 a 63 para el campo, 146 a 152 para el contador, 190 a 193 para los resultados y 216 a 218 para el botón de limpiar. Abro `app/static/js/pages/buscar.js`, línea 18, y las líneas 29 y 36; entre 43 y 47 se toma solo lo publicado y entre 49 y 77 se compara texto, categoría y año, incluso «Antes de 2019». Escribo en el campo y ves cómo cambia la lista. No hay llamada al servidor: es almacenamiento local del navegador, parte visual del corte 2."
 
-> "En `/buscar` no hay un botón con id: la búsqueda salta con el evento `input` de `#search-input`, con `data-filter-category` y `data-filter-year`, y con `#search-clear`. En `buscar.js`, `publicados()` lee `Store.getContent()` y filtra `status === 'publicado'`; `coincide()` compara texto en título y etiquetas, categoría y año, con el caso «Antes de 2019». Jinja inyecta los datos desde `simul_data.py`. No hay ni un `fetch`: es `localStorage`, la capa visual del corte 2."
+### [2:15] De la pantalla al servidor — 0:45
 
-### [2:15] Ruta y validación — 0:45
+> "Me voy a `app/routes/contenido_routes.py`, líneas 35 a 86: entra `GET /api/museo/contenido/`, que es público. Swagger muestra los filtros: texto, categoría, tipo, año entre **1900 y 2100**, página desde 1 y tamaño entre 1 y 100. Si mando `anio=1800`, aparece **422**. En `app/controllers/contenido_controller.py`, 20 a 36, los valores vacíos pasan a página 1 y 12 elementos. No hace falta iniciar sesión."
 
-👉 **MOSTRAR:** Swagger en `GET /api/museo/contenido/` con los parámetros desplegados; ejecutar con `anio=1800` para mostrar el 422.
+### [3:00] Servicio, consulta y base — 1:30
 
-> "`GET /api/museo/contenido/`, público. Swagger documenta los `Query(...)`: `q`, `categoria`, `tipo`, `anio` —mínimo 1900 y máximo 2100—, `page` (mínimo 1) y `per_page` (1 a 100). Si mando `anio=1800` → **422**: es validación declarativa, no un `if` dentro de la función. El controlador normaliza `None` a `page=1` y `per_page=12`. No hace falta token."
-
-### [3:00] Servicio, repositorio y SQL — 1:30
-
-👉 **MOSTRAR:** `contenido_repository.py:13`, `:66-...` y `:371-...`; resaltar `count()`, `offset/limit`, el techo de la división y el `IN (SELECT ...)`, además de `app/models/types.py:6`.
-
-> "`get_publicados` filtra `estado == 'publicado'`, aplica filtros, hace `count()` para el total, ordena por `fec_crea.desc()` y aplica `offset((page-1)*per_page).limit(per_page)`. El resultado es un `@dataclass Pagina` con `pages = -(-total // per_page)`, el techo de la división. El texto usa `.ilike('%q%')` sobre `titulo` y `categoria` → `lower(...) LIKE lower(...)` en MySQL. El año vive en tablas de subtipo, así que se usa `id_contenido.in_(select(...))` y `extract('year', fecha)`. **¿Por qué `IN` y no `JOIN`?** Porque un `JOIN` duplicaría la fila de contenido. `estado`, `tipo`, `categoria` y `fec_crea` tienen índice en modelo y DDL; `YearType` crea `YEAR` en MySQL y `SMALLINT` en el SQLite de desarrollo."
+> "Me voy a `app/services/contenido_service.py`, líneas 74 a 103, y después a `app/repositories/contenido_repository.py`, líneas 12 a 28, 65 a 104 y 369 a 448. El servicio pide la página; la parte que consulta toma solo lo publicado, aplica filtros, cuenta el total, ordena por fecha y devuelve el bloque correspondiente. Las páginas se calculan con el total entre el tamaño, redondeado hacia arriba. El texto compara sin importar mayúsculas; el año vive en tablas aparte, por eso se usa una lista de identificadores y no se juntan tablas, para no duplicar filas. En `app/models/types.py`, 6 a 28, el año se guarda como YEAR en MySQL."
 
 ### [4:30] Respuesta — 0:45
 
-👉 **MOSTRAR:** ejecutar en Swagger con `q=museo&anio=2024` y mostrar el 200 con `items`, `page`, `pages` y `total`.
-
-> "Ejecuto con `q=museo&anio=2024` → **HTTP 200**, con `{success, message, data: {items, page, pages, total}}`. Cada item usa los mismos campos del prototipo —`tipo`, `titulo`, `categoria`, `anio`, `imagen`, `autor`—: ahí está la coherencia con el corte 2. El middleware instala sesión por petición, hace `commit` si el código es < 400 y `rollback` si no."
+> "Me voy a Swagger y ejecuto con `q=museo&anio=2024`: aparece **200** con `items`, `page`, `pages` y `total`. Cada elemento trae los campos del prototipo —tipo, título, categoría, año, imagen y autor—: ahí está la coherencia con el corte 2. La app confirma o deshace al terminar la petición."
 
 ### [5:15] Persistencia — 1:00
 
-👉 **MOSTRAR:** DBeaver con la consulta del respaldo y las filas `estado='publicado'`; ampliar los índices de `db/DDL.sql:108-109` y la vista `v_ranking`.
-
-> "En DBeaver verifico que las filas devueltas tienen `estado='publicado'` y que los índices del DDL están creados sobre las columnas que filtra la consulta. Muestro también la vista del catálogo definida en `db/DDL.sql`."
+> "Me voy a DBeaver y compruebo que las filas tengan `estado='publicado'` y que los índices del DDL estén sobre esas columnas. En `db/DDL.sql`, líneas 451 a 464, muestro la vista del ranking, una consulta guardada con puntos y nivel. Las dos vistas de la base están al final del archivo."
 
 ### [6:15] Arquitectura y base de datos — 1:00
 
-👉 **MOSTRAR:** `app/__init__.py:208-238` y `db/DDL.sql:94-118`, `:355-370`, `:451-...`.
-
-> "Salgo del botón para mostrar el resto. El backend tiene **7 capas**: `routes` define endpoints y dependencias, `controllers` arma la respuesta, `services` concentra las reglas de negocio, `repositories` construye consultas, `models` mapea tablas, `schemas` valida con Pydantic y `utils` tiene seguridad, respuestas y roles. `create_app()` ensambla routers, middlewares y errores. La base tiene **25 tablas y 2 vistas** en `db/DDL.sql`: ENUM de estados, `YEAR`, FK con `ON DELETE` explícito, índices en columnas consultadas y el compuesto `idx_notif_usuario_leida`. El DDL se monta como *init script* de MySQL, así que la BD nace igual al diagrama E-R del corte 2. Conexión DBeaver: `127.0.0.1:3307`, `simul_db`, `simul_user` / `simul_password`."
+> "Me voy a `app/__init__.py`, líneas 208 a 238. El backend está en **siete partes**: entrada, orden del trabajo, reglas, consulta a la base, modelos, formatos y utilidades. En `db/DDL.sql`, líneas 94 a 118 y 355 a 408, están las tablas; entre 433 y 464, las dos vistas. Son **25 tablas y 2 vistas**, con índices en las columnas más usadas. El SQL se entrega a MySQL al crear el contenedor, igual al diagrama del corte 2. En DBeaver: `127.0.0.1:3307`, base `simul_db`, usuario `simul_user`."
 
 ### [7:15] API REST y evidencia — 1:00
 
-👉 **MOSTRAR:** `/docs` y `/openapi.json`; `app/__init__.py:114-177`.
-
-> "Bajo `/api/museo` hay **30 rutas y 37 operaciones** en autenticación, contenido, validación, gamificación, administración y museo. Están los cinco métodos —GET, POST, PUT, PATCH y DELETE— con 200/201, 401, 403, 404, 409 y 422. FastAPI genera `/docs` y `/openapi.json` desde los decoradores. Los errores globales dan siempre el mismo sobre: 422 con `details`, código HTTP para excepciones de Starlette y 500 genérico con `logger.exception` en servidor, **sin traza al cliente**. En `/docs` ejecuto la búsqueda con parámetros y veo el **200** con `items`, `page`, `pages` y `total`: esa es la evidencia."
+> "Me voy al navegador, a `/docs` y `/openapi.json`. Bajo `/api/museo` hay **30 rutas y 37 operaciones** de ingreso, contenido, validación, puntos, administración y museo, con los cinco métodos y respuestas 200, 201, 401, 403, 404, 409 y 422. Los errores traen siempre el mismo formato; el 422 señala el campo y un fallo interno solo muestra un mensaje general. Al ejecutar con parámetros veo el **200** con `items`, `page`, `pages` y `total`: esa es la evidencia."
 
 ### [8:15] Seguridad — 0:30
 
-👉 **MOSTRAR:** `app/utils/roles.py:191` y `app/utils/security.py:23-71`; si alcanza, `contenido_routes.py:155` (`usuario_opcional`).
-
-> "El login emite JWT con PBKDF2 + salt en `app/utils/security.py`, sin `werkzeug`. Las rutas protegidas usan `Depends(requiere_usuario)` y el rol se comprueba con `rol_nombre`. Los esquemas de salida no exponen `password_hash`: `UsuarioOut` lo dice en su docstring. El detalle de contenido usa `usuario_opcional`: funciona sin token y solo añade `es_favorito` si viene uno."
+> "Me voy a `app/utils/roles.py`, línea 191: ahí está la comprobación de sesión para rutas privadas. En `app/routes/contenido_routes.py`, 150 a 156, el detalle permite entrar sin sesión; si viene una, solo añade el dato de favorito. La huella con valor aleatorio está en `app/utils/security.py`, 23 a 46 y 49 a 85, y los datos devueltos no incluyen la contraseña."
 
 ### [8:45] Pruebas, Docker y coherencia — 0:45
 
-👉 **MOSTRAR:** terminal con `pytest -q` → 19 passed; `docker-compose.yml:16-18` y `:28-44`; README con el diagrama E-R.
-
-> "`docker compose up --build` levanta `simul_app` en 5000 y `simul_db` en 3307, con healthcheck e init script. Cargo con `docker compose exec app python db/seed.py` y corro `pytest -q`: **19 pruebas** en SQLite temporal. Y la coherencia: los RF del corte 1, las pantallas del corte 2 y este backend usan las mismas entidades y nombres de campo."
+> "Me voy a la terminal: `pytest -q` da **19 pruebas** en una base temporal, sin tocar MySQL. En `tests/test_app.py`, 511 a 525, están las de catálogos y ranking. En `docker-compose.yml`, 14 a 24 y 27 a 44, se ve la app en el puerto 5000 y la base en el 3307 con el SQL inicial. Los requisitos del corte 1, las pantallas del corte 2 y este servicio usan las mismas entidades y nombres."
 
 ### [9:30] Cierre — 0:30
 
-👉 **MOSTRAR:** volver a `/docs` y al buscador en `/buscar`; hablar mirando a cámara.
-
-> "Los 6 criterios: (1) arquitectura modular de 7 capas, (2) SQLAlchemy + MySQL con 25 tablas espejo del E-R, (3) REST completo con CRUD y Swagger, (4) reglas de negocio, validación, JWT/roles y errores sin exposición, (5) evidencia en Swagger, Docker y 19 tests, y (6) trazabilidad de los tres cortes. Con eso doy por terminada la demostración."
+> "Me voy de nuevo a `/docs` y al buscador. Los **6 criterios**: siete partes, MySQL con 25 tablas y 2 vistas, API con Swagger, reglas y permisos, evidencia en Swagger, Docker y 19 pruebas, y coherencia entre los tres cortes. Termino aquí."
 
 ## Respaldo (no leer)
 
@@ -128,12 +92,12 @@ WHERE contenido.estado = 'publicado'
 ORDER BY contenido.fec_crea DESC LIMIT 12, 12;
 ```
 
-- `Pagina` y `_aplicar_filtros` están en `contenido_repository.py`; el filtro de
-  año usa `IN` sobre cuatro subtipos con columna `anio` y `extract` para otros dos.
-- Vistas del DDL: `v_bandeja_validacion` y `v_ranking`. Init script montado en
-  `/docker-entrypoint-initdb.d/01_schema.sql`.
+- El resultado con total y páginas está en `contenido_repository.py`.
+- El filtro de año usa una lista de identificadores para no repetir filas.
+- Las dos vistas del DDL son `v_bandeja_validacion` y `v_ranking`.
+- El archivo SQL se monta como `/docker-entrypoint-initdb.d/01_schema.sql`.
 
-**Preguntas propias de este botón:** ¿por qué `IN` y no `JOIN`? → evita duplicados.
-¿Cómo calculás la paginación? → `count()`, `offset/limit` y techo. ¿`anio=1800`? →
-422 por `Query(ge=1900)`. ¿Por qué no hay `fetch` en la web? → prototipo del corte
-2; cambiar el `fetch` sería lo único a tocar, las capas no se modifican.
+**Preguntas propias de este botón:** ¿por qué una lista y no juntar tablas? →
+evita duplicados. ¿Cómo se calculan las páginas? → total entre tamaño, hacia arriba.
+¿`anio=1800`? → 422 por el rango permitido. ¿Por qué no hay llamada al servidor en
+la web? → es el prototipo del corte 2; cambiar eso sería lo único a tocar.

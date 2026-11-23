@@ -1,7 +1,7 @@
 # Video 1 — «Aprobar y publicar» (10 min)
 
 **Integrante 1.** Ancla única: aprobación del administrador.
-**No mencionar** los otros dos botones en ningún momento. Mostrar todo el proyecto a
+**No mencionar** los otros dos botones en ningún momento. Recorre todo el proyecto a
 través de este botón.
 
 Leé antes [00_ANTES_DE_GRABAR.md](00_ANTES_DE_GRABAR.md) (Docker, credenciales y
@@ -11,28 +11,24 @@ acuerdo previo).
 
 Tener abiertos estos archivos en el editor, exactamente en estas líneas:
 
-| Archivo | Líneas | Qué hay que verificar |
+| Archivo | Líneas | Qué vas a señalar |
 |---|---|---|
-| `app/templates/pages/admin_validacion.html` | `8` | `window.SIMUL_QUEUE = {{ simul_queue | tojson }}` |
-| `app/templates/pages/admin_validacion.html` | `50-60` | contador `id="queue-counter"` («6 pendientes») |
-| `app/templates/pages/admin_validacion.html` | `94` | contenedor `id="queue-list"` |
-| `app/static/js/pages/admin_validacion.js` | `163-170` | botón con `data-approve` |
-| `app/static/js/pages/admin_validacion.js` | `204-250` | función `aprobar(id)` |
-| `app/static/js/pages/admin_validacion.js` | `374-383` | delegación del click (`closest('[data-approve]')`) |
-| `app/routes/validacion_routes.py` | `47-73` | endpoint `aprobar` y sus decoradores |
-| `app/controllers/validacion_controller.py` | `41-53`, `96-120` | `aprobar` y `_decidir` |
-| `app/services/validacion_service.py` | `32` | `PUNTOS_PUBLICAR = 100` |
-| `app/services/validacion_service.py` | `80-160` | método `aprobar` |
-| `app/services/validacion_service.py` | `249-277` | `_cargar` (403 / 404 / 409) |
-| `app/services/validacion_service.py` | `291-326` | `_notificar` y `_refrescar_gamificacion` |
-| `app/repositories/contenido_repository.py` | `58-63` | `get_by_id` con `db.session.get` |
-| `app/repositories/validacion_repository.py` | `36-...` | `add_log` (solo `add`, sin commit) |
-| `app/models/contenido.py` | `6-...` | ENUM `estado`, FK `id_validador` |
-| `app/models/validacion_log.py` | `6-...` | ENUM `accion` |
-| `app/models/historial_puntos.py` | `6-...` | movimiento de puntos |
-| `app/models/notificacion.py` | `6-20` | índice `idx_notif_usuario_leida` |
-| `app/models/usuario.py` | `137` | propiedad `rol_nombre` |
-| `tests/test_app.py` | `433-463` | `test_aprobar_suma_puntos_y_publica` |
+| `app/templates/pages/admin_validacion.html` | `8`, `50-60`, `94` | datos de la cola, contador y lista |
+| `app/static/js/pages/admin_validacion.js` | `163-166` | botón creado con `data-approve` |
+| `app/static/js/pages/admin_validacion.js` | `204-245` | acción que se ejecuta al hacer clic |
+| `app/static/js/pages/admin_validacion.js` | `374-380`, `390-391` | captura del clic y cierre del bloque |
+| `app/routes/validacion_routes.py` | `47-68` | entrada de la operación |
+| `app/controllers/validacion_controller.py` | `41-52`, `96-113` | controlador y llamada al servicio |
+| `app/services/validacion_service.py` | `32`, `80-160` | valor de puntos y regla principal |
+| `app/services/validacion_service.py` | `249-277` | comprobaciones de permiso y estado |
+| `app/services/validacion_service.py` | `306-326` | nivel e insignias |
+| `app/repositories/contenido_repository.py` | `58-63` | lectura del contenido |
+| `app/repositories/validacion_repository.py` | `36-44` | escritura del registro |
+| `app/models/contenido.py` | `6-45` | campos de estado y validador |
+| `app/models/historial_puntos.py` | `6-40` | movimiento de puntos |
+| `app/models/usuario.py` | `136-139` | nombre del rol |
+| `app/schemas/simul_auth_schema.py` | `91-112` | datos de usuario que se devuelven |
+| `tests/test_app.py` | `433-463` | prueba de esta operación |
 
 Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
@@ -40,81 +36,51 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [0:00] Acuerdo previo — 1:00
 
-👉 **MOSTRAR:** pantalla de inicio del museo o `/docs`; no hace falta abrir código todavía.
-
-> "Aclaración antes de empezar: la interfaz HTML es la entrega del **corte 2** y
-> persiste en `localStorage`; el backend del **corte 3** expone esa misma operación
-> como API REST y la demostramos en **Swagger contra MySQL**. El botón
-> visual no llama a la API —lo dejamos así para conservar el entregable anterior—,
-> pero la operación sí está implementada capa por capa y persiste. Arrancamos en
-> Flask en el corte 2 y migramos a **FastAPI**, que da Swagger automático y
-> validación con Pydantic. Los tres diremos lo mismo."
+> "Me voy a la pantalla de inicio antes de empezar: es la entrega del corte 2 y guarda datos en el navegador. El corte 3 ofrece la misma acción como servicio, probado en Swagger contra MySQL. El botón visual no llama al servicio; lo dejamos así para conservar lo anterior, pero la acción existe completa y guarda en la base. Arrancamos en Flask y pasamos a FastAPI, que genera la documentación solo. Los tres diremos lo mismo."
 
 ### [1:00] Presentación — 0:15
 
-👉 **MOSTRAR:** `/admin/validacion` ya cargado, con sesión admin. Resaltar el contador `id="queue-counter"` (`admin_validacion.html:50-60`).
-
-> "Soy **[NOMBRE]**. Voy a usar el botón **«Aprobar y publicar»** para explicarles **todo el proyecto**: cómo está armado, cómo persiste, cómo se prueba y cómo se conecta con los cortes anteriores."
+> "Me voy a `/admin/validacion`, con la sesión de administrador abierta. Soy **[NOMBRE]** y voy a usar el botón **«Aprobar y publicar»** para explicarles **todo el proyecto**: cómo está armado, cómo guarda, cómo se prueba y cómo se conecta con los cortes anteriores."
 
 ### [1:15] Capa visual — 1:00
 
-👉 **MOSTRAR:** primero el editor en `admin_validacion.js:163-170` (el `data-approve`); después volver a la tarjeta y hacer clic en «Aprobar y publicar» para que se vea el toast.
+> "Me voy al editor, a `app/templates/pages/admin_validacion.html`, líneas 50 a 60, para ver el contador de pendientes, y a la línea 94, donde se dibuja la lista. Después abro `app/static/js/pages/admin_validacion.js`, líneas 163 a 166: el botón se crea con un marcador llamado `data-approve`. Entre 204 y 245 está la acción al hacer clic: actualiza el elemento, lo saca de la cola y muestra el aviso. Hago clic en la tarjeta para que veas el resultado. Esto es almacenamiento local del navegador, la parte visual del corte 2."
 
-> "Estoy en `/admin/validacion`: lo sirve FastAPI con una plantilla Jinja desde `web_routes.py`. El botón no tiene `id`: se genera en `admin_validacion.js` con `data-approve`, y el click se captura por delegación —`closest('[data-approve]')` → `aprobar(id)`—. Esa función hace `Store.upsertContent(status:'publicado')`, `Store.dropFromQueue` y un toast. Es `localStorage`: la capa visual del corte 2."
+### [2:15] De la pantalla al servidor — 0:45
 
-### [2:15] Ruta y controlador — 0:45
+> "Ahora me voy a `app/routes/validacion_routes.py`, líneas 47 a 68. Ahí entra `POST /api/museo/validacion/{id}/aprobar`: pide sesión iniciada y las observaciones son opcionales; sin sesión, responde **401**. Sigo en `app/controllers/validacion_controller.py`, líneas 41 a 52 y 96 a 113: el controlador reconoce al usuario y llama a la parte que contiene la regla. El permiso de administrador no se comprueba aquí, sino más adentro, para que no se pueda saltar."
 
-👉 **MOSTRAR:** editor en `validacion_routes.py:47-73` y luego `validacion_controller.py:41-53` y `:96-120`. En Swagger, abrir el endpoint y el `Authorize`.
+### [3:00] La regla de negocio — 1:15
 
-> "La operación real es `POST /api/museo/validacion/{id}/aprobar`. El router lleva `Depends(requiere_usuario)`: sin token, **401**. La ruta recibe `DecisionIn | None` — observaciones opcionales, `Body(default=None)`—. El controlador `_decidir` obtiene al usuario con `usuario_actual()` y llama a `service.aprobar`. Detalle de diseño: el **rol no se comprueba aquí**, se comprueba en el servicio para que la regla no se pueda saltar desde otra ruta."
+> "Me voy a `app/services/validacion_service.py`. La línea 32 fija los **100 puntos**; entre 80 y 160 está la regla; entre 249 y 277, las comprobaciones; y entre 306 y 326, el nivel y las insignias. Si quien decide no es administrador, **403**; si no existe, **404**; y si ya no está pendiente, **409**. Después, en un solo paso: estado publicado, quién lo hizo y cuándo, una fila en el registro, aviso al autor, 100 puntos y nivel actualizado. O se hace todo, o no se hace nada."
 
-### [3:00] Servicio — 1:15
+### [4:15] Datos y respuesta — 1:00
 
-👉 **MOSTRAR:** `validacion_service.py:32` (constante), `:80-160` (método `aprobar`), `:249-277` (`_cargar`) y `:291-326` (notificación y gamificación). Resaltar el `commit` único al final.
-
-> "`_cargar` devuelve **403** si `admin.rol_nombre != 'admin'` —propiedad que lee `self.rol.nombre`, en `usuario.py:137`—, **404** si no existe y **409** si `estado != 'pendiente'`: así no se decide dos veces. Después, en **una sola transacción**: estado `publicado`, `id_validador` y `fec_valid`; `ValidacionLog(accion='aprueba')`; notificación al autor; `registrar_movimiento(puntos=100)`, que suma `puntos_total` y escribe un `HistorialPuntos`; `_refrescar_gamificacion`, que recalcula el nivel por rangos y otorga insignias; y **un único commit**. O se hacen las seis cosas, o ninguna."
-
-### [4:15] Repositorio, ORM y respuesta — 1:00
-
-👉 **MOSTRAR:** `contenido_repository.py:58-63` y `validacion_repository.py:36-...`; luego ejecutar el endpoint en Swagger y mostrar el cuerpo 200 abajo.
-
-> "`get_by_id` usa `db.session.get`, que aprovecha el mapa de identidad de SQLAlchemy. `add_log` solo hace `add`: no commitea. En `contenido.py`, `estado` es ENUM con índice y `id_validador` es FK con `ON DELETE SET NULL`. Ejecuto en Swagger → **HTTP 200**. El sobre es `{success, message, data}`, de `response.py:14-33`; aparece `estado: 'publicado'` y el validador como objeto, **nunca `password_hash`**. El middleware instala una sesión por petición, hace `commit` si el código es < 400 y `rollback` si no."
+> "Me voy a `app/repositories/contenido_repository.py`, líneas 58 a 63, y a `app/repositories/validacion_repository.py`, líneas 36 a 44: uno lee el contenido y el otro escribe el registro, sin confirmar por su cuenta. En `app/models/contenido.py`, 6 a 45, y en `app/models/historial_puntos.py`, 6 a 40, están los campos que se tocan. Ejecuto en Swagger: aparece **200** con el contenido publicado y el validador, nunca la contraseña. La app confirma al terminar; si falla, deshace."
 
 ### [5:15] Persistencia — 1:00
 
-👉 **MOSTRAR:** DBeaver con las tres consultas del respaldo ejecutadas una por una; resaltar `estado`, la fila `aprueba` y el `+100`.
-
-> "En DBeaver muestro tres consultas: el contenido con su estado y los puntos del autor, la fila `aprueba` en `validacion_log` y el movimiento de **+100** en `historial_puntos`. Ahí está la prueba de que no es solo una respuesta bonita."
+> "Me voy a DBeaver y ejecuto una consulta por una: el contenido con su estado y los puntos del autor, la fila del registro de decisiones y el movimiento de **más 100 puntos**. Si los tres aparecen, no es solo una respuesta bonita: quedó guardado."
 
 ### [6:15] Arquitectura y base de datos — 1:00
 
-👉 **MOSTRAR:** `app/__init__.py:208-238` (prefijos) y `db/DDL.sql:94-118`, `:355-370`, `:433-...` (tablas y vistas). Si alcanza, `docker-compose.yml:28-44`.
-
-> "Salgo del botón para mostrar el resto. El backend tiene **7 capas**: `routes` define endpoints y dependencias, `controllers` arma la respuesta, `services` concentra las reglas de negocio, `repositories` construye consultas, `models` mapea tablas, `schemas` valida con Pydantic y `utils` tiene seguridad, respuestas y roles. `create_app()` ensambla routers, middlewares y errores. La base tiene **25 tablas y 2 vistas** en `db/DDL.sql`: ENUM de estados, `YEAR`, FK con `ON DELETE` explícito, índices en columnas consultadas y el compuesto `idx_notif_usuario_leida`. El DDL se monta como *init script* de MySQL, así que la BD nace igual al diagrama E-R del corte 2. Conexión DBeaver: `127.0.0.1:3307`, `simul_db`, `simul_user` / `simul_password`."
+> "Me voy a `app/__init__.py`, líneas 208 a 238. El backend está en **siete partes**: entrada, orden del trabajo, reglas, consulta a la base, modelos, formatos y utilidades. En `db/DDL.sql`, líneas 94 a 118 y 355 a 408, están las tablas; entre 433 y 464, las dos vistas. Son **25 tablas y 2 vistas**, con índices en las columnas más usadas. El SQL se entrega a MySQL al crear el contenedor, igual al diagrama del corte 2. En DBeaver: `127.0.0.1:3307`, base `simul_db`, usuario `simul_user`."
 
 ### [7:15] API REST y evidencia — 1:00
 
-👉 **MOSTRAR:** `/docs` y `/openapi.json` en el navegador; `app/__init__.py:114-177` (los tres handlers).
-
-> "Bajo `/api/museo` hay **30 rutas y 37 operaciones** en autenticación, contenido, validación, gamificación, administración y museo. Están los cinco métodos —GET, POST, PUT, PATCH y DELETE— con 200/201, 401, 403, 404, 409 y 422. FastAPI genera `/docs` y `/openapi.json` desde los decoradores. Los errores globales dan siempre el mismo sobre: 422 con `details`, código HTTP para excepciones de Starlette y 500 genérico con `logger.exception` en servidor, **sin traza al cliente**. En `/docs` ejecuto los endpoints y veo el código HTTP y el cuerpo de cada respuesta: esa es la evidencia."
+> "Me voy al navegador, a `/docs` y `/openapi.json`. Bajo `/api/museo` hay **30 rutas y 37 operaciones** de ingreso, contenido, validación, puntos, administración y museo, con los cinco métodos y respuestas 200, 201, 401, 403, 404, 409 y 422. Los errores traen siempre el mismo formato; el 422 señala el campo y un fallo interno solo muestra un mensaje general. Al ejecutar desde `/docs` veo código y cuerpo: esa es la evidencia."
 
 ### [8:15] Seguridad — 0:30
 
-👉 **MOSTRAR:** `app/utils/security.py:23-71` y `app/utils/roles.py:191`; si alcanza, `app/schemas/simul_auth_schema.py:91-93` (docstring de `UsuarioOut`).
-
-> "El login emite JWT con PBKDF2 + salt en `app/utils/security.py`, sin `werkzeug`. Las rutas protegidas usan `Depends(requiere_usuario)` y el rol se comprueba con `rol_nombre`. Los esquemas de salida no exponen `password_hash`: `UsuarioOut` lo dice en su docstring."
+> "Me voy a `app/utils/security.py`, líneas 23 a 46 y 49 a 85: la contraseña se guarda como huella con valor aleatorio, nunca en texto plano. En `app/utils/roles.py`, línea 191, está la sesión; en `app/models/usuario.py`, 136 a 139, el rol. Los datos devueltos, en `app/schemas/simul_auth_schema.py`, 91 a 112, no incluyen la contraseña."
 
 ### [8:45] Pruebas, Docker y coherencia — 0:45
 
-👉 **MOSTRAR:** terminal con `pytest -q` → 19 passed, `docker-compose.yml:16-18` y `:28-44`, y el README con el diagrama E-R.
-
-> "`docker compose up --build` levanta `simul_app` en 5000 y `simul_db` en 3307, con healthcheck e init script. Cargo con `docker compose exec app python db/seed.py` y corro `pytest -q`: **19 pruebas** en SQLite temporal. Y la coherencia: los RF del corte 1, las pantallas del corte 2 y este backend usan las mismas entidades y nombres de campo."
+> "Me voy a la terminal: `pytest -q` da **19 pruebas** en una base temporal, sin tocar MySQL. En `docker-compose.yml`, líneas 14 a 24 y 27 a 44, se ve la app en el puerto 5000 y la base en el 3307 con el SQL inicial. Los requisitos del corte 1, las pantallas del corte 2 y este servicio usan las mismas entidades y nombres."
 
 ### [9:30] Cierre — 0:30
 
-👉 **MOSTRAR:** volver a `/docs` y al botón en `/admin/validacion`; hablar mirando a cámara.
-
-> "Los 6 criterios: (1) arquitectura modular de 7 capas, (2) SQLAlchemy + MySQL con 25 tablas espejo del E-R, (3) REST completo con CRUD y Swagger, (4) reglas de negocio, validación, JWT/roles y errores sin exposición, (5) evidencia en Swagger, Docker y 19 tests, y (6) trazabilidad de los tres cortes. Con eso doy por terminada la demostración."
+> "Me voy de nuevo a `/docs` y a la tarjeta. Los **6 criterios**: siete partes, MySQL con 25 tablas y 2 vistas, API con Swagger, reglas y permisos, evidencia en Swagger, Docker y 19 pruebas, y coherencia entre los tres cortes. Termino aquí."
 
 ## Respaldo (no leer)
 
@@ -130,10 +96,10 @@ SELECT puntos, motivo FROM historial_puntos
 WHERE id_contenido = <ID> ORDER BY fecha DESC;
 ```
 
-- `get_nivel_por_puntos`: `>= mínimo y < máximo`, el último nivel incluye su máximo.
-  Insignias: `puntos_requeridos <= puntos_total`.
-- Los repositorios no commitean: el commit es del servicio; el middleware confirma la sesión.
+- Los niveles van por rangos de puntos y la insignia se da al superar el umbral.
+- Quien consulta no guarda; guarda la parte que contiene la regla.
 
-**Preguntas propias de este botón:** ¿docente aprueba? → 403 en `_cargar`. ¿Cómo sabés
-que son 100? → constante `PUNTOS_PUBLICAR` + fila en `historial_puntos`. ¿Dónde queda
-el motivo? → `contenido.observaciones` y `validacion_log`. ¿Aprobar dos veces? → 409.
+**Preguntas propias de este botón:** ¿un docente puede decidir? → 403.
+¿Cómo sabés que son 100? → valor fijo en el servicio y fila en el historial.
+¿Dónde queda el motivo? → en el contenido y en el registro de decisiones.
+¿Se puede decidir dos veces? → 409.
