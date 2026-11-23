@@ -1,107 +1,85 @@
-# Video 1 — «Aprobar y publicar» (10 min)
+# Video 1 — Aprobar y publicar (12 min)
 
-**Integrante 1.** Ancla única: aprobación del administrador.
-**No mencionar** los otros dos botones en ningún momento. Recorre todo el proyecto a
-través de este botón.
+Guion para leer en voz alta. Un solo ancla: la aprobación. Los tiempos son acumulados.
 
-Leé antes [00_ANTES_DE_GRABAR.md](00_ANTES_DE_GRABAR.md) (Docker, credenciales y
-acuerdo previo).
+### [00:48] Acuerdo previo — 0:48
 
-## Antes de iniciar a grabar
+> "Antes de empezar, recuerdo que esto es la entrega del tercer corte. En el corte uno definimos las entidades y las reglas; en el corte dos quedaron las pantallas. Hoy esas pantallas ya no viven solas: el botón llama a una dirección `/api/museo`, esa dirección guarda en MySQL y la misma operación se ejecuta en Swagger. Los tres usamos el mismo backend y las mismas credenciales. Yo voy a recorrer todo el proyecto desde una sola acción: la aprobación."
 
-Tener abiertos estos archivos en el editor, exactamente en estas líneas:
+### [01:10] Presentación — 0:22
 
-| Archivo | Líneas | Qué vas a señalar |
-|---|---|---|
-| `app/templates/pages/admin_validacion.html` | `8`, `50-60`, `94` | datos de la cola, contador y lista |
-| `app/static/js/pages/login.js` | `117-150` | inicio de sesión contra la API y guardado del token |
-| `app/static/js/api.js` | `50-92`, `186-202` | petición HTTP, consulta de la bandeja y llamada de aprobación |
-| `app/static/js/pages/admin_validacion.js` | `156-159` | botón creado con `data-approve` |
-| `app/static/js/pages/admin_validacion.js` | `197-223` | acción al hacer clic |
-| `app/static/js/pages/admin_validacion.js` | `347-356` | captura del clic |
-| `app/routes/validacion_routes.py` | `47-68` | entrada de la operación |
-| `app/controllers/validacion_controller.py` | `41-52`, `96-113` | controlador y llamada al servicio |
-| `app/services/validacion_service.py` | `32`, `80-160` | valor de puntos y regla principal |
-| `app/services/validacion_service.py` | `249-277` | comprobaciones de permiso y estado |
-| `app/services/validacion_service.py` | `306-326` | nivel e insignias |
-| `app/repositories/contenido_repository.py` | `68-73` | lectura del contenido |
-| `app/repositories/validacion_repository.py` | `36-44` | escritura del registro |
-| `app/models/contenido.py` | `6-45` | campos de estado y validador |
-| `app/models/historial_puntos.py` | `6-40` | movimiento de puntos |
-| `app/models/usuario.py` | `136-139` | nombre del rol |
-| `app/schemas/simul_auth_schema.py` | `96-120` | datos de usuario que se devuelven |
-| `tests/test_app.py` | `433-463` | prueba de esta operación |
+> "Estoy en `http://localhost:5000/admin/validacion`, con la sesión abierta. Soy **[NOMBRE]**. Acá está el botón **Aprobar y publicar**. Con esa sola acción recorro la pantalla, la API, las reglas, la base, Swagger y las pruebas."
 
-Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
+### [02:50] La capa visual — 1:40
 
-## Guion
+> "Me voy al editor. En `app/templates/pages/admin_validacion.html`, líneas 50 a 60, está el contador: en la 59 sale el número que viene del servidor y en la 94, el contenedor de la lista. Abro `app/static/js/pages/admin_validacion.js`: entre 41 y 68 la bandeja se pide a la API; entre 155 y 159 se dibuja el botón **Aprobar y publicar** con su identificador; entre 197 y 223 está la acción, que llama a la API, avisa y vuelve a cargar la bandeja; entre 348 y 354 el clic se captura en el contenedor. Y en `app/static/js/api.js`, líneas 194 a 202, esa acción se convierte en `POST /api/museo/validacion/{id}/aprobar`, con observaciones opcionales. Vuelvo a la pantalla, con 6 pendientes, y hago clic en **Aprobar y publicar** del contenido 7. El aviso confirma, la tarjeta desaparece y el contador baja a 5. Ese clic ya escribió en MySQL; ahora les muestro la misma llamada desde Swagger."
 
-### [0:00] Acuerdo previo — 1:00
+### [04:03] Ingreso real y bandeja — 1:13
 
-> "Me voy a la pantalla de inicio antes de empezar: es la entrega del corte 2. La sesión se guarda en el navegador, pero las acciones ya están conectadas: el botón llama a la API, la API guarda en MySQL y la misma operación se prueba en Swagger. Arrancamos en Flask y pasamos a FastAPI, que genera la documentación solo. Los tres diremos lo mismo."
+> "Antes de esa llamada necesito sesión. En `app/static/js/pages/login.js`, líneas 117 a 153, la pantalla manda correo y clave a `POST /api/museo/auth/login`. Uso `l.jimenez@unilibre.edu.co` y clave `1234`, las credenciales del administrador 5. En `app/static/js/api.js`, líneas 129 a 138 y 19 a 28, el token que devuelve el servidor se guarda en el navegador, en `simul.token`, y de ahí sale en cada petición. Sin ese token, la puerta responde 401. Con la sesión puesta, abro `GET /api/museo/validacion/bandeja`: responde 200 con 6 pendientes, los ids 7, 13, 14, 15, 16 y 17. Tras el clic que acabo de hacer, esa misma consulta da 5."
 
-### [1:00] Presentación — 0:15
+### [05:23] Las siete capas — 1:20
 
-> "Me voy a `/admin/validacion`, con la sesión de administrador abierta. Soy **[NOMBRE]** y voy a usar el botón **«Aprobar y publicar»** para explicarles **todo el proyecto**: cómo está armado, cómo guarda, cómo se prueba y cómo se conecta con los cortes anteriores."
+> "Me voy a `app/__init__.py`, líneas 208 a 239, donde se enganchan los routers con el prefijo `/api/museo`. Adentro hay siete capas. Entrada: `app/routes/validacion_routes.py`, 47 a 68. Orden del trabajo: `app/controllers/validacion_controller.py`, 41 a 52 y 96 a 113. Reglas: `app/services/validacion_service.py`, 80 a 156. Acceso a datos: `app/repositories/validacion_repository.py`, 11 a 40, y `contenido_repository.py`, 68 a 73. Modelos: `app/models/contenido.py`, 55 a 88; `historial_puntos.py`, 21 a 48; `validacion_log.py`, 20 a 51. Formatos: `app/schemas/contenido_schema.py`, 165 a 171 y 232 a 253, y `simul_auth_schema.py`, 53 a 58 y 96 a 120. Utilidades: `app/utils/roles.py`, 47 a 65 y 101 a 111; `response.py`, 14 a 59; y `security.py`, 23 a 85."
 
-### [1:15] Capa visual — 1:00
+### [06:34] La regla de negocio — 1:11
 
-> "Me voy al editor, a `app/templates/pages/admin_validacion.html`, líneas 50 a 60, para ver el contador, y a la línea 94, donde se dibuja la lista. Abro `app/static/js/pages/admin_validacion.js`, líneas 156 a 159: el botón se crea con `data-approve`. Entre 197 y 223 está la acción: llama a la API, vuelve a consultar la bandeja y muestra el aviso. Me voy a `app/static/js/api.js`, líneas 194 a 202, para ver la llamada `POST /validacion/{id}/aprobar`. Hago clic y el contador baja porque la API ya guardó el cambio."
+> "Entro a la regla. En `app/services/validacion_service.py`, línea 32, el premio es fijo: 100 puntos. Entre 80 y 156 pasa todo: el contenido queda en estado publicado, se guarda quién decide —el id 5— y cuándo; se escribe la fila de decisión con acción `aprueba`; se avisa al autor; se suman los 100 puntos con el motivo de la publicación; y se recalculan nivel e insignias entre 306 y 326. Antes, entre 249 y 276, se comprueban el permiso y el estado. Sin sesión, 401; si quien decide no es administrador, 403; si el contenido no existe, 404; si ya salió de la bandeja, 409. Todo se confirma junto: si algo falla, no queda a medias."
 
-### [2:15] De la pantalla al servidor — 0:45
+### [07:56] Swagger, la prueba en vivo — 1:22
 
-> "Ahora me voy a `app/routes/validacion_routes.py`, líneas 47 a 68. Ahí entra `POST /api/museo/validacion/{id}/aprobar`: pide sesión iniciada y las observaciones son opcionales; sin token, responde **401**. Sigo en `app/controllers/validacion_controller.py`, líneas 41 a 52 y 96 a 113: el controlador reconoce al usuario y llama a la parte que contiene la regla. El permiso de administrador no se comprueba aquí, sino más adentro, para que no se pueda saltar."
+> "Ahora sí, al navegador: `http://localhost:5000/docs`. Ubico `POST /api/museo/validacion/{id}/aprobar`, toco **Try it out**, pongo el id 13 —otro pendiente de la misma cola— y ejecuto. Arriba, en **Authorize**, pegué el token que dio el ingreso, sin la palabra Bearer. La respuesta es 200 y el cuerpo trae el contenido publicado y el validador, con nombre e id; nunca la clave. Es la misma llamada que hizo el botón, pero escrita a mano. Después abro `http://localhost:5000/openapi.json`: hay 30 rutas y 37 operaciones, con respuestas 200, 201, 401, 403, 404, 409 y 422. Para cerrar el círculo, ejecuto `GET /api/museo/contenido/{id}` con el 7 y lo veo publicado. Y vuelvo a la bandeja: el contador quedó en 4, uno por el clic y otro por Swagger."
 
-### [3:00] La regla de negocio — 1:15
+### [08:45] La huella en MySQL — 0:49
 
-> "Me voy a `app/services/validacion_service.py`. La línea 32 fija los **100 puntos**; entre 80 y 160 está la regla; entre 249 y 277, las comprobaciones; y entre 306 y 326, el nivel y las insignias. Si quien decide no es administrador, **403**; si no existe, **404**; y si ya no está pendiente, **409**. Después, en un solo paso: estado publicado, quién lo hizo y cuándo, una fila en el registro, aviso al autor, 100 puntos y nivel actualizado. O se hace todo, o no se hace nada."
+> "Me voy a DBeaver, en `127.0.0.1:3307`, base `simul_db`, y refresco. Primero, el contenido 7: `estado=publicado`, `id_validador=5`, `fec_valid` con fecha, y su autora Valentina con `puntos_total=1340`, antes 1240. Segundo, `validacion_log`: una fila con `accion='aprueba'`, `id_admin=5`, `id_contenido=7` y su fecha. Tercero, `historial_puntos`: una fila con `puntos=100`, `id_usuario=1`, `id_contenido=7` y el motivo `Publicación en el museo: Propuesta: Sistema Blockchain para Titulos Academicos`. Las tres consultas están al final, por si quieren repetirlas."
 
-### [4:15] Datos y respuesta — 1:00
+### [09:40] Arquitectura y base — 0:55
 
-> "Me voy a `app/repositories/contenido_repository.py`, líneas 68 a 73, y a `app/repositories/validacion_repository.py`, líneas 36 a 44: uno lee el contenido y el otro escribe el registro, sin confirmar por su cuenta. En `app/models/contenido.py`, 6 a 45, y en `app/models/historial_puntos.py`, 6 a 40, están los campos que se tocan. En `app/static/js/api.js`, líneas 50 a 92, se ve cómo se envía el token y se lee la respuesta. En Swagger aparece **200** con el contenido publicado y el validador, nunca la contraseña. La app confirma al terminar; si falla, deshace."
+> "Un paso más atrás. `docker-compose.yml`, líneas 14 a 24, levanta la app en el puerto 5000; entre 27 y 44, MySQL 8.4 en el 3307, con `db/DDL.sql` montado como script inicial. En `db/DDL.sql`, entre 19 y 424 están las 25 tablas, con índices en estado, tipo, fecha y relaciones; entre 433 y 464, las 2 vistas: bandeja y ranking. Las entidades y los nombres son los del corte 1; las pantallas son las del corte 2; hoy las dos se apoyan en esta misma API."
 
-### [5:15] Persistencia — 1:00
+### [10:32] Seguridad — 0:52
 
-> "Me voy a DBeaver y ejecuto una consulta por una: el contenido con su estado y los puntos del autor, la fila del registro de decisiones y el movimiento de **más 100 puntos**. Si los tres aparecen, no es solo una respuesta bonita: quedó guardado."
+> "Seguridad, en tres ideas. La clave no se guarda tal cual: en `app/utils/security.py`, entre 23 y 85, queda como huella con un valor aleatorio, y la comparación es segura: no filtra nada por el tiempo que tarda. El token sale del ingreso y viaja en cada llamada; en `app/utils/roles.py`, línea 191, está la puerta de rol, y la regla vuelve a comprobar el permiso por adentro. Y las respuestas, en `app/schemas/simul_auth_schema.py`, 96 a 120, no devuelven la clave."
 
-### [6:15] Arquitectura y base de datos — 1:00
+### [11:02] Pruebas — 0:30
 
-> "Me voy a `app/__init__.py`, líneas 208 a 238. El backend está en **siete partes**: entrada, orden del trabajo, reglas, consulta a la base, modelos, formatos y utilidades. En `db/DDL.sql`, líneas 94 a 118 y 355 a 408, están las tablas; entre 433 y 464, las dos vistas. Son **25 tablas y 2 vistas**, con índices en las columnas más usadas. El SQL se entrega a MySQL al crear el contenedor, igual al diagrama del corte 2. En DBeaver: `127.0.0.1:3307`, base `simul_db`, usuario `simul_user`."
+> "En la terminal: `.\.venv\Scripts\python.exe -m pytest -q`, o simplemente `pytest -q`. Da 19 pruebas en una base temporal, sin tocar MySQL. En `tests/test_app.py`, entre 433 y 461, está la prueba de esta operación: crea contenido, aprueba y comprueba que el autor ganó exactamente 100 puntos."
 
-### [7:15] API REST y evidencia — 1:00
+### [11:37] Cierre — 0:35
 
-> "Me voy al navegador, a `/docs` y `/openapi.json`. Bajo `/api/museo` hay **30 rutas y 37 operaciones** de ingreso, contenido, validación, puntos, administración y museo, con los cinco métodos y respuestas 200, 201, 401, 403, 404, 409 y 422. Los errores traen siempre el mismo formato; el 422 señala el campo y un fallo interno solo muestra un mensaje general. Al ejecutar desde `/docs` veo código y cuerpo: esa es la evidencia."
-
-### [8:15] Seguridad — 0:30
-
-> "Me voy a `app/static/js/pages/login.js`, líneas 117 a 150: la página envía correo y clave, recibe el token y lo guarda para las siguientes peticiones. En `app/utils/security.py`, líneas 23 a 46 y 49 a 85, la contraseña se guarda como huella con valor aleatorio, nunca en texto plano. En `app/utils/roles.py`, línea 191, está la sesión; en `app/models/usuario.py`, 136 a 139, el rol. Los datos devueltos, en `app/schemas/simul_auth_schema.py`, 91 a 112, no incluyen la contraseña."
-
-### [8:45] Pruebas, Docker y coherencia — 0:45
-
-> "Me voy a la terminal: `pytest -q` da **19 pruebas** en una base temporal, sin tocar MySQL. En `docker-compose.yml`, líneas 14 a 24 y 27 a 44, se ve la app en el puerto 5000 y la base en el 3307 con el SQL inicial. Los requisitos del corte 1, las pantallas del corte 2 y este servicio usan las mismas entidades y nombres."
-
-### [9:30] Cierre — 0:30
-
-> "Me voy de nuevo a `/docs` y a la tarjeta. Los **6 criterios**: siete partes, MySQL con 25 tablas y 2 vistas, API con Swagger, reglas y permisos, evidencia en Swagger, Docker y 19 pruebas, y coherencia entre los tres cortes. Termino aquí."
+> "Cierro con los 6 criterios: siete capas separadas; MySQL con 25 tablas y 2 vistas; API con Swagger, 30 rutas y 37 operaciones; reglas y permisos bien puestos; evidencia en Swagger, en Docker y en las 19 pruebas; y coherencia entre los tres cortes. La aprobación que vimos al principio es la misma que quedó guardada. Termino acá."
 
 ## Respaldo (no leer)
 
 ```sql
-SELECT c.id_contenido, c.titulo, c.estado, c.fec_valid, u.puntos_total
+-- 1. Contenido 7 y su autor
+SELECT c.id_contenido, c.estado, c.id_validador, c.fec_valid,
+       u.nombre AS autor, u.puntos_total
 FROM contenido c JOIN usuario u ON u.id_usuario = c.id_autor
-WHERE c.id_contenido = <ID>;
+WHERE c.id_contenido = 7;
+-- Esperado: publicado | 5 | fecha | Valentina Moreno | 1340 (antes 1240)
 
-SELECT accion, observaciones, fecha_decision FROM validacion_log
-WHERE id_contenido = <ID> ORDER BY fecha_decision DESC;
+-- 2. Decisión del administrador
+SELECT accion, id_admin, id_contenido, fecha_decision
+FROM validacion_log
+WHERE id_contenido = 7 AND accion = 'aprueba';
+-- Esperado: aprueba | 5 | 7 | fecha
 
-SELECT puntos, motivo FROM historial_puntos
-WHERE id_contenido = <ID> ORDER BY fecha DESC;
+-- 3. Movimiento de puntos
+SELECT puntos, id_usuario, id_contenido, motivo, fecha
+FROM historial_puntos
+WHERE id_contenido = 7 AND puntos = 100;
+-- Esperado: 100 | 1 | 7 | Publicación en el museo: Propuesta: Sistema Blockchain para Titulos Academicos | fecha
 ```
 
-- Los niveles van por rangos de puntos y la insignia se da al superar el umbral.
-- Quien consulta no guarda; guarda la parte que contiene la regla.
+- Si el contador sigue en 6, falta la sesión o la llamada no llegó a `/api/museo`.
+- Si el estado sigue pendiente, la operación no se confirmó: revisar permiso y estado antes de repetir.
+- El nivel y las insignias se recalculan con el total ya sumado.
 
-**Preguntas propias de este botón:** ¿un docente puede decidir? → 403.
-¿Cómo sabés que son 100? → valor fijo en el servicio y fila en el historial.
-¿Dónde queda el motivo? → en el contenido y en el registro de decisiones.
-¿Se puede decidir dos veces? → 409.
+**Preguntas propias de este botón**
+
+- ¿Un docente puede decidir? No: la regla pide rol administrador y responde 403.
+- ¿Cuántos puntos lleva el autor? 100 fijos, y la fila del historial lo confirma.
+- ¿Quién queda registrado? El id 5, en el contenido y en la bitácora.
+- ¿Se puede aprobar dos veces? No: si ya no está pendiente, responde 409.
