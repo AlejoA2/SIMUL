@@ -15,7 +15,7 @@ de `app/data/simul_data.py` y entrega además el mismo JSON a
 la página mediante `tojson`, de modo que el JavaScript
 filtra y busca sin volver a pedirlo al servidor. La API REST
 del corte 3 (/api/museo/*, respaldada por MySQL) es
-independiente y se consume desde Swagger/Postman.
+independiente y se consume desde Swagger.
 
 Las páginas privadas (dashboards, administración) no se
 protegen en el servidor porque la sesión vive en

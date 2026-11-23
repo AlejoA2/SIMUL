@@ -241,9 +241,8 @@ pytest -q
 
 Las pruebas usan SQLite temporal (no tocan MySQL) y cubren documentación
 OpenAPI, autenticación, CRUD de contenido, validaciones, roles y el flujo de
-validación con gamificación. Evidencia manual de la API: **Swagger**
-(`/docs`) y la colección **Postman** en
-[`docs/postman/SIMUL.postman_collection.json`](docs/postman/SIMUL.postman_collection.json).
+validación con gamificación. Evidencia manual de la API: **Swagger** en `/docs`
+(y su especificación en `/openapi.json`).
 
 ---
 

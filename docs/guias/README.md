@@ -19,7 +19,7 @@ distinto y **no menciona los otros dos**.
   quien explica rechazar no habla de aprobar ni de buscar; quien explica buscar no
   habla de ninguno de los otros dos.
 - **Todos hablan del resto del proyecto:** 7 capas, DDL de 25 tablas y 2 vistas,
-  API de 30 rutas / 37 operaciones, seguridad, Docker, 19 pruebas, Postman y
+  API de 30 rutas / 37 operaciones, seguridad, Docker, 19 pruebas y
   trazabilidad de los tres cortes.
 - Texto con `>` = **se dice en voz alta**. La línea `👉 MOSTRAR:` indica **qué parte
   de la pantalla o del editor hay que enseñar** en ese momento. El material de

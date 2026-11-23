@@ -18,15 +18,14 @@ pytest -q                                     # debe dar 19 passed
 | API | `http://localhost:5000/api/museo/...` |
 | MySQL (DBeaver) | `127.0.0.1:3307` · db `simul_db` · usuario `simul_user` · password `simul_password` |
 | Admin de demo | `l.jimenez@unilibre.edu.co` / `1234` |
-| Postman | Importar `docs/postman/SIMUL.postman_collection.json` (6 carpetas / 23 requests) |
 
-Si Docker no está arriba, Postman y Swagger dan *Connection refused*.
+Si Docker no está arriba, Swagger da *Connection refused*.
 
 ## 2. Acuerdo previo — lo dicen los TRES, idéntico (0:00 – 1:00)
 
 > "Aclaración antes de empezar: la interfaz HTML es la entrega del **corte 2** y
 > persiste en `localStorage`; el backend del **corte 3** expone esa misma operación
-> como API REST y la demostramos en **Swagger y Postman contra MySQL**. El botón
+> como API REST y la demostramos en **Swagger contra MySQL**. El botón
 > visual no llama a la API —lo dejamos así para conservar el entregable anterior—,
 > pero la operación sí está implementada capa por capa y persiste. Arrancamos en
 > Flask en el corte 2 y migramos a **FastAPI**, que da Swagger automático y
@@ -56,7 +55,6 @@ Tenerlos abiertos en el editor (o al menos poder ir a ellos rápido). Son el
 | `db/DDL.sql` | `433-450` | vista `v_bandeja_validacion` |
 | `db/DDL.sql` | `451-...` | vista `v_ranking` |
 | `tests/test_app.py` | `20-41`, `511-525` | documentación OpenAPI y catálogos |
-| `docs/postman/SIMUL.postman_collection.json` | (archivo JSON) | importar en Postman; no tiene líneas estables |
 
 ## 4. Cómo leer cada bloque del guion
 
@@ -74,7 +72,6 @@ La hora es **acumulada**: `[1:00]` significa "a partir del minuto 1". El bloque
 ## 5. Checklist rápido
 
 - [ ] Docker `up` y `/docs` responde.
-- [ ] Postman con la colección importada y el login probado.
 - [ ] DBeaver conectado a `127.0.0.1:3307`.
 - [ ] Editor con los archivos de la tabla 3 **y los de tu video**.
 - [ ] Acuerdo previo memorizado (lo dicen los tres igual).

@@ -24,7 +24,6 @@ instance/
 *.sqlite
 *.sqlite3
 
-# Postman (workspace local del IDE, no es parte del entregable;
-# la coleccion versionada esta en docs/postman/)
+# Metadatos locales de Postman del IDE (no son parte del entregable)
 .postman/
 postman/
