@@ -23,7 +23,3 @@ instance/
 *.db
 *.sqlite
 *.sqlite3
-
-# Metadatos locales de Postman del IDE (no son parte del entregable)
-.postman/
-postman/

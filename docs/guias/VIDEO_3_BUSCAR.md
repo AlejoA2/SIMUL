@@ -26,8 +26,8 @@ Tener abiertos estos archivos en el editor, exactamente en estas líneas:
 | `app/controllers/contenido_controller.py` | `20-...` | `listar` (normaliza `None`) |
 | `app/services/contenido_service.py` | `74-...` | `listar` |
 | `app/repositories/contenido_repository.py` | `13-...` | `@dataclass Pagina` |
-| `app/repositories/contenido_repository.py` | `66-...` | `get_publicados` (count, order, offset, limit) |
-| `app/repositories/contenido_repository.py` | `371-...` | `_aplicar_filtros` (`ilike`, `IN`, `extract`) |
+| `app/repositories/contenido_repository.py` | `65-...` | `get_publicados` (count, order, offset, limit) |
+| `app/repositories/contenido_repository.py` | `369-...` | `_aplicar_filtros` (`ilike`, `IN`, `extract`) |
 | `app/models/types.py` | `6-...` | `YearType` (YEAR en MySQL / SMALLINT en SQLite) |
 | `db/DDL.sql` | `108-109` | `idx_contenido_estado`, `idx_contenido_tipo` |
 | `db/DDL.sql` | `451-...` | vista `v_ranking` |
@@ -99,7 +99,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [8:15] Seguridad — 0:30
 
-👉 **MOSTRAR:** `app/utils/roles.py:194` y `app/utils/security.py:23-71`; si alcanza, `contenido_routes.py:155` (`usuario_opcional`).
+👉 **MOSTRAR:** `app/utils/roles.py:191` y `app/utils/security.py:23-71`; si alcanza, `contenido_routes.py:155` (`usuario_opcional`).
 
 > "El login emite JWT con PBKDF2 + salt en `app/utils/security.py`, sin `werkzeug`. Las rutas protegidas usan `Depends(requiere_usuario)` y el rol se comprueba con `rol_nombre`. Los esquemas de salida no exponen `password_hash`: `UsuarioOut` lo dice en su docstring. El detalle de contenido usa `usuario_opcional`: funciona sin token y solo añade `es_favorito` si viene uno."
 

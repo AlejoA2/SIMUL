@@ -70,10 +70,8 @@ def _sub_del_token(token: str) -> str | None:
     """
     Devuelve el sub del token.
 
-    Si el token es inválido o expirado lanza 401 (igual que
-    verify_jwt_in_request(optional=True) del template de
-    Flask: en rutas públicas un token presente pero malo
-    también rechaza).
+    Si el token es inválido o expirado lanza 401: en rutas
+    públicas un token presente pero malo también rechaza.
     """
 
     try:
@@ -161,8 +159,7 @@ def _dependencia_usuario(opcional: bool):
                         usuario_id
                     )
 
-                    # Inactivo = sin sesión (igual que con
-                    # el template de Flask).
+                    # Inactivo = sin sesión.
                     if (
                         usuario is not None
                         and not usuario.estado

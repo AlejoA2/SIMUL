@@ -69,7 +69,7 @@ puntos…). Todos los usuarios de demostración usan la contraseña **`1234`**.
 ## Arranque local (sin Docker)
 
 Sirve para desarrollar la API con recarga automática. Si no defines
-`DATABASE_URL`, la app usa **SQLite** (`instance/simul.db`) como respaldo.
+`DATABASE_URL`, la app usa **SQLite** (`simul_local.db`) como respaldo.
 
 ```bash
 python -m venv .venv
@@ -80,8 +80,9 @@ pip install -r requirements.txt
 uvicorn run:app --reload        # http://localhost:5000/docs
 ```
 
-Para conectar a MySQL, copia `.env.example` a `.env` y ajusta `DATABASE_URL`
-(ver la sección [Variables de entorno](#variables-de-entorno)).
+Para conectar a MySQL, copia `.env.example` a `.env` y ajusta `DATABASE_URL`:
+la app carga ese archivo al arrancar (ver
+[Variables de entorno](#variables-de-entorno)).
 
 ---
 
@@ -226,7 +227,7 @@ automáticamente en **`/docs`**. Respuestas con sobre uniforme:
 
 | Variable | Por defecto | Descripción |
 |---|---|---|
-| `DATABASE_URL` | `sqlite:///instance/simul.db` | Cadena de conexión (en Docker: MySQL) |
+| `DATABASE_URL` | `sqlite:///simul_local.db` | Cadena de conexión (en Docker: MySQL) |
 | `JWT_SECRET_KEY` | `simul-development-secret-key-change-me` | Clave para firmar JWT (**cámbiala en producción**) |
 | `JWT_ACCESS_TOKEN_EXPIRES` | `3600` | Duración del token (segundos) |
 
@@ -249,12 +250,10 @@ validación con gamificación. Evidencia manual de la API: **Swagger** en `/docs
 ## Documentación
 
 - [`docs/BACKEND.md`](docs/BACKEND.md) — arquitectura del backend, capas y API.
+- [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) — arquitectura general y
+  trazabilidad de los tres cortes.
 - [`docs/guias/README.md`](docs/guias/README.md) — guiones separados por integrante,
   con checklist de archivos/líneas y qué mostrar en cada bloque.
-- [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) — análisis general (nota: sus
-  secciones sobre el backend describen el estado previo a FastAPI).
-- [`docs/FRONTEND.md`](docs/FRONTEND.md), [`docs/PAGINAS.md`](docs/PAGINAS.md),
-  [`docs/ESTILOS.md`](docs/ESTILOS.md), [`docs/DATOS.md`](docs/DATOS.md).
 
 ---
 

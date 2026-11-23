@@ -2,7 +2,7 @@
 Vistas HTML (Jinja2) para FastAPI.
 
 - renderizar(): envuelve TemplateResponse y siempre inyecta
-  `url_for`, que los templates usan igual que en Flask:
+  `url_for` para los templates Jinja:
   url_for('web.<pagina>', ...) y url_for('static', ...).
 - El mapa endpoint → ruta se alimenta desde el propio
   web_router (los nombres de ruta son la fuente de verdad,
@@ -32,7 +32,7 @@ def registrar_rutas_web(web_router):
 def url_for(endpoint, **params):
 
     """
-    Construye una URL como el url_for de Flask.
+    Construye una URL para los templates Jinja.
 
     - url_for('static', filename='css/app.css') → /static/...
     - url_for('web.detalle_contenido', contenido_id=3)

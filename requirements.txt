@@ -14,3 +14,5 @@ PyMySQL>=1.1
 cryptography>=42
 # Plantillas HTML (vistas del museo)
 jinja2>=3.1
+# Carga de .env para ejecución local (no sobrescribe variables del entorno)
+python-dotenv>=1.0

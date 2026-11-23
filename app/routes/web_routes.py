@@ -4,7 +4,7 @@ RUTAS WEB - Museo Digital Interactivo (SIMUL)
 =============================================================
 
 Solo vistas HTML (Jinja2 vía FastAPI). Las URLs conservan
-los mismos nombres de endpoint que el template de Flask
+los nombres de endpoint del entregable anterior
 (web.index, web.explorar, ...) para que los `url_for()` de
 los templates sigan funcionando tal cual.
 

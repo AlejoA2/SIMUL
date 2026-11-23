@@ -46,8 +46,8 @@ Tenerlos abiertos en el editor (o al menos poder ir a ellos rápido). Son el
 | `app/__init__.py` | `208-238` | `include_router`: prefijos `/api/museo/...` |
 | `app/utils/response.py` | `14-33` | `success()` → sobre `{success, message, data}` |
 | `app/utils/response.py` | `34-...` | `error()` → sobre de error |
-| `app/utils/roles.py` | `194`, `198` | `requiere_usuario` y `usuario_opcional` |
-| `app/utils/security.py` | `23-48`, `49-...` | PBKDF2 + `verify_password`, sin `werkzeug` |
+| `app/utils/roles.py` | `191`, `195` | `requiere_usuario` y `usuario_opcional` |
+| `app/utils/security.py` | `23-46`, `49-85` | PBKDF2 + `verify_password`, sin `werkzeug` |
 | `db/DDL.sql` | `94-118` | tabla `contenido` (ENUM, índices `idx_contenido_estado/tipo`) |
 | `db/DDL.sql` | `355-370` | tabla `notificacion`, índice compuesto `idx_notif_usuario_leida` |
 | `db/DDL.sql` | `375-389` | tabla `validacion_log` |

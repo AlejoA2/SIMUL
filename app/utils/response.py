@@ -4,7 +4,7 @@ Sobre de respuestas de la API.
 Se conserva el formato {success, message, data} / {success,
 message, details} que usan el frontend y las capas de
 servicio; aquí se emite como JSONResponse con el código
-HTTP correspondiente (FastAPI no usa tuplas como Flask).
+HTTP correspondiente (FastAPI responde con JSONResponse).
 """
 
 from fastapi.encoders import jsonable_encoder

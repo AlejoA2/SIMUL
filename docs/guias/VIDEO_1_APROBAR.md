@@ -25,7 +25,7 @@ Tener abiertos estos archivos en el editor, exactamente en estas líneas:
 | `app/services/validacion_service.py` | `80-160` | método `aprobar` |
 | `app/services/validacion_service.py` | `249-277` | `_cargar` (403 / 404 / 409) |
 | `app/services/validacion_service.py` | `291-326` | `_notificar` y `_refrescar_gamificacion` |
-| `app/repositories/contenido_repository.py` | `59-65` | `get_by_id` con `db.session.get` |
+| `app/repositories/contenido_repository.py` | `58-63` | `get_by_id` con `db.session.get` |
 | `app/repositories/validacion_repository.py` | `36-...` | `add_log` (solo `add`, sin commit) |
 | `app/models/contenido.py` | `6-...` | ENUM `estado`, FK `id_validador` |
 | `app/models/validacion_log.py` | `6-...` | ENUM `accion` |
@@ -76,7 +76,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [4:15] Repositorio, ORM y respuesta — 1:00
 
-👉 **MOSTRAR:** `contenido_repository.py:59-65` y `validacion_repository.py:36-...`; luego ejecutar el endpoint en Swagger y mostrar el cuerpo 200 abajo.
+👉 **MOSTRAR:** `contenido_repository.py:58-63` y `validacion_repository.py:36-...`; luego ejecutar el endpoint en Swagger y mostrar el cuerpo 200 abajo.
 
 > "`get_by_id` usa `db.session.get`, que aprovecha el mapa de identidad de SQLAlchemy. `add_log` solo hace `add`: no commitea. En `contenido.py`, `estado` es ENUM con índice y `id_validador` es FK con `ON DELETE SET NULL`. Ejecuto en Swagger → **HTTP 200**. El sobre es `{success, message, data}`, de `response.py:14-33`; aparece `estado: 'publicado'` y el validador como objeto, **nunca `password_hash`**. El middleware instala una sesión por petición, hace `commit` si el código es < 400 y `rollback` si no."
 
@@ -100,7 +100,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [8:15] Seguridad — 0:30
 
-👉 **MOSTRAR:** `app/utils/security.py:23-71` y `app/utils/roles.py:194`; si alcanza, `app/schemas/simul_auth_schema.py:91-93` (docstring de `UsuarioOut`).
+👉 **MOSTRAR:** `app/utils/security.py:23-71` y `app/utils/roles.py:191`; si alcanza, `app/schemas/simul_auth_schema.py:91-93` (docstring de `UsuarioOut`).
 
 > "El login emite JWT con PBKDF2 + salt en `app/utils/security.py`, sin `werkzeug`. Las rutas protegidas usan `Depends(requiere_usuario)` y el rol se comprueba con `rol_nombre`. Los esquemas de salida no exponen `password_hash`: `UsuarioOut` lo dice en su docstring."
 

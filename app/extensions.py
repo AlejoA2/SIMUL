@@ -59,8 +59,8 @@ _sesion_actual: ContextVar[Session | None] = ContextVar(
 class _FachadaDB:
 
     """
-    Fachada con la API de flask-sqlalchemy sobre
-    SQLAlchemy puro: modelos, tipos y sesión activa.
+    Fachada declarativa sobre SQLAlchemy puro:
+    modelos, tipos y sesión activa.
     """
 
     # ---- Modelos ----
@@ -94,9 +94,8 @@ class _FachadaDB:
     @staticmethod
     def Table(nombre, *columnas, **kwargs):
 
-        """Como en flask-sqlalchemy: los modelos declaran
-        db.Table(nombre, db.Column(...)) sin pasar la
-        metadata; aquí se inyecta automáticamente."""
+        """Los modelos declaran db.Table(nombre, db.Column(...))
+        sin pasar la metadata; aquí se inyecta automáticamente."""
 
         return _TablaSQL(
             nombre,

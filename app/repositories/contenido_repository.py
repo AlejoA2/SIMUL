@@ -13,9 +13,8 @@ from app.extensions import db
 class Pagina:
 
     """
-    Resultado paginado con la misma interfaz que la
-    paginación de flask-sqlalchemy (.items, .page, .pages,
-    .total), usada por el servicio de contenido.
+    Resultado paginado con la interfaz .items, .page,
+    .pages y .total, usada por el servicio de contenido.
     """
 
     items: list = field(default_factory=list)
@@ -85,8 +84,7 @@ class ContenidoRepository:
             anio
         )
 
-        # Conteo + página (la paginación clásica de
-        # flask-sqlalchemy, ahora explícita).
+        # Conteo + página (paginación explícita).
         total = query.count()
 
         items = (

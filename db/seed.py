@@ -81,12 +81,6 @@ from app.models.investigacion import (  # noqa: E402
 # CONFIGURACIÓN
 # ==========================================================
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "mysql+pymysql://inventory_user:inventory_password"
-    "@127.0.0.1:3307/inventory_db"
-)
-
 ROL_POR_ETIQUETA = {
     "Estudiante": "estudiante",
     "Egresado": "egresado",

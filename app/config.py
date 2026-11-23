@@ -1,5 +1,11 @@
 import os
 
+from dotenv import load_dotenv
+
+# Carga .env desde la raíz del proyecto si existe. No sobrescribe
+# variables ya definidas (Docker y las pruebas mandan las suyas).
+load_dotenv()
+
 
 class Config:
 
@@ -8,7 +14,7 @@ class Config:
     # fuera de Docker se usa SQLite como respaldo local.
     DATABASE_URL = os.getenv(
         "DATABASE_URL",
-        "sqlite:///instance/simul.db"
+        "sqlite:///simul_local.db"
     )
 
     SECRET_KEY = os.getenv(

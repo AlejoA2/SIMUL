@@ -3,9 +3,8 @@
 Documentación del **tercer corte**: la API REST del Museo Digital Interactivo.
 
 > Este documento describe el estado **actual** del backend. La visión general
-> del proyecto (requisitos, frontend, estilos) está en
-> [`ARQUITECTURA.md`](ARQUITECTURA.md), [`FRONTEND.md`](FRONTEND.md),
-> [`PAGINAS.md`](PAGINAS.md), [`ESTILOS.md`](ESTILOS.md) y [`DATOS.md`](DATOS.md).
+> del proyecto y la trazabilidad de los tres cortes están en
+> [`ARQUITECTURA.md`](ARQUITECTURA.md).
 
 ---
 
@@ -58,9 +57,9 @@ Documentación interactiva: **`/docs`** (Swagger UI) y **`/redoc`**.
 
 ## 3. Capa de datos
 
-`app/extensions.py` expone una fachada `db` que conserva la ergonomía de
-`flask-sqlalchemy` (`db.Model`, `db.Column`, `db.relationship`, `db.session`)
-sobre SQLAlchemy puro, sin depender de Flask.
+`app/extensions.py` expone una fachada `db` con la ergonomía declarativa de
+SQLAlchemy (`db.Model`, `db.Column`, `db.relationship`, `db.session`) sobre la
+base declarativa y la sesión por petición.
 
 - **Sesión por petición**: la instala el middleware.
 - **Sesión fuera de petición**: `with sesion_bd():` (usada por `db/seed.py` y
@@ -138,7 +137,8 @@ pip install -r requirements.txt
 uvicorn run:app --reload
 ```
 
-Sin `DATABASE_URL` la app usa SQLite (`instance/simul.db`).
+Sin `DATABASE_URL` la app usa SQLite (`simul_local.db`). Si copiaste
+`.env.example` a `.env`, la app lo carga automáticamente.
 
 ---
 
