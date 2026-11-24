@@ -21,8 +21,11 @@ distinto y **no menciona los otros dos**.
 - **Todos hablan del resto del proyecto:** 7 capas, DDL de 25 tablas y 2 vistas,
   API de 30 rutas / 37 operaciones, seguridad, Docker, 19 pruebas y
   trazabilidad de los tres cortes.
-- Texto con `>` = **se dice en voz alta**, incluidas las frases «me voy al archivo
-  tal, líneas tantas a tantas». Esa frase es la instrucción: movete a ese archivo
-  y mostrás ese rango mientras lo decís. El material de respaldo al final **no se lee**.
+- **Cómo se lee.** En [VIDEO_3_BUSCAR.md](VIDEO_3_BUSCAR.md) el texto plano se dice
+  en voz alta y lo que está en **negrita dentro de corchetes** es indicación de
+  cámara o editor: no se lee. En los guiones 1 y 2, el texto con `>` se dice en voz
+  alta. En todos, las frases «me voy al archivo tal, líneas tantas a tantas» son la
+  instrucción: movete a ese archivo y mostrás ese rango mientras lo decís. El
+  material de respaldo al final **no se lee**.
 - Antes de grabar, abrí tu archivo y la sección **«Antes de iniciar a grabar»**:
   ahí están los archivos y las líneas exactas que tenés que tener listos.

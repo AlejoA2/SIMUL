@@ -73,14 +73,15 @@ FROM contenido WHERE estado = 'pendiente';
 - [ ] Elegir categoría `Proyecto` → **2 tarjetas**.
 - [ ] Botón **Limpiar** → vuelve a 21.
 - [ ] En el editor: `buscar.html` 11-17, 50-63, 93-132, 146-152, 190-193,
-      216-218 y `buscar.js` 41-54 (tarjeta), 56-69 (parámetros), 71-86 (pintado).
+      216-218, `buscar.js` 41-54 (tarjeta), `buscar.js` 191-246 (arranque y
+      escuchadores) y `web_routes.py` 90-108 (vista HTML del buscador).
 
 ## 2. [03:18–07:09] El recorrido de capas — solo señalar en el editor
 
 | Archivo | Líneas | Qué se señala |
 |---|---|---|
 | `app/static/js/api.js` | 16-17, 50-92, 214-226 | dirección base, petición, consulta |
-| `app/routes/web_routes.py` | 90-108 | vista HTML del buscador |
+| `app/static/js/pages/buscar.js` | 56-69, 71-86, 92-122 | parámetros, pintado y consulta |
 | `app/routes/contenido_routes.py` | 37-100, 162-177 | listado y detalle público |
 | `app/controllers/contenido_controller.py` | 20-49, 51-60, 271-280 | valores por defecto, detalle |
 | `app/services/contenido_service.py` | 74-105, 107-137, 590-607, 863-929 | sobre, detalle, resumen |
@@ -95,6 +96,10 @@ FROM contenido WHERE estado = 'pendiente';
 | `db/DDL.sql` | 94-118, 108-111 | tabla `contenido` e índices |
 | `db/DDL.sql` | 19-413, 433-448, 451-464 | 25 tablas y 2 vistas |
 | `docker-compose.yml` | 14-24, 27-44 | app :5000, MySQL :3307 |
+
+- [ ] **[07:09] La vuelta** — en la pantalla: escribir `proyecto` otra vez → contador
+      en **2**; escribir algo sin coincidencias → «Sin resultados» con el botón
+      **Limpiar** (vuelve a 21).
 
 ---
 
