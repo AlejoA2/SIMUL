@@ -152,6 +152,12 @@ En el navegador, el token queda en `simul.token`. La sesión visible queda en
 3. Si el conteo no cambia, comprobar que el contenedor `simul_app` esté arriba y
    que `DATABASE_URL` no apunte a SQLite.
 
+> **Si sale `Access denied for user 'inventory_user'...`:** es la conexión
+> vieja del proyecto inventory, que ya no existe. Los datos actuales son
+> `127.0.0.1:3307`, base `simul_db`, usuario `simul_user`, clave
+> `simul_password`: click derecho → **Editar conexión** → pestaña *Principal* →
+> corregir base, usuario y clave → **Probar conexión**.
+
 > **Si al abrir una tabla (por ejemplo `avance_investigacion`) sale
 > `Public key retrieval is not allowed`:** MySQL 8 usa la autenticación
 > `caching_sha2_password` y el controlador necesita la clave pública del
