@@ -76,7 +76,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [08:01] Swagger, paso a paso — 0:52
 
-> "Ahora abro `/docs`. Busco `GET /api/museo/contenido/`, hago clic en Try it out, pongo `q=proyecto&anio=2024` — un término que sé que devuelve filas — y ejecuto. Aparece 200 con `items`, `page`, `pages` y `total`. Repito con `anio=1800`: 422 con el nombre del campo. Después ejecuto `GET /api/museo/contenido/{id}` con un identificador de la lista: 200. Abro `/openapi.json` y cuento: 30 rutas y 37 operaciones. En `app/__init__.py`, 128 a 157, se arma el 422 con el detalle del campo."
+> "Ahora abro `/docs`. Busco `GET /api/museo/contenido/`, hago clic en Try it out, pongo `q=proyecto&anio=2023` — un término que sé que devuelve filas — y ejecuto. Aparece 200 con `items`, `page`, `pages` y `total`. Repito con `anio=1800`: 422 con el nombre del campo. Después ejecuto `GET /api/museo/contenido/{id}` con un identificador de la lista: 200. Abro `/openapi.json` y cuento: 30 rutas y 37 operaciones. En `app/__init__.py`, 128 a 157, se arma el 422 con el detalle del campo."
 
 ### [08:45] DBeaver — 0:44
 
@@ -110,20 +110,20 @@ WHERE c.estado = 'publicado'
        OR LOWER(c.categoria) LIKE LOWER('%proyecto%'))
   AND (
         c.id_contenido IN (
-          SELECT a.id_contenido FROM acontecimiento a WHERE a.anio = 2024
+          SELECT a.id_contenido FROM acontecimiento a WHERE a.anio = 2023
         ) OR c.id_contenido IN (
-          SELECT p.id_contenido FROM premio p WHERE p.anio = 2024
+          SELECT p.id_contenido FROM premio p WHERE p.anio = 2023
         ) OR c.id_contenido IN (
-          SELECT p.id_contenido FROM proyecto p WHERE p.anio = 2024
+          SELECT p.id_contenido FROM proyecto p WHERE p.anio = 2023
         ) OR c.id_contenido IN (
           SELECT av.id_contenido FROM avance_investigacion av
-          WHERE av.anio = 2024
+          WHERE av.anio = 2023
         ) OR c.id_contenido IN (
           SELECT e.id_contenido FROM evento e
-          WHERE YEAR(e.fecha_evento) = 2024
+          WHERE YEAR(e.fecha_evento) = 2023
         ) OR c.id_contenido IN (
           SELECT n.id_contenido FROM noticia n
-          WHERE YEAR(n.fecha_publicacion) = 2024
+          WHERE YEAR(n.fecha_publicacion) = 2023
         )
       )
 ORDER BY c.fec_crea DESC
