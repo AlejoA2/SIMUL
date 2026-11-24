@@ -1,338 +1,206 @@
 # Video 3 — «Buscar / filtrar» (11 min)
 
-**Integrante 3.** Ancla única: la búsqueda del catálogo.
-**No mencionar** los otros dos botones en ningún momento. Recorré todo el proyecto a
-través de este botón.
+**Integrante 3.** Ancla única: la búsqueda del catálogo. **No mencionar** los otros
+dos botones. Recorrer el proyecto entero desde este botón, demostrando dominio de la
+arquitectura y cumpliendo la rúbrica.
 
-**Cómo leer este guion:** lo que está en **negrita dentro de corchetes** es indicación
-de cámara o editor —no se lee en voz alta—. Todo lo demás es lo que hablas, en frases
-cortas y con calma. Los `[mm:ss]` son los tiempos de referencia. Cada bloque dice
-primero **en qué capa estás y para qué sirve**, después qué hace ahí el botón de
-buscar, y al final dónde se señala el código.
+**Cómo leer:**
 
-Leé antes [00_ANTES_DE_GRABAR.md](00_ANTES_DE_GRABAR.md) (Docker, credenciales y
-acuerdo previo).
+- **`[PANTALLA: ...]`** y **`[CÓDIGO: archivo → líneas]`** en negrita = indicación,
+  **no se lee**. Cada bloque dice si mostrás la página o el código, y un solo archivo
+  por bloque.
+- Todo lo demás se lee en voz alta, con calma, en frases cortas.
+- Los `[mm:ss]` son tiempos de referencia. El material de «Respaldo» **no se lee**.
+
+Leé antes [00_ANTES_DE_GRABAR.md](00_ANTES_DE_GRABAR.md).
 
 ## Antes de iniciar a grabar
 
-Tener abiertos estos archivos en el editor, exactamente en estas líneas:
+Abrir estos archivos en el editor (una sola vez, para no perder tiempo buscando):
 
-| Archivo | Líneas | Qué vas a señalar |
-|---|---|---|
-| `app/templates/pages/buscar.html` | `11-17`, `50-63` | listas de apoyo y campo de texto |
-| `app/templates/pages/buscar.html` | `93-132`, `146-152`, `176-193`, `216-218` | filtros, contador, esqueleto, grilla y limpieza |
-| `app/static/js/pages/buscar.js` | `18-22`, `41-54` | estado y tarjeta |
-| `app/static/js/pages/buscar.js` | `56-69`, `71-86`, `92-122` | parámetros, pintado y consulta |
-| `app/static/js/pages/buscar.js` | `191-246` | arranque y escuchadores |
-| `app/static/js/api.js` | `16-17`, `50-92`, `214-226` | dirección base, petición y armado de la consulta |
-| `app/routes/web_routes.py` | `90-108` | vista HTML del buscador |
-| `app/routes/contenido_routes.py` | `37-100` | entrada del listado y parámetros |
-| `app/routes/contenido_routes.py` | `162-177` | detalle público con sesión opcional |
-| `app/controllers/contenido_controller.py` | `20-49`, `51-60` | valores por defecto y detalle |
-| `app/services/contenido_service.py` | `74-105`, `107-137` | armar la respuesta y el detalle |
-| `app/services/contenido_service.py` | `590-607`, `863-929` | resumen de tarjeta, año, imagen y descripción |
-| `app/repositories/contenido_repository.py` | `12-28`, `75-115` | sobre de página y consulta con total |
-| `app/repositories/contenido_repository.py` | `380-459` | filtros de texto, categoría, tipo y año |
-| `app/models/contenido.py` | `6-88` | entidad contenido, estado y fecha |
-| `app/models/types.py` | `6-28` | año como YEAR en MySQL |
-| `app/schemas/contenido_schema.py` | `109-121`, `259-276` | rango del año y formatos de salida |
-| `app/utils/response.py` | `14-31`, `34-59` | sobre de respuesta y de error |
-| `app/utils/roles.py` | `191`, `195` | sesión obligatoria y opcional |
-| `app/utils/security.py` | `30-46`, `49-85` | huella de la clave y comparación segura |
-| `app/__init__.py` | `128-157`, `208-239` | detalle del 422 y routers |
-| `db/DDL.sql` | `94-118`, `108-111` | tabla contenido e índices |
-| `db/DDL.sql` | `19-413`, `433-448`, `451-464` | 25 tablas y las dos vistas |
-| `tests/test_app.py` | `20-39`, `511-525` | documentación OpenAPI y catálogos |
-| `docker-compose.yml` | `14-24`, `27-44` | app en 5000, MySQL en 3307 y DDL inicial |
-
-Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
+| Archivo | Líneas |
+|---|---|
+| `app/templates/pages/buscar.html` | 50-63, 93-132, 147, 190-193 |
+| `app/static/js/pages/buscar.js` | 56-69, 71-86, 92 |
+| `app/static/js/api.js` | 16, 50-92, 214-226 |
+| `app/routes/contenido_routes.py` | 37-100 |
+| `app/controllers/contenido_controller.py` | 20-49 |
+| `app/services/contenido_service.py` | 74-105, 590 |
+| `app/repositories/contenido_repository.py` | 75-115, 380-459 |
+| `app/models/contenido.py` | 6-88 |
+| `db/DDL.sql` | 94-118, 108-111 |
+| `app/__init__.py` | 208-239 |
+| `tests/test_app.py` | 20, 511 |
+| `docker-compose.yml` | 14-24, 27-44 |
 
 ---
 
 ## Guion
 
-### [00:48] Acuerdo previo — 0:23
+### [00:48] Intro — mi botón — 0:40
 
-Antes de empezar, recuerdo que esto es la entrega del tercer corte. En el corte uno
-definimos las entidades y las reglas; en el corte dos quedaron las pantallas. Hoy
-esas pantallas ya no viven solas: el botón llama a una dirección de la API, esa
-dirección consulta MySQL y la misma operación se puede ejecutar en Swagger. Los tres
-usamos el mismo backend y las mismas credenciales. Yo voy a recorrer todo el proyecto
-desde una sola acción: la búsqueda.
+**[PANTALLA: `http://localhost:5000/buscar`]**
 
-### [01:11] Mi botón: el campo de búsqueda (capa de presentación) — 1:02
+Soy [NOMBRE]. Esto es el tercer corte: el corte uno definió las entidades y las
+reglas, el corte dos dejó las pantallas, y hoy esas pantallas hablan con el servidor.
+Voy a recorrer todo el proyecto desde un solo botón: el de buscar. Escribo «proyecto»
+y la grilla pasa de 21 tarjetas a 2. Ese viaje —del campo a la base y de vuelta— es
+lo que voy a explicar.
 
-**[PANTALLA: navegador en `http://localhost:5000/buscar` — señalar el campo de texto
-rojo]**
+### [01:28] La página: el HTML (capa de presentación) — 0:40
 
-Soy [NOMBRE] y hoy recorro el proyecto entero desde este botón: el campo de búsqueda
-de /buscar. Es lo primero que ve el visitante, y es por acá por donde va a entrar
-toda la explicación.
+**[CÓDIGO: `app/templates/pages/buscar.html` → líneas 50 a 63]**
 
-**[EDITOR: `app/templates/pages/buscar.html`, líneas 50 a 63]**
+Primero la capa de presentación: este es el HTML de la página. Acá está el campo de
+búsqueda, con id `search-input`. En el mismo archivo están los filtros de categoría
+y año —líneas 93 a 132—, el contador `search-count` —línea 147— y la grilla
+`search-results` —líneas 190 a 193—, que está vacía hasta que llegan los datos. Esta
+capa solo muestra: no decide nada y no habla con la base.
 
-Este es el código del campo: un input con id `search-input`. Estamos en la **capa de
-presentación**, el HTML. Esta capa solo muestra: no decide nada, no valida nada y no
-habla con la base. Su trabajo es darle la forma al museo.
+### [02:08] El JavaScript del buscador — 0:45
 
-**[PANTALLA: señalar el resto de la página]**
+**[CÓDIGO: `app/static/js/pages/buscar.js` → líneas 56 a 69 y 92]**
 
-En la misma plantilla están las otras piezas del botón. Los filtros de categoría y
-año están en las líneas 93 a 132. El contador que arriba de la grilla dice «21
-resultados encontrados» está en la línea 146, con id `search-count`. La cuadrícula
-donde se pintan las tarjetas está en las líneas 190 a 193, con id `search-results`
-—al abrir está vacía y oculta—; mientras carga se ve el esqueleto de las líneas 176
-a 186. Y el botón «Limpiar filtros» está en la línea 216.
+Segunda parada, todavía en el navegador. Cada tecla que escribo dispara la función
+`buscar` —línea 92 de este archivo—. Esa función arma los parámetros: el texto va en
+`q`, la categoría en `categoria`, el año en `anio` —líneas 56 a 69— y llama a la API.
+Cuando llega la respuesta, la función `pintar` —líneas 71 a 86— llena la grilla y
+actualiza el contador. Concepto: el navegador no toca la base; pide y pinta.
 
-**[PANTALLA: escribir `proyecto` en el campo]**
+### [02:53] El cliente de la API — 0:35
 
-Escribo «proyecto»: el contador pasa a «2 resultados encontrados» y la cuadrícula se
-llena con dos tarjetas —Sistema de Monitoreo Ambiental con IoT y App para gestión de
-notas—. Cada fila de la respuesta se convierte en tarjeta en
-`app/static/js/pages/buscar.js`, líneas 41 a 54: título, año, imagen y autor.
+**[CÓDIGO: `app/static/js/api.js` → líneas 214 a 226]**
 
-**[EDITOR: `buscar.html`, líneas 11 a 17]**
+Tercera parada: `SIMULApi.contenido` convierte esos parámetros en la dirección
+`/api/museo/contenido/?q=proyecto&anio=2023`. La base de todas las llamadas,
+`/api/museo`, está en la línea 16 de este archivo, y la función `request` —líneas 50
+a 92— hace el `fetch` y devuelve el campo `data`. Hasta acá, el navegador. Ahora
+empieza el servidor.
 
-Y arriba de la plantilla, en las líneas 11 a 17, el servidor inyecta las listas de
-apoyo —categorías, años y slugs— para que los filtros no estén escritos a mano.
+### [03:28] Capa 1 · Rutas — la puerta de entrada — 0:45
 
-### [02:13] Quién prepara la página y quién escucha (vistas web + capa cliente) — 1:05
+**[CÓDIGO: `app/routes/contenido_routes.py` → líneas 37 a 100]**
 
-**[EDITOR: `app/routes/web_routes.py`, líneas 90 a 108]**
+Primera capa del servidor: rutas, la puerta de entrada de la API. En la línea 37
+está declarado `GET /api/museo/contenido`. Esta capa solo recibe y valida: el año
+tiene que estar entre 1900 y 2100 —líneas 62 a 67—, así que `anio=1800` responde 422
+sin pasar a ninguna otra capa. Es un endpoint público, con sesión opcional —línea
+44—. Al final, la función llama al controlador —líneas 92 a 100—.
 
-¿Quién entrega esta página? La capa de **vistas web**, que sirve los HTML. La función
-`buscar`, en la línea 90, responde a `GET /buscar` y renderiza `pages/buscar.html`
-con las listas de categorías y años y con la búsqueda inicial, si venía una en la
-dirección. Concepto: esta ruta solo sirve el molde; los resultados todavía no salen
-de acá.
+### [04:13] Capa 2 · Controladores — 0:35
 
-**[EDITOR: `app/static/js/pages/buscar.js`, líneas 191 a 246]**
+**[CÓDIGO: `app/controllers/contenido_controller.py` → líneas 20 a 49]**
 
-Cuando la página termina de cargar, entra la **capa cliente**, el JavaScript que
-corre en el navegador. El buscador arranca en la línea 191, con el evento
-`simul:ready`, y ahí se engancha todo: el campo escucha cada tecla —línea 203—, los
-filtros laterales escuchan el clic —líneas 210 a 232—, y el botón limpiar
-restablece todo —líneas 234 a 243—. En la línea 245 se hace la primera consulta,
-para que al abrir ya aparezcan las 21 tarjetas.
+Segunda capa: controladores. Coordinan y aplican permisos; no tocan la base. El
+método `listar` pone los valores por defecto —página 1 y 12 elementos, líneas 45 a
+48— y si alguien pide ver pendientes sin ser admin, responde 403 —líneas 31 a 37—.
+Para la búsqueda pública, solo pasa todo al servicio.
 
-Ojo con el concepto: el navegador no toca MySQL. Pide a la API y pinta lo que llega.
+### [04:48] Capa 3 · Servicios — 0:40
 
-### [03:18] Del campo a la dirección: el viaje de la información — 0:52
+**[CÓDIGO: `app/services/contenido_service.py` → líneas 74 a 105]**
 
-**[EDITOR: `buscar.js`, líneas 56 a 69]**
+Tercera capa: servicios, las reglas del negocio. El método `listar` le pide al
+repositorio la página publicada —línea 85 de este archivo— y arma la respuesta:
+`items`, `page`, `pages` y `total`. Además, cada fila se convierte en resumen de
+tarjeta en la línea 590 de este archivo: título, categoría, año, imagen y autor. Eso
+es exactamente lo que después se ve en la grilla de la página.
 
-Cada tecla llama a la función `buscar` —línea 92— y lo primero que hace es armar los
-parámetros: el texto va en `q`, la categoría en `categoria`, el año en `anio`, y
-`per_page` en 100 para traer todo de una vez.
+### [05:28] Capa 4 · Repositorios — 0:45
 
-**[EDITOR: `buscar.js`, líneas 92 a 122]**
+**[CÓDIGO: `app/repositories/contenido_repository.py` → líneas 75 a 115 y 380 a 459]**
 
-Después `buscar` muestra el esqueleto de carga y llama a `SIMULApi.contenido(...)`.
-Eso ya es una petición HTTP: el navegador está pidiendo, todavía no tiene nada.
+Cuarta capa: repositorios, la única capa que genera SQL. `get_publicados` filtra
+solo lo publicado —líneas 86 a 88—, cuenta el total, ordena por fecha y pagina con
+`offset` y `limit`. Los filtros del botón están en `_aplicar_filtros` —líneas 380 a
+459—: el texto compara título o categoría sin distinguir mayúsculas, y el año se
+resuelve con subconsultas porque cada subtipo guarda el año a su manera.
 
-**[EDITOR: `app/static/js/api.js`, líneas 214 a 226]**
+### [06:13] Capa 5 · Modelos y MySQL — 0:40
 
-`SIMULApi.contenido` está en `api.js`, línea 214: convierte los parámetros en texto
-de dirección —`q=proyecto&anio=2023`— y arma `/contenido/` con ese sufijo.
+**[CÓDIGO: `app/models/contenido.py` → líneas 6 a 88, y después `db/DDL.sql` → líneas 94 a 118]**
 
-**[EDITOR: `api.js`, línea 16 y líneas 50 a 92]**
+Quinta capa: el modelo. La clase `Contenido` es una clase de SQLAlchemy, el espejo
+en Python de la tabla contenido —tipo, título, categoría, estado y fechas—. Y la
+tabla real está en `db/DDL.sql`, línea 94, con los índices de la búsqueda en las
+líneas 108 a 111: estado, tipo, categoría y fecha. Aquí está la verdad: MySQL, con
+25 tablas y 2 vistas. Esta búsqueda solo lee; nunca escribe.
 
-Y en la línea 16 está la base de todo: `/api/museo`. La función `request`, líneas 50
-a 92, hace el `fetch` contra `/api/museo/contenido/?q=...`, agrega el token si hay
-sesión y devuelve el campo `data` de la respuesta. Concepto: esta es la única puerta
-del navegador hacia el servidor; todas las pantallas del museo pasan por acá.
+### [06:53] De vuelta en la página — 0:35
 
-### [04:10] Capa 1 · Rutas — la puerta de entrada — 0:40
+**[PANTALLA: `/buscar` — escribir `proyecto`]**
 
-**[EDITOR: `app/routes/contenido_routes.py`, líneas 37 a 100]**
+La respuesta vuelve por las mismas capas, en orden inverso, y el JavaScript pinta la
+grilla. Se refleja en la página así: el contador dice «2 resultados encontrados» y
+aparecen las dos tarjetas. Si escribo algo sin coincidencias, aparece «Sin
+resultados» con su botón Limpiar. Ese es el circuito completo: del campo a MySQL y de
+vuelta a la página.
 
-La petición cruzó la red y llegó al servidor. Entramos a la **capa de rutas**, la
-puerta de entrada de la API. Acá, en la línea 37, está declarado
-`GET /api/museo/contenido`: exactamente el mismo camino que acabamos de armar en el
-navegador.
-
-¿Qué hace esta capa y qué no? Recibe, lee los parámetros y valida —nada más. Fíjate
-en los `Query`: el texto libre en la línea 47; el año, en las líneas 62 a 67, tiene
-que ser como mínimo 1900 y como máximo 2100; el tamaño de página, en las líneas 79 a
-84, entre 1 y 100. Si mando `anio=1800`, FastAPI corta acá mismo y responde 422
-antes de que cualquier otra capa trabaje. La ruta no contiene reglas de negocio.
-
-Un detalle de seguridad, en la línea 44: sesión opcional. El catálogo es público; si
-el visitante trae token, se carga el usuario, y si no, sigue anónimo. Los formatos de
-entrada y salida también tienen su capa de esquemas: `app/schemas/contenido_schema.py`,
-líneas 109 a 121, declara el mismo rango de año para cuando se crea contenido. El
-prefijo `/api/museo` está montado en `app/__init__.py`, líneas 216 a 219.
-
-Y la función termina devolviendo `controller.listar(...)` con los siete argumentos
-—líneas 92 a 100—. La información pasa a la siguiente capa.
-
-### [04:50] Capa 2 · Controladores — coordinación y permisos — 0:30
-
-**[EDITOR: `app/controllers/contenido_controller.py`, líneas 20 a 49]**
-
-Segunda capa: **controladores**. Coordinan entre la ruta y el servicio; no hablan con
-la base ni arman SQL. En la línea 20 está `listar`. Con la búsqueda hace tres cosas:
-convierte los números, pone los valores por defecto —página 1 y doce elementos por
-página, líneas 45 a 48— y aplica una regla de acceso: si alguien pide ver pendientes
-o rechazados sin ser admin, responde 403 —líneas 31 a 37—. Para la búsqueda pública,
-solo pasa el filtro al servicio.
-
-### [05:20] Capa 3 · Servicios — las reglas del negocio — 0:40
-
-**[EDITOR: `app/services/contenido_service.py`, líneas 74 a 105]**
-
-Tercera capa: **servicios**, donde viven las reglas del negocio. `listar`, en la
-línea 74, le pide al repositorio la página publicada —línea 85— y con lo que vuelve
-arma la respuesta: `items`, `page`, `pages` y `total` —líneas 95 a 105—.
-
-**[EDITOR: `contenido_service.py`, líneas 590 a 607]**
-
-Cada fila se convierte en un resumen de tarjeta en la línea 590: id, tipo, título,
-categoría, estado, fecha, año, imagen, descripción y autor. Es exactamente lo que
-después pinta `buscar.js`. El servicio también calcula el año de cada subtipo
-—líneas 863 a 929—, porque cada tipo lo guarda a su manera.
-
-Y el formato de la respuesta, el sobre `{success, message, data}`, lo genera
-`app/utils/response.py`, líneas 14 a 31: es el mismo sobre que consume el navegador.
-
-### [06:00] Capa 4 · Repositorios — el único que habla con la base — 0:40
-
-**[EDITOR: `app/repositories/contenido_repository.py`, líneas 75 a 115]**
-
-Cuarta capa: **repositorios**, la única que consulta la tabla contenido. En la línea
-75 está `get_publicados`. Primero filtra: solo estado `publicado` —líneas 86 a 88—.
-Cuenta el total —línea 99—, ordena por fecha de creación —línea 103— y pagina de
-forma explícita con `offset` y `limit` —líneas 104 y 105—. El sobre `Pagina`, en las
-líneas 12 a 28, es el formato en el que suben los datos al servicio.
-
-**[EDITOR: `contenido_repository.py`, líneas 380 a 459]**
-
-Los filtros del botón están en `_aplicar_filtros`. El texto, líneas 389 a 398:
-compara título o categoría sin importar mayúsculas —`ilike`—. Categoría y tipo,
-líneas 400 a 410: coincidencia exacta. Y el año, líneas 412 a 457: cada subtipo
-guarda el año a su manera —cuatro en columna `anio`, evento y noticia en su fecha—,
-así que se pide una lista de identificadores con subconsultas. ¿Por qué no juntar
-todas las tablas en un solo `join`? Porque la fila base se repetiría por cada
-coincidencia y el total mentiría.
-
-### [06:40] Capa 5 · Modelos — el espejo de la tabla en MySQL — 0:29
-
-**[EDITOR: `app/models/contenido.py`, líneas 6 a 88]**
-
-Quinta capa: **modelos**. La clase `Contenido` es el espejo en Python de la tabla
-contenido: tipo con sus siete valores, título, categoría, estado con sus tres valores
-—pendiente, publicado, rechazado— y la fecha de creación, con sus índices.
-
-**[EDITOR: `db/DDL.sql`, líneas 94 a 118]**
-
-Y el espejo real: la tabla en MySQL, en `db/DDL.sql`, línea 94, con sus claves
-foráneas al autor y al validador. Los índices de búsqueda están en las líneas 108 a
-111 —estado, tipo, categoría y fecha—. El año se guarda como `YEAR` de MySQL, en
-`app/models/types.py`, líneas 6 a 28. Esta consulta no escribe nada: solo lee filas
-publicadas.
-
-### [07:09] La vuelta: de MySQL a la pantalla — 0:52
-
-**[PANTALLA: navegador /buscar — escribir `proyecto` otra vez]**
-
-La información vuelve por las mismas capas, en orden inverso. MySQL devuelve las
-filas; el repositorio las convierte en objetos; el servicio arma el sobre con
-`items`, `page`, `pages` y `total`; la ruta lo devuelve como JSON con el sobre
-`{success, message, data}`; `api.js` entrega el campo `data`; y `buscar.js`, en la
-línea 71, pinta la cuadrícula y actualiza el contador —líneas 81 a 85—.
-
-**[PANTALLA: el contador dice «2 resultados encontrados»]**
-
-Ahí está: el contador, que es el id `search-count` de `buscar.html` línea 146, dice
-«2 resultados encontrados». Si escribo algo sin coincidencias, la grilla se oculta y
-aparece el estado vacío con su botón «Limpiar filtros» —`buscar.html`, líneas 197 a
-219—. Si la conexión falla, `buscar.js` muestra un aviso —líneas 114 a 118— y la
-lista queda vacía.
-
-**[EDITOR: `app/routes/contenido_routes.py`, líneas 162 a 177]**
-
-Y para cerrar el círculo: al hacer clic en una tarjeta entra
-`GET /api/museo/contenido/{id}`, en la línea 162 de las rutas —misma capa de
-entrada—, y baja por controlador, línea 51, y servicio, línea 107, que devuelve 404
-si el id no existe o si el contenido no está publicado —líneas 113 a 133—. La
-sesión, si viene, solo sirve para marcar el favorito.
-
-### [08:01] Swagger: la misma búsqueda, sin navegador — 0:44
+### [07:28] Swagger — la misma prueba, sin navegador — 0:50
 
 **[PANTALLA: `http://localhost:5000/docs`]**
 
-Ahora muestro que este mismo flujo existe sin mi pantalla: abro `/docs`, la
-documentación que FastAPI genera sola.
+El mismo circuito, ahora desde la documentación. En `GET /api/museo/contenido/` hago
+Try it out con `q=proyecto` y `anio=2023`: responde 200 con `items`, `page`, `pages`
+y `total` —dos filas, las mismas que acabo de ver en la página—. Cambio a
+`anio=1800`: 422 con `details.query.anio`, que nombra el campo. Con `id=1` en
+`GET /api/museo/contenido/{id}`: 200 con la ficha completa. Y en `/openapi.json`:
+30 rutas y 37 operaciones.
 
-**[ACCIONES: clic en `GET /api/museo/contenido/` → Try it out]**
-
-Escribo `q=proyecto` y `anio=2023` y ejecuto: responde 200 con `items`, `page`,
-`pages` y `total` —dos filas, las mismas que vio la pantalla—. Cambio el año a 1800
-y ejecuto de nuevo: 422 con `details.query.anio`, que nombra el campo. Ese detalle
-lo arma `app/__init__.py`, líneas 128 a 157.
-
-**[ACCIONES: `GET /api/museo/contenido/{id}` con `id=1` → 200 con la ficha]**
-
-Y en una pestaña nueva, `/openapi.json`: 30 rutas y 37 operaciones.
-
-### [08:45] MySQL: las mismas filas — 0:51
+### [08:18] MySQL — las mismas filas — 0:40
 
 **[PANTALLA: DBeaver, `127.0.0.1:3307`, base `simul_db`]**
 
-Ahora bajo a la base de datos, la capa de abajo de todo. La búsqueda no escribe:
-solo lee. Corro la consulta equivalente —está en VIDEO_3_PASOS, sección 4— y da
-2 filas: ids 1 y 12, exactamente las mismas que devolvió Swagger. Con `SHOW INDEX`
-confirmo los índices de estado, tipo, categoría y fecha que acabo de señalar en el
-DDL. Y al final del DDL, líneas 433 a 464, están las dos vistas,
-`v_bandeja_validacion` y `v_ranking`: consultas guardadas, no tablas nuevas.
+Y la misma búsqueda en la base de datos. Corro la consulta —está en
+`VIDEO_3_PASOS.md`, sección 4—: da 2 filas, ids 1 y 12, exactamente las que devolvió
+Swagger. `SHOW INDEX` muestra los índices que acabo de señalar en el DDL. La
+búsqueda no escribe nada: solo lee filas publicadas.
 
-### [09:36] Arquitectura, FastAPI y Docker — 0:33
+### [08:58] Arquitectura, FastAPI y Docker — 0:45
 
-**[EDITOR: `app/__init__.py`, líneas 208 a 239]**
+**[CÓDIGO: `app/__init__.py` → líneas 208 a 239]**
 
-El recorrido de capas cerró. Acá están los `include_router`: el de páginas web y los
-seis de la API con el prefijo `/api/museo`. Siete capas arriba —rutas, controladores,
-servicios, repositorios, modelos, esquemas y utilidades— y abajo 25 tablas y 2 vistas
-en `db/DDL.sql`, de la línea 19 a la 464.
+Este es el armado general: acá se montan los routers con el prefijo `/api/museo`.
+Siete capas en total —rutas, controladores, servicios, repositorios, modelos,
+esquemas y utilidades— y abajo MySQL con 25 tablas y 2 vistas. Criterio 1 de la
+rúbrica, arquitectura: este recorrido. Criterio 3, FastAPI con Swagger: está, porque
+FastAPI genera la documentación sola y trae la validación de parámetros incluida. En
+`docker-compose.yml` la app corre en el puerto 5000 y MySQL en el 3307, con el DDL
+como script inicial. Y es coherente con los cortes uno y dos: mismas entidades,
+mismas pantallas, mismas credenciales.
 
-El criterio tres de la rúbrica pide FastAPI con Swagger: está, porque FastAPI genera
-la documentación OpenAPI sola. ¿Por qué FastAPI y no Flask? Porque FastAPI trae la
-validación de parámetros y la documentación incluidas, que es justo lo que este
-corte evalúa. En `docker-compose.yml`, líneas 14 a 24 y 27 a 44, la app corre en el
-puerto 5000 y MySQL en el 3307, con el DDL como script inicial. Coherencia total con
-los cortes uno y dos: mismas entidades, mismas pantallas, mismas credenciales.
+### [09:43] Seguridad — 0:35
 
-### [10:09] Seguridad — 0:29
+**[PANTALLA: Swagger]**
 
-**[PANTALLA: Swagger, sin tocar Authorize]**
+Criterio 4, seguridad. El catálogo es público; lo personal pide token. Ejecuto
+`GET /gamificacion/mi-historial` sin Authorize: 401. Hago login con el admin, copio
+el token, lo pego en Authorize y repito: 200. Las claves se guardan como huella en
+`app/utils/security.py` y nunca salen en una respuesta; los roles y permisos están en
+`app/utils/roles.py`.
 
-Seguridad. El listado es público: lo vimos, 200 sin token. Lo personal pide token.
-Ejecuto `GET /gamificacion/mi-historial` sin Authorize: 401. Hago login con el
-admin, copio el token, lo pego en Authorize —sin la palabra `Bearer`— y repito:
-200. Las claves se guardan como huella en `app/utils/security.py`, líneas 30 a 85,
-y nunca salen en la respuesta. La sesión obligatoria y la opcional están en
-`app/utils/roles.py`, líneas 191 y 195.
+### [10:18] Pruebas — 0:25
 
-### [10:38] Pruebas — 0:26
+**[PANTALLA: terminal]**
 
-En la terminal, con el entorno activado, `pytest -q` da 19 pruebas en una base
-temporal, sin tocar MySQL. En `tests/test_app.py`, líneas 20 a 39, está la prueba de
-que la documentación OpenAPI responde; y en 511 a 525, la de los catálogos de
-búsqueda.
+Criterio 5, pruebas y Docker. En la terminal, `pytest -q` da 19 pruebas en una base
+temporal, sin tocar MySQL; están en `tests/test_app.py`, con la de OpenAPI en la
+línea 20. Y Docker levanta todo con `docker compose up -d`.
 
-### [11:04] Cierre — 0:26
+### [10:43] Cierre — los 6 criterios — 0:30
 
-Cierro con los seis criterios de la rúbrica: arquitectura por capas; MySQL con 25
-tablas y 2 vistas; API REST con los cinco métodos —GET, POST, PUT, PATCH y DELETE— y
-Swagger con 30 rutas y 37 operaciones; reglas, validaciones y seguridad —422, 401,
-403—; pruebas en Swagger, Docker y 19 pruebas automatizadas; y coherencia entre los
-tres cortes. Todo lo viste pasar por un solo botón: el de buscar. Termino aquí.
+Cierro con los seis criterios: uno, arquitectura por capas; dos, MySQL con
+SQLAlchemy, 25 tablas y 2 vistas; tres, API REST con GET, POST, PUT, PATCH y DELETE
+documentada en Swagger —30 rutas y 37 operaciones—; cuatro, validaciones, reglas y
+permisos —422, 401 y 403—; cinco, evidencia en Swagger, Docker y 19 pruebas; y seis,
+coherencia entre los tres cortes. Todo demostrado desde un solo botón: el de buscar.
+Termino aquí.
 
 ---
 
 ## Respaldo (no leer)
 
-Consulta equivalente a la búsqueda con texto y año:
+Consulta equivalente a la búsqueda con texto y año (la que se corre en DBeaver):
 
 ```sql
 SELECT c.id_contenido, c.titulo, c.categoria, c.estado, c.fec_crea
@@ -362,17 +230,14 @@ ORDER BY c.fec_crea DESC
 LIMIT 100;
 ```
 
-- El sobre con total y páginas está en `contenido_repository.py`, 12 a 28 y 98 a 115.
-- `pages` sale de total entre tamaño, hacia arriba: `-(-total // per_page)`, línea 114.
-- El detalle público con sesión opcional está en `contenido_routes.py`, 162 a 177; el
-  marcador de favorito se arma en `contenido_service.py`, 681 a 687.
+- El sobre con total y páginas está en `contenido_repository.py`, 12 a 28; `pages`
+  sale de `-(-total // per_page)`, línea 114.
 - Las dos vistas del DDL son `v_bandeja_validacion` y `v_ranking`.
 - El SQL entra a MySQL como `/docker-entrypoint-initdb.d/01_schema.sql`.
 
-**Preguntas propias de este botón:** ¿por qué una lista de identificadores y no juntar
-tablas? → cada subtipo guarda el año a su manera; juntar tablas repetiría la fila
-base. ¿De dónde salen los resultados? → de MySQL por `GET /api/museo/contenido/`; el
-navegador solo pinta la respuesta. ¿`anio=1800`? → 422, porque la ruta pide un año
-entre 1900 y 2100. ¿La búsqueda escribe? → no, solo lee filas publicadas. ¿Y si no
-hay coincidencias? → 200 con `items` vacío, `total` en cero y el aviso «Sin
-resultados».
+**Preguntas propias de este botón:** ¿por qué subconsultas y no un `join`? → cada
+subtipo guarda el año a su manera; juntar tablas repetiría la fila base y el total
+mentiría. ¿De dónde salen los resultados? → de MySQL por `GET /api/museo/contenido/`;
+el navegador solo pinta. ¿`anio=1800`? → 422, porque la ruta pide un año entre 1900
+y 2100. ¿La búsqueda escribe? → no, solo lee filas publicadas. ¿Y sin coincidencias?
+→ 200 con `items` vacío y el aviso «Sin resultados».
