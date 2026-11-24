@@ -249,7 +249,9 @@ validación con gamificación. Evidencia manual de la API: **Swagger** en `/docs
 
 ## Documentación
 
-- [`docs/BACKEND.md`](docs/BACKEND.md) — arquitectura del backend, capas y API.
+- [`docs/BACKEND.md`](docs/BACKEND.md) - arquitectura del backend, capas y API.
+- [`docs/EVIDENCIAS.md`](docs/EVIDENCIAS.md) - evidencias de llamadas reales
+  (CRUD, errores, Docker y pruebas) del tercer corte.
 - [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) — arquitectura general y
   trazabilidad de los tres cortes.
 - [`docs/guias/README.md`](docs/guias/README.md) — guiones separados por integrante,

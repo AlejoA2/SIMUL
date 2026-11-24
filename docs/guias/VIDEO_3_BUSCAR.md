@@ -84,7 +84,7 @@ Más los archivos comunes del apartado 3 de `00_ANTES_DE_GRABAR.md`.
 
 ### [09:36] Arquitectura y Docker — 0:51
 
-> "Me voy a `app/__init__.py`, 208 a 239: ahí están los `include_router` con el prefijo `/api/museo`. El prefijo se repite en los seis routers de la API. Siete capas arriba, 25 tablas y 2 vistas abajo en `db/DDL.sql`, de la línea 19 a la 464. En `docker-compose.yml`, 14 a 24 y 27 a 44, la app queda en el puerto 5000 y MySQL en el 3307, con el DDL como script inicial. Coherencia total con los cortes uno y dos."
+> "Me voy a `app/__init__.py`, 208 a 239: ahí están los `include_router` con el prefijo `/api/museo`. El prefijo se repite en los seis routers de la API. El criterio tres de la rúbrica pide FastAPI con Swagger, y acá está: FastAPI genera la documentación OpenAPI sola, y la arquitectura por capas es la de siempre —rutas, controladores, servicios, repositorios y modelos—. Siete capas arriba, 25 tablas y 2 vistas abajo en `db/DDL.sql`, de la línea 19 a la 464. En `docker-compose.yml`, 14 a 24 y 27 a 44, la app queda en el puerto 5000 y MySQL en el 3307, con el DDL como script inicial. Coherencia total con los cortes uno y dos."
 
 ### [10:09] Seguridad — 0:33
 

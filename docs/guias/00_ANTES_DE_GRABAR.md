@@ -223,6 +223,13 @@ formatos y utilidades.
 5. Evidencia en Swagger, Docker y 19 pruebas.
 6. Coherencia entre los tres cortes.
 
+**Si preguntan por Flask:** el criterio 3 de la rúbrica pide **FastAPI con
+Swagger**; se usó FastAPI porque genera la documentación OpenAPI automáticamente
+y conserva la misma arquitectura por capas (rutas, controladores, servicios,
+repositorios y modelos). La justificación está escrita en
+`docs/ARQUITECTURA.md` (sección 6) y las evidencias de las llamadas, con sus
+códigos HTTP, en `docs/EVIDENCIAS.md`.
+
 ---
 
 ## 9. Checklist antes de grabar
