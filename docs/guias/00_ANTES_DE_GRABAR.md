@@ -152,6 +152,20 @@ En el navegador, el token queda en `simul.token`. La sesión visible queda en
 3. Si el conteo no cambia, comprobar que el contenedor `simul_app` esté arriba y
    que `DATABASE_URL` no apunte a SQLite.
 
+> **Si al abrir una tabla (por ejemplo `avance_investigacion`) sale
+> `Public key retrieval is not allowed`:** MySQL 8 usa la autenticación
+> `caching_sha2_password` y el controlador necesita la clave pública del
+> servidor. Arreglo (una sola vez por conexión):
+>
+> 1. Click derecho en la conexión → **Editar conexión**.
+> 2. Pestaña **Propiedades del controlador** (*Driver properties*).
+> 3. Buscar `allowPublicKeyRetrieval` y ponerle el valor **`true`**
+>    (doble clic en la columna del valor). Si no aparece, agregarla con el
+>    botón **+** (*Add new property*).
+> 4. **Aceptar** y reconectar (click derecho → **Reconectar**).
+>
+> Después las tablas y columnas se abren sin pedir más nada.
+
 Consultas base:
 
 ```sql
